@@ -1,0 +1,20 @@
+apiVersion: k8ssandra.io/v1alpha1
+kind: K8ssandraCluster
+metadata:
+  name: demo
+  namespace: k8ssandra-operator
+spec:
+  cassandra:
+    serverVersion: "4.0.7"
+    datacenters:
+      - metadata:
+          name: dc1
+        size: 1
+        storageConfig:
+          cassandraDataVolumeClaimSpec:
+            storageClassName: standard
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 5Gi
