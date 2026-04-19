@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "bigdata-job-market"
 version = "0.1.0"
 description = "Job market crawler"
-requires-python = ">=3.13"
+requires-python = ">=3.10"
 dependencies = [
   "requests",
   "beautifulsoup4",
