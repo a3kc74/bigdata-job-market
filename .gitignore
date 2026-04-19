@@ -1,0 +1,11 @@
+TV1_workspace/
+__pycache__
+
+.venv
+.python-version
+
+uv.lock
+.env
+.log
+
+
