@@ -22,7 +22,7 @@ kubectl get storageclass
 Ví dụ cấu hình nhẹ:
 
 ```powershell
-minikube start --driver=docker --cpus=2 --memory=7300
+minikube start --driver=docker --cpus=2 --memory=9500
 ```
 
 Kiểm tra:
