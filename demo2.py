@@ -183,7 +183,7 @@ def save_json(data, filename="jobs.json"):
 # MAIN
 # ======================
 if __name__ == "__main__":
-    jobs = crawl_topcv(30)
+    jobs = crawl_topcv(20)
 
     print("Total:", len(jobs))
 
