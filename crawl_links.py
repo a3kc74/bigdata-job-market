@@ -20,5 +20,4 @@ def get_job_links(page=1):
             if href.startswith("/"):
                 href = BASE_URL + href
             job_links.add(href)
-
     return list(job_links)
