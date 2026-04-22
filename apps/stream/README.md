@@ -49,7 +49,7 @@ python create_topics.py
 ### 5. Start the producer (from repo root)
 
 ```bash
-python apps/ingestion/producer.py
+python producer.py
 ```
 
 ### 6. Start Spark streaming (from repo root)
@@ -57,13 +57,13 @@ python apps/ingestion/producer.py
 ```bash
 spark-submit \
   --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1 \
-  apps/stream/stream_main.py
+  stream_main.py
 ```
 
 ### 7. Start the API (from repo root)
 
 ```bash
-uvicorn apps.serving.api:app --reload --port 8000
+uvicorn api:app --reload --port 8000
 ```
 
 ### 8. Test endpoints
