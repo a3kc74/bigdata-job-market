@@ -6,27 +6,20 @@ Gold-layer window aggregations.
 
 """
 
-from pyspark.sql import DataFrame, functions as F
-
-
-from pyspark.sql import DataFrame, functions as F
+from pyspark.sql import DataFrame
+from pyspark.sql import functions as F
 
 
 def build_job_counts_10m(main_stream_df: DataFrame) -> DataFrame:
-    return (
-        main_stream_df
-        .groupBy(
-            F.window("event_ts", "10 minutes"),
-            F.col("location_city"),
-        )
-        .count()
-    )
+    return main_stream_df.groupBy(
+        F.window("event_ts", "10 minutes"),
+        F.col("location_city"),
+    ).count()
 
 
 def build_skill_counts_30m(main_stream_df: DataFrame) -> DataFrame:
     exploded = (
-        main_stream_df
-        .select(
+        main_stream_df.select(
             "event_ts",
             F.explode_outer("skills").alias("skill"),
         )
@@ -34,11 +27,7 @@ def build_skill_counts_30m(main_stream_df: DataFrame) -> DataFrame:
         .filter(F.length(F.col("skill")) > 0)
     )
 
-    return (
-        exploded
-        .groupBy(
-            F.window("event_ts", "30 minutes", "10 minutes"),
-            F.col("skill"),
-        )
-        .count()
-    )
+    return exploded.groupBy(
+        F.window("event_ts", "30 minutes", "10 minutes"),
+        F.col("skill"),
+    ).count()

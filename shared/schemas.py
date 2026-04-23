@@ -6,7 +6,7 @@ The schema is applied when reading raw JSON from Kafka to produce
 typed, structured rows.
 """
 
-from pyspark.sql.types import StructField, StructType, StringType
+from pyspark.sql.types import StringType, StructField, StructType
 
 RAW_EVENT_SCHEMA = StructType(
     [

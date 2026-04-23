@@ -14,16 +14,22 @@ replication_factor=1.This means each partition has only one copy.
 A DLQ (dead-letter queue) is a separate topic where broken or malformed events are sent instead of crashing the main pipeline.
 """
 
-
 import os
-from dotenv import load_dotenv
+
 from confluent_kafka.admin import AdminClient, NewTopic
+from dotenv import load_dotenv
 
 load_dotenv()
 
-BOOTSTRAP = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092") #This is the Kafka broker address the client first connects to.
-RAW_TOPIC = os.getenv("RAW_TOPIC", "raw_events") # This is the main topic where raw job events are published.
-DLQ_TOPIC = os.getenv("DLQ_TOPIC", "raw_events_dlq") # This is the dead-letter queue where malformed events are sent.
+BOOTSTRAP = os.getenv(
+    "KAFKA_BOOTSTRAP_SERVERS", "localhost:9092"
+)  # This is the Kafka broker address the client first connects to.
+RAW_TOPIC = os.getenv(
+    "RAW_TOPIC", "raw_events"
+)  # This is the main topic where raw job events are published.
+DLQ_TOPIC = os.getenv(
+    "DLQ_TOPIC", "raw_events_dlq"
+)  # This is the dead-letter queue where malformed events are sent.
 
 
 def main():

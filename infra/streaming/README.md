@@ -1,172 +1,193 @@
-# Streaming pipeline on Kubernetes
+# Speed Layer — Real-Time Job Market Pipeline
 
-Tài liệu này mô tả cách chạy pipeline:
+Real-time streaming pipeline that **crawls live job postings from TopCV**, pushes them through **Kafka**, processes them with **Spark Structured Streaming**, and serves aggregated results via **Redis + FastAPI**.
 
-Kafka -> Spark Structured Streaming -> Elasticsearch
+## Architecture
 
-## 1. Điều kiện cần
-
-- Minikube đang chạy
-- Namespace `kafka`, `spark`, `streaming` đã được tạo
-- Kafka cluster đã chạy trên K8s
-- Spark service account đã được cấp quyền trong namespace `spark`
-- Elasticsearch đã chạy trong namespace `streaming`
-
-## 2. Kiểm tra cluster
-
-```powershell
-minikube status
-kubectl get nodes
-kubectl get pods -n kafka
-kubectl get pods -n spark
-kubectl get pods -n streaming
+```
+TopCV Website ──► StreamingCrawler ──► process.py ──► Kafka ──► Spark Streaming ──► Redis ──► FastAPI
+  (live data)     (configurable       (schema       (raw_events   (validate →       (speed    (REST
+                   throughput)          mapping)      topic)        clean →           views)    API)
+                                                                   normalize →
+                                                                   aggregate)
 ```
 
-## 3. Elasticsearch sink
+## What's Here
 
-Elasticsearch được expose nội bộ bằng service:
+| File | Location | Purpose |
+|------|----------|---------|
+| `docker-compose.yml` | `infra/compose/` | Starts Kafka (Zookeeper) + Redis |
+| `.env.example` | `configs/` | Environment variable template |
+| `create_topics.py` | `scripts/` | Creates Kafka topics (`raw_events`, `raw_events_dlq`) |
+| `requirements.txt` | `configs/` | Python dependencies for the speed layer |
+| `producer.py` | `apps/ingestion/` | Crawls TopCV, maps to schema, publishes to Kafka |
+| `process.py` | `apps/ingestion/` | Maps raw crawler JSON to `RAW_EVENT_SCHEMA` |
+| `schemas.py` | `shared/` | Spark schema definition for raw events |
+| `transform.py` | `apps/stream/` | Validate → Clean → Normalize transforms |
+| `aggregations.py` | `apps/stream/` | Gold-layer window aggregations |
+| `sinks.py` | `apps/stream/` | Writes gold aggregates to Redis |
+| `stream_main.py` | `apps/stream/` | Spark Structured Streaming entry point |
+| `api.py` | `apps/serving/` | FastAPI endpoints to query speed views |
+| `sample_events.py` | `scripts/` | (Legacy) Fake event generator for testing |
 
-- `elasticsearch.streaming.svc:9200`
+## Quick Start
 
-Kiểm tra pod:
+### 1. Copy env file
 
-```powershell
-kubectl get pods -n streaming
+```bash
+cp configs/.env.example .env
 ```
 
-Port-forward để kiểm tra từ máy local:
+### 2. Start infrastructure
 
-```powershell
-kubectl port-forward svc/elasticsearch -n streaming 9200:9200
+```bash
+cd infra/compose
+docker compose up -d
+cd ../..
 ```
 
-Kiểm tra:
+This starts:
+- **Kafka** (Zookeeper + Broker) on `localhost:9092`
+- **Redis** on `localhost:6379`
 
-```powershell
-curl.exe http://localhost:9200
+### 3. Install Python dependencies
+
+```bash
+pip install -r configs/requirements.txt
+
+# Install Playwright browser (required for crawling TopCV)
+playwright install chromium
 ```
 
-## 4. Build image Spark app
+> **Note:** The crawler uses Playwright in **headed mode** (non-headless) to bypass
+> Cloudflare bot detection. A display server (X11/Wayland) must be available
+> (i.e. `DISPLAY` or `WAYLAND_DISPLAY` env var set). On a headless server,
+> use `xvfb-run` to provide a virtual display.
 
-Từ root repo:
+### 4. Create Kafka topics
 
-```powershell
-docker build --no-cache -t spark-kafka-es:demo -f infra/spark/Dockerfile .
-docker run --rm spark-kafka-es:demo sh -lc "which python && which python3 && python --version && python3 --version"
-minikube image load spark-kafka-es:demo
+```bash
+# From project root
+python scripts/create_topics.py
 ```
 
-## 5. Submit Spark Streaming job
+### 5. Start the producer (real crawler → Kafka)
 
-Chạy trong Anaconda Prompt hoặc terminal có `spark-submit`:
+Run from the **project root** directory:
 
-```cmd
-set PYSPARK_PYTHON=python3
-set PYSPARK_DRIVER_PYTHON=python3
-set SPARK_SUBMIT_OPTS=-Djava.security.manager=allow
+```bash
+# Default: crawl all new jobs, 2s delay between each job
+python apps/ingestion/producer.py
+
+# Custom: specific keyword, faster throughput
+python apps/ingestion/producer.py --keyword "data engineer" --delay-jobs 1.0
+
+# Limit to 5 pages and 50 events, no looping
+python apps/ingestion/producer.py --max-pages 5 --max-events 50 --no-loop
+
+# Filter by city
+python apps/ingestion/producer.py --keyword "python" --location "ha-noi" --delay-jobs 0.5
 ```
 
-Lấy API server:
+#### Producer CLI Options
 
-```powershell
-kubectl cluster-info
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--keyword` | `""` | TopCV search keyword (empty = all jobs) |
+| `--location` | `""` | City filter (e.g. `ha-noi`, `ho-chi-minh`) |
+| `--delay-jobs` | `2.0` | Seconds between crawling each job (throughput control) |
+| `--delay-pages` | `5.0` | Seconds between fetching listing pages |
+| `--max-pages` | `0` | Max listing pages per cycle (0 = unlimited) |
+| `--max-events` | `0` | Stop after N events (0 = unlimited) |
+| `--no-loop` | `false` | Don't restart after exhausting all pages |
+
+> **Throughput tuning:** Lower `--delay-jobs` = faster stream. Set `--delay-jobs 0.5` for ~2 events/sec, or `--delay-jobs 5.0` for a slower, gentler crawl.
+
+### 6. Start Spark Structured Streaming
+
+Run from the **project root** directory:
+
+```bash
+spark-submit \
+  --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1 \
+  apps/stream/stream_main.py
 ```
 
-Submit job:
+### 7. Start the API
 
-```cmd
-spark-submit ^
-  --master k8s://https://127.0.0.1:60565 ^
-  --deploy-mode cluster ^
-  --name kafka-to-es ^
-  --packages org.apache.spark:spark-sql-kafka-0-10_2.13:4.1.1 ^
-  --conf spark.executor.instances=1 ^
-  --conf spark.kubernetes.namespace=spark ^
-  --conf spark.kubernetes.authenticate.driver.serviceAccountName=spark ^
-  --conf spark.kubernetes.container.image=spark-kafka-es:demo ^
-  --conf spark.kubernetes.container.image.pullPolicy=IfNotPresent ^
-  --conf spark.driver.extraJavaOptions="-Duser.home=/tmp -Divy.home=/tmp/.ivy2.5.2 -Divy.cache.dir=/tmp/.ivy2.5.2/cache" ^
-  --conf spark.kubernetes.driverEnv.HOME=/tmp ^
-  --conf spark.kubernetes.driverEnv.PYSPARK_PYTHON=python3 ^
-  --conf spark.kubernetes.driverEnv.PYSPARK_DRIVER_PYTHON=python3 ^
-  --conf spark.executorEnv.PYSPARK_PYTHON=python3 ^
-  --conf spark.kubernetes.driverEnv.PATH=/usr/local/bin:/usr/bin:/bin ^
-  --conf spark.executorEnv.PATH=/usr/local/bin:/usr/bin:/bin ^
-  --conf spark.kubernetes.driverEnv.KAFKA_BOOTSTRAP=my-cluster-kafka-bootstrap.kafka.svc:9092 ^
-  --conf spark.kubernetes.driverEnv.KAFKA_TOPIC=my-topic ^
-  --conf spark.kubernetes.driverEnv.ES_URL=http://elasticsearch.streaming.svc:9200 ^
-  --conf spark.kubernetes.driverEnv.ES_INDEX=jobs_streaming ^
-  local:///opt/spark/work-dir/kafka_to_es.py
+Run from the **project root** directory:
+
+```bash
+uvicorn apps.serving.api:app --reload --port 8000
 ```
 
-## 6. Theo dõi Spark pods
+### 8. Test endpoints
 
-```powershell
-kubectl get pods -n spark -w
+```bash
+curl http://localhost:8000/health
+curl http://localhost:8000/realtime/job-counts
+curl http://localhost:8000/realtime/top-skills
 ```
 
-Kết quả mong đợi:
-- 1 driver pod Running
-- 1 executor pod được tạo
-- driver log có `batch_id=...`
+## Data Flow Detail
 
-## 7. Gửi dữ liệu vào Kafka
+### Crawler → Schema Mapping
 
-Mở producer:
+The `process.py` module maps raw crawler output to `RAW_EVENT_SCHEMA`:
 
-```powershell
-kubectl delete pod kafka-producer -n kafka --ignore-not-found
-kubectl run kafka-producer -ti --image=quay.io/strimzi/kafka:0.51.0-kafka-4.2.0 --rm=true --restart=Never -n kafka -- bin/kafka-console-producer.sh --bootstrap-server my-cluster-kafka-bootstrap:9092 --topic my-topic
+| Crawler Field | Schema Field | Transform |
+|---------------|-------------|-----------|
+| `source_url` | `source_url` | Direct |
+| (hash of `source_url`) | `job_id` | MD5 hash |
+| `domain` | `source` | Strip `www.` |
+| `title` | `title` | Direct |
+| `company_name` | `company_name` | Direct |
+| `salary` | `salary_text` | Direct |
+| `location` | `location_text` | Direct |
+| `skills` (list) | `skills_text` | Join with `, ` |
+| `description` + `requirements` + `benefits` | `description_text` | Concatenated |
+| `crawled_at` | `event_ts` | Direct (ISO 8601) |
+| (generated) | `ingest_ts` | Current UTC time |
+
+### Spark Pipeline
+
+```
+RAW SOURCE (Kafka) → VALIDATE (parse JSON + schema) → CLEAN (filter, parse timestamps)
+→ NORMALIZE (location mapping, salary parsing, skills array)
+→ GOLD (window aggregates: job counts, skill counts)
+→ SINK (Redis hashes + sorted-set indices)
 ```
 
-Gửi dữ liệu test:
+## Environment Variables
 
-```text
-job_101|Data Engineer|Ha Noi
-job_102|Backend Developer|HCM
-job_103|Data Analyst|Da Nang
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `KAFKA_BOOTSTRAP_SERVERS` | `localhost:9092` | Kafka broker address |
+| `RAW_TOPIC` | `raw_events` | Main Kafka topic |
+| `DLQ_TOPIC` | `raw_events_dlq` | Dead-letter queue topic |
+| `REDIS_HOST` | `localhost` | Redis host |
+| `REDIS_PORT` | `6379` | Redis port |
+| `REDIS_TTL_SECONDS` | `7200` | TTL for Redis speed view keys |
+| `CHECKPOINT_DIR` | `/tmp/speed_layer_checkpoints` | Spark checkpoint directory |
+| `TRIGGER_SECONDS` | `10` | Spark micro-batch trigger interval |
+| `PRODUCER_DELAY_SECONDS` | `0` | Extra delay after each Kafka produce |
+
+## Crawler Standalone Usage
+
+The crawler can also be used independently:
+
+```bash
+# Crawl a single URL
+python apps/ingestion/crawler.py single "https://www.topcv.vn/viec-lam/..."
+
+# Stream to stdout (no Kafka)
+python apps/ingestion/crawler.py stream --keyword "data" --max-events 10 --no-loop
 ```
 
-## 8. Kiểm tra log Spark
+## Tear Down docker containers and Spark checkpoints
 
-```powershell
-kubectl logs -f <driver-pod-name> -n spark --container spark-kubernetes-driver
+```bash
+cd infra/compose
+docker compose down -v
+rm -rf /tmp/speed_layer_checkpoints
 ```
-
-Kết quả mong đợi:
-
-```text
-batch_id=1, rows=3
-{"errors":false, ... "result":"created" ...}
-```
-
-## 9. Kiểm tra dữ liệu trong Elasticsearch
-
-```powershell
-curl.exe http://localhost:9200/jobs_streaming/_search?pretty
-```
-
-Hoặc đếm số document:
-
-```powershell
-curl.exe http://localhost:9200/jobs_streaming/_count
-```
-
-## 10. Kết quả đạt được
-
-Pipeline hoạt động đúng khi:
-
-- Kafka nhận message
-- Spark Structured Streaming consume được topic
-- Spark transform dữ liệu thành các field:
-  - `job_id`
-  - `job_title`
-  - `city`
-  - `raw_value`
-- Elasticsearch index document thành công
-
-## 11. Ghi chú
-
-- Spark app đang dùng `startingOffsets=latest`, nên chỉ đọc các message gửi sau khi job đã chạy ổn định.
-- Nếu gõ thừa ký tự `>` trong console producer thì dữ liệu sẽ bị lưu nguyên ký tự đó vào field `raw_value`.
-- Nếu API server của Minikube đổi port sau khi restart cluster, cần cập nhật lại giá trị `--master k8s://https://127.0.0.1:<port>`.

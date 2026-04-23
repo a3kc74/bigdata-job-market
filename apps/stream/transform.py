@@ -9,7 +9,8 @@ Layers in intent:
 RAW SOURCE -> VALIDATE -> CLEAN -> NORMALIZE
 """
 
-from pyspark.sql import DataFrame, functions as F
+from pyspark.sql import DataFrame
+from pyspark.sql import functions as F
 
 
 def validate_raw_events(raw_kafka_df: DataFrame, schema) -> DataFrame:
@@ -56,17 +57,28 @@ def clean_events(validated_df: DataFrame) -> DataFrame:
     - trim common text fields
     """
     return (
-        validated_df
-        .filter(F.col("is_parse_ok") == True)
+        validated_df.filter(F.col("is_parse_ok") == True)
         .filter(F.col("job_id").isNotNull())
-        .withColumn("event_ts", F.coalesce(F.to_timestamp("event_ts"), F.col("kafka_ts")))
-        .withColumn("ingest_ts", F.coalesce(F.to_timestamp("ingest_ts"), F.col("validated_ingest_ts")))
+        .withColumn(
+            "event_ts", F.coalesce(F.to_timestamp("event_ts"), F.col("kafka_ts"))
+        )
+        .withColumn(
+            "ingest_ts",
+            F.coalesce(F.to_timestamp("ingest_ts"), F.col("validated_ingest_ts")),
+        )
         .withColumn("title", F.trim(F.coalesce(F.col("title"), F.lit(""))))
-        .withColumn("company_name", F.trim(F.coalesce(F.col("company_name"), F.lit(""))))
-        .withColumn("location_text", F.trim(F.coalesce(F.col("location_text"), F.lit("unknown"))))
+        .withColumn(
+            "company_name", F.trim(F.coalesce(F.col("company_name"), F.lit("")))
+        )
+        .withColumn(
+            "location_text",
+            F.trim(F.coalesce(F.col("location_text"), F.lit("unknown"))),
+        )
         .withColumn("salary_text", F.trim(F.coalesce(F.col("salary_text"), F.lit(""))))
         .withColumn("skills_text", F.trim(F.coalesce(F.col("skills_text"), F.lit(""))))
-        .withColumn("description_text", F.trim(F.coalesce(F.col("description_text"), F.lit(""))))
+        .withColumn(
+            "description_text", F.trim(F.coalesce(F.col("description_text"), F.lit("")))
+        )
         .withColumn("source", F.trim(F.coalesce(F.col("source"), F.lit("unknown"))))
         .filter(F.col("event_ts").isNotNull())
     )
@@ -86,17 +98,13 @@ def normalize_events(clean_df: DataFrame) -> DataFrame:
     first_num = F.regexp_extract(text_salary, r"(\d+)", 1).cast("int")
     second_num = F.regexp_extract(text_salary, r"(\d+)\D+(\d+)", 2).cast("int")
 
-    multiplier = (
-        F.when(text_salary.contains("usd"), F.lit(25000))
-        .otherwise(F.lit(1000000))
+    multiplier = F.when(text_salary.contains("usd"), F.lit(25000)).otherwise(
+        F.lit(1000000)
     )
 
-    location_key = F.lower(
-        F.trim(F.coalesce(F.col("location_text"), F.lit("unknown")))
-    )
+    location_key = F.lower(F.trim(F.coalesce(F.col("location_text"), F.lit("unknown"))))
 
-    skills_array_expr = F.expr(
-        """
+    skills_array_expr = F.expr("""
         filter(
           transform(
             split(
@@ -107,31 +115,32 @@ def normalize_events(clean_df: DataFrame) -> DataFrame:
           ),
           x -> x <> ''
         )
-        """
-    )
+        """)
 
     return (
-        clean_df
-        .withColumn(
+        clean_df.withColumn(
             "location_city",
-            F.when(location_key.isin("hn", "ha noi", "hà nội", "hanoi"), F.lit("Ha Noi"))
-             .when(
-                 location_key.isin(
-                     "hcm",
-                     "tp hcm",
-                     "ho chi minh",
-                     "hồ chí minh",
-                     "ho chi minh city",
-                 ),
-                 F.lit("Ho Chi Minh City"),
-             )
-             .otherwise(F.initcap(location_key))
+            F.when(
+                location_key.isin("hn", "ha noi", "hà nội", "hanoi"), F.lit("Ha Noi")
+            )
+            .when(
+                location_key.isin(
+                    "hcm",
+                    "tp hcm",
+                    "ho chi minh",
+                    "hồ chí minh",
+                    "ho chi minh city",
+                ),
+                F.lit("Ho Chi Minh City"),
+            )
+            .otherwise(F.initcap(location_key)),
         )
         .withColumn("salary_min", first_num * multiplier)
         .withColumn(
             "salary_max",
-            F.when(second_num.isNotNull(), second_num * multiplier)
-             .otherwise(first_num * multiplier)
+            F.when(second_num.isNotNull(), second_num * multiplier).otherwise(
+                first_num * multiplier
+            ),
         )
         .withColumn("skills", skills_array_expr)
         .withColumn("job_title", F.col("title"))

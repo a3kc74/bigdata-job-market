@@ -17,14 +17,23 @@ Usage:
 """
 
 import os
+import sys
 
 from dotenv import load_dotenv
 from pyspark.sql import SparkSession
 
-from schemas import RAW_EVENT_SCHEMA
-from transform import validate_raw_events, clean_events, normalize_events
-from aggregations import build_job_counts_10m, build_skill_counts_30m
-from sinks import write_job_counts, write_skill_counts
+# Add project root to sys.path for proper absolute imports
+_current_dir = os.path.dirname(os.path.abspath(__file__))
+_project_root = os.path.dirname(os.path.dirname(_current_dir))
+if _project_root not in sys.path:
+    sys.path.insert(0, _project_root)
+
+from apps.stream.aggregations import (build_job_counts_10m,
+                                      build_skill_counts_30m)
+from apps.stream.sinks import write_job_counts, write_skill_counts
+from apps.stream.transform import (clean_events, normalize_events,
+                                   validate_raw_events)
+from shared.schemas import RAW_EVENT_SCHEMA
 
 load_dotenv()
 
@@ -35,17 +44,12 @@ TRIGGER_SECONDS = os.getenv("TRIGGER_SECONDS", "10")
 
 
 def main():
-    spark = (
-        SparkSession.builder
-        .appName("job-speed-layer-demo")
-        .getOrCreate()
-    )
+    spark = SparkSession.builder.appName("job-speed-layer-demo").getOrCreate()
     spark.sparkContext.setLogLevel("WARN")
 
     # ── RAW SOURCE: read from Kafka ─────────────────────────────────────
     raw_kafka_df = (
-        spark.readStream
-        .format("kafka")
+        spark.readStream.format("kafka")
         .option("kafka.bootstrap.servers", BOOTSTRAP)
         .option("subscribe", RAW_TOPIC)
         .option("startingOffsets", "latest")
@@ -58,11 +62,11 @@ def main():
     normalized_df = normalize_events(cleaned_df)
 
     # ── MAIN STREAM: late-data policy + dedup ───────────────────────────
-    main_stream_df = (
-        normalized_df
-        .withWatermark("event_ts", "30 minutes")   # ADDED: allow late events up to 30 minutes in stateful operations
-        .dropDuplicates(["job_id"])                # ADDED: deduplicate by job_id within the watermark horizon
-    )
+    main_stream_df = normalized_df.withWatermark(
+        "event_ts", "30 minutes"
+    ).dropDuplicates(  # ADDED: allow late events up to 30 minutes in stateful operations
+        ["job_id"]
+    )  # ADDED: deduplicate by job_id within the watermark horizon
 
     # ── GOLD: realtime window aggregates ────────────────────────────────
     gold_job_counts_df = build_job_counts_10m(main_stream_df)
@@ -70,8 +74,7 @@ def main():
 
     # ── SINK: write gold to Redis ───────────────────────────────────────
     query_job_counts = (
-        gold_job_counts_df.writeStream
-        .outputMode("update")
+        gold_job_counts_df.writeStream.outputMode("update")
         .foreachBatch(write_job_counts)
         .trigger(processingTime=f"{TRIGGER_SECONDS} seconds")
         .option("checkpointLocation", f"{CHECKPOINT_DIR}/job_counts")
@@ -79,8 +82,7 @@ def main():
     )
 
     query_skill_counts = (
-        gold_skill_counts_df.writeStream
-        .outputMode("update")
+        gold_skill_counts_df.writeStream.outputMode("update")
         .foreachBatch(write_skill_counts)
         .trigger(processingTime=f"{TRIGGER_SECONDS} seconds")
         .option("checkpointLocation", f"{CHECKPOINT_DIR}/skill_counts")
@@ -89,8 +91,7 @@ def main():
 
     # ── DEBUG: inspect main stream rows in console ──────────────────────
     query_main_console = (
-        main_stream_df.writeStream
-        .outputMode("append")
+        main_stream_df.writeStream.outputMode("append")
         .format("console")
         .option("truncate", False)
         .option("numRows", 10)
