@@ -44,6 +44,7 @@ SOURCE = "topcv"
 # =========================
 # FETCH
 # =========================
+"""
 def get_soup(url):
     scraper = cloudscraper.create_scraper(
         browser={'browser': 'chrome', 'platform': 'windows', 'desktop': True}
@@ -55,6 +56,20 @@ def get_soup(url):
         return None
 
     return BeautifulSoup(res.text, "html.parser")
+"""
+def get_soup(scraper, url):
+    """
+    Hàm fetch dùng chung phiên (session) và bắt lỗi mạng an toàn.
+    """
+    try:
+        res = scraper.get(url, timeout=15)
+        if res.status_code != 200:
+            print(f"[!] HTTP {res.status_code} tại URL: {url}")
+            return None
+        return BeautifulSoup(res.text, "html.parser")
+    except Exception as e:
+        print(f"[!] Lỗi kết nối {url}: {e}")
+        return None
 # =========================
 # NORMALIZE
 # =========================
@@ -303,9 +318,9 @@ def extract_education(soup):
 # =========================
 # MAIN PARSER
 # =========================
-def parse_job(url):
+def parse_job(scraper, url):
 
-    soup = get_soup(url)
+    soup = get_soup(scraper, url)
     if not soup:
         return None
 
@@ -440,24 +455,24 @@ def parse_job(url):
             "company_name": company,
             "salary": salary_raw,
             "location": city,
-            "experience": exp,
+            "monthOfExperience": exp,
             "deadline": valid_through,
             "occupationalCategory": level,
             "education": education,
-            "employment_type": employment_type,
+            "employmentType": employment_type,
             "openings": openings,
             "description": description,
             "requirements": requirements_raw,
             "income": income, 
             "benefits": benefits,
             "schedule": schedule,
-            "skills_needed": skills_needed,
-            "skills_should_have": skills_should_have,
+            "skillsNeeded": skills_needed,
+            "skillsShouldHave": skills_should_have,
             "specialty": specialty,
             "meta_tags": meta_tags,
             "json_ld": json_ld,
-            "sections_by_heading": extract_sections(soup),
-            "page_text": soup.get_text(" ", strip=True)
+            "sectionsByHeading": extract_sections(soup),
+            "pageText": soup.get_text(" ", strip=True)
         },
 
         # ===== RAW QUALITY FLAGS =====
@@ -556,4 +571,4 @@ def run_batch_crawler(start_page=1, end_page=3):
     print(f"\n[OK] Batch Crawler hoàn tất! Tổng cộng đã lưu: {total_jobs_saved} jobs.")
 
 if __name__ == "__main__":
-    main()
+    run_batch_crawler(1, 2)
