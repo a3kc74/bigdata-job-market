@@ -1,12 +1,10 @@
 import cloudscraper
 from bs4 import BeautifulSoup
 
-BASE_URL = "https://www.topcv.vn"
-
 scraper = cloudscraper.create_scraper()
 
 def get_job_links(page=1):
-    url = f"{BASE_URL}/tim-viec-lam-it-phan-mem-c10026?page={page}"
+    url = f"https://www.topcv.vn/tim-viec-lam-cong-nghe-thong-tin-cr257?category_family=r257&page={page}"
     res = scraper.get(url)
     
     soup = BeautifulSoup(res.text, "html.parser")

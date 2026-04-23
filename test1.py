@@ -3,13 +3,44 @@ from bs4 import BeautifulSoup
 import json
 import hashlib
 import re
+import time
+import random
 from urllib.parse import urlparse, urlunparse
-from datetime import datetime, UTC
+from datetime import datetime, UTC, timezone, timedelta
 
+# ===========================================================
+# 1. CRAWL LINKS
+# ===========================================================
+BASE_URL = "https://www.topcv.vn"
+def get_job_links(scraper, page=1):
+    url = f"https://www.topcv.vn/tim-viec-lam-cong-nghe-thong-tin-cr257?category_family=r257&page={page}"
+    print(f"[*] Đang quét trang danh sách: {url}")
+    
+    try:
+        res = scraper.get(url, timeout=15)
+        soup = BeautifulSoup(res.text, "html.parser")
+    except Exception as e:
+        print(f"[!] Lỗi khi lấy danh sách trang {page}: {e}")
+        return []
 
+    job_links = set()
+    for a in soup.find_all("a", href=True):
+        href = a["href"]
+        # Lọc: Chỉ lấy những link trỏ tới chi tiết việc làm
+        if "/viec-lam/" in href:
+            # Bổ sung domain nếu link dạng rút gọn
+            if href.startswith("/"):
+                href = BASE_URL + href
+            # Cắt bỏ đuôi theo dõi tracking (?ta_source=...) để link sạch 100%
+            href = href.split("?")[0] 
+            job_links.add(href)
+            
+    return list(job_links)
+
+# ===========================================================
+# 2. CRAWL DETAIL
+# ===========================================================
 SOURCE = "topcv"
-
-
 # =========================
 # FETCH
 # =========================
@@ -24,8 +55,6 @@ def get_soup(url):
         return None
 
     return BeautifulSoup(res.text, "html.parser")
-
-
 # =========================
 # NORMALIZE
 # =========================
@@ -88,8 +117,11 @@ def extract_company_html(soup):
 
 
 def extract_salary_html(soup):
-    return text_or_none(soup.select_one(".salary, .job-detail__salary"))
-
+    sec = soup.select_one("div.section-salary")
+    if not sec:
+        return None
+    val = sec.find("div", class_="job-detail__info--section-content-value")
+    return val.get_text(strip=True) if val else None
 
 def extract_level_html(soup):
     return text_or_none(soup.select_one(".job-level"))
@@ -132,7 +164,7 @@ def extract_location_html(soup):
 
             for item in content.find_all('div'):
 
-                # ❗ bỏ div cha (tránh gộp text)
+                # bỏ div cha (tránh gộp text)
                 if item.find('div'):
                     continue
 
@@ -145,6 +177,9 @@ def extract_location_html(soup):
 
     return []
 
+def extract_dl(soup):
+    dl = soup.select_one(".job-detail__info--deadline-date")
+    return text_or_none(dl)
 
 
 def extract_job_requirements(soup):
@@ -153,6 +188,34 @@ def extract_job_requirements(soup):
     
     # Dùng List Comprehension để rút chữ ra và bỏ qua các thẻ rỗng
     return [li.get_text(strip=True) for li in li_tags if li.get_text(strip=True)]
+
+def extract_income(soup):
+    sections = soup.select(".job-description__item")
+
+    for sec in sections:
+        title = sec.find("h3")
+        if title and "Thu nhập" in title.get_text(strip=True):
+
+            content = sec.select_one(".job-description__item--content")
+            if not content:
+                return []
+
+            return [
+                text for li in content.find_all("li")
+                if (text := li.get_text(strip=True))
+            ]
+
+    return None
+
+def extract_description(soup):
+    container = soup.find("div", class_="job-description__item--content")
+    if not container:
+        return []
+    
+    return [
+        text for li in container.find_all("li")
+        if (text := li.get_text(strip=True))
+    ]
 
 def extract_sections(soup):
     sections = {}
@@ -163,7 +226,7 @@ def extract_sections(soup):
             sections[title.get_text(strip=True)] = content
     return sections
 
-def extract_ul_list(html_content):
+def extract_benefits(html_content):
     # 1. Parse đoạn HTML (nếu bạn đang truyền vào một chuỗi string)
     # Lưu ý: Nếu bạn đã có sẵn đối tượng soup của thẻ <ul> này từ bước trước,
     # bạn có thể bỏ qua dòng BeautifulSoup này.
@@ -181,6 +244,62 @@ def extract_ul_list(html_content):
             
     return result_items
 
+def extract_must(soup):
+    for box in soup.find_all("div", class_="box-category"):
+        title = box.find("div", class_="box-title")
+
+        if title and "kỹ năng cần có" in title.text.lower():
+            skills = [
+                tag.text.strip()
+                for tag in box.find_all("span", class_="box-category-tag")
+                if tag.text.strip()
+            ]
+            return skills if skills else None
+    return None
+
+def extract_should(soup):
+    for box in soup.find_all("div", class_="box-category"):
+        title = box.find("div", class_="box-title")
+
+        if title and "kỹ năng nên có" in title.text.lower():
+            skills = [
+                tag.text.strip()
+                for tag in box.find_all("span", class_="box-category-tag")
+                if tag.text.strip()
+            ]
+            return skills if skills else None
+
+    return None
+
+def extract_specializations(soup):
+    for group in soup.select(".job-tags__group"):
+        name = group.select_one(".job-tags__group-name")
+        
+        if name and "chuyên môn" in name.text.lower():
+            items = group.select(".item.search-from-tag.link")
+            
+            result = [
+                item.text.strip()
+                for item in items
+                if item.text.strip()
+            ]
+            
+            return result if result else None
+
+    return None
+
+def extract_education(soup):
+    for group in soup.select(".box-general-group"):
+        title = group.select_one(".box-general-group-info-title")
+        
+        if title and "học vấn" in title.text.lower():
+            value = group.select_one(".box-general-group-info-value")
+            
+            if value:
+                text = value.text.strip()
+                return text if text else None
+
+    return None
 # =========================
 # MAIN PARSER
 # =========================
@@ -200,32 +319,68 @@ def parse_job(url):
 
     employment_type = json_ld.get("employmentType")
 
-    posting_date = json_ld.get("datePosted")
-
-    valid_through = json_ld.get("validThrough")
+    #posting_date = json_ld.get("datePosted")
 
     level = json_ld.get("occupationalCategory")
 
     openings = json_ld.get("totalJobOpenings")
 
     schedule = extract_schedule(soup)
-    benefits = extract_ul_list(json_ld.get("jobBenefits"))
+    benefits = extract_benefits(json_ld.get("jobBenefits"))
+    income = extract_income(soup)
+    skills_needed = extract_must(soup)
+    skills_should_have = extract_should(soup)
+    if skills_needed is None and skills_should_have is None:
+        skills_should_have = json_ld.get("skills")
+        skills_needed = json_ld.get("skills")
+
+    specialty = extract_specializations(soup)
+    if not specialty:
+        specialty = json_ld.get("industry")
+
+    education = extract_education(soup)
+    
+    # thời gian crawl dữ liệu (ingest_ts)
+    now = datetime.now(UTC)
+    ingest_ts = int(now.timestamp() * 1000)
+    
+    # thời gian post job (event_ts)
+    vn_tz = timezone(timedelta(hours=7))
+    date_str = json_ld.get("datePosted")
+    if date_str:
+        try:
+            dt = datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=vn_tz)
+            event_ts = int(dt.timestamp() * 1000)
+        except ValueError:
+            event_ts = None # Lỗi format thì null
+    else:
+        event_ts = None # Không có ngày đăng thì null
+    
+    # thời gian hết hạn đăng ký 
+    deadline = extract_dl(soup)
+    valid_through = None # Mặc định là None nếu không tìm thấy
+    if deadline:
+        try:
+            vt = datetime.strptime(deadline, "%d/%m/%Y").replace(hour=23, minute=59, second=59, tzinfo=vn_tz)
+            valid_through = int(vt.timestamp() * 1000)
+        except ValueError:
+            pass # Bỏ qua nếu regex/text không đúng định dạng ngày
 
     # salary
+    """
     salary_raw = None
     salary_obj = json_ld.get("baseSalary", {})
     if salary_obj:
         salary_raw = str(salary_obj)
+    """
 
     # location
-    #addr = json_ld.get("jobLocation", {}).get("address", {})
-    #city = addr.get("addressRegion")
-
+    """
+    addr = json_ld.get("jobLocation", {}).get("address", {})
+    city = addr.get("addressRegion")
+    """
     # experience
     exp = json_ld.get("experienceRequirements", {}).get("monthsOfExperience")
-
-    # skills
-    skills = json_ld.get("skills")
 
     # ===== FALLBACK HTML =====
     if not exp:
@@ -233,8 +388,8 @@ def parse_job(url):
     if not company:
         company = extract_company_html(soup)
 
-    if not salary_raw:
-        salary_raw = extract_salary_html(soup)
+    #if not salary_raw:
+    salary_raw = extract_salary_html(soup)
 
     #if not city:
     city = extract_location_html(soup)
@@ -243,23 +398,29 @@ def parse_job(url):
         level = extract_level_html(soup)
 
     requirements_raw = extract_job_requirements(soup)
+    description = extract_description(soup)
 
     # =========================
     # KEYS
     # =========================
     normalized_url = normalize_url(url)
-
+    if not title or not company:
+        # Trong thực tế, bạn có thể ghi URL này ra file error_links.log để kiểm tra sau
+        print(f"Skipping bad URL or blocked by Captcha: {url}")
+        return None
     job_id = sha256_hash(f"{SOURCE}|{normalized_url}")
+
+    req_str = ", ".join(requirements_raw) if requirements_raw else ""
+    city_str = ", ".join(city) if isinstance(city, list) else str(city or "")
 
     hash_content = sha256_hash(
         normalize_text(title) + "|" +
         normalize_text(company) + "|" +
-        #normalize_text(city) + "|" +
-        normalize_text(salary_raw) + "|" 
-        #normalize_text(requirements_raw)
+        normalize_text(city_str) + "|" +
+        normalize_text(salary_raw) + "|" +
+        normalize_text(req_str) + "|" +
+        normalize_text(employment_type)
     )
-
-    now = datetime.now(UTC).isoformat().replace("+00:00", "Z")
 
     # =========================
     # RAW RECORD
@@ -269,29 +430,30 @@ def parse_job(url):
         "source_url": url,
         "normalized_source_url": normalized_url,
         "crawl_version": 1,
-        "ingest_ts": now,
-        "event_ts": now,
-
+        "ingest_ts": ingest_ts,
+        "event_ts": event_ts,
         "job_id": job_id,
         "hash_content": hash_content,
 
         "payload": {
-            "domain": "www.topcv.vn",
-            "fetch_method": "cloudscraper",
-
             "title": title,
             "company_name": company,
             "salary": salary_raw,
             "location": city,
             "experience": exp,
             "deadline": valid_through,
-
-            "description": soup.get_text(" ", strip=True),
+            "occupationalCategory": level,
+            "education": education,
+            "employment_type": employment_type,
+            "openings": openings,
+            "description": description,
             "requirements": requirements_raw,
+            "income": income, 
             "benefits": benefits,
             "schedule": schedule,
-            "skills": skills,
-            "categories": json_ld.get("industry"),
+            "skills_needed": skills_needed,
+            "skills_should_have": skills_should_have,
+            "specialty": specialty,
             "meta_tags": meta_tags,
             "json_ld": json_ld,
             "sections_by_heading": extract_sections(soup),
@@ -302,17 +464,29 @@ def parse_job(url):
         "quality_flags": {
             "has_json_ld": bool(json_ld),
             "has_page_text": bool(soup.get_text(strip=True)),
-            "has_structured_salary": bool(salary_obj),
-            "has_structured_company_name_conflict":
-                bool(company and extract_company_html(soup) and company != extract_company_html(soup)),
-            "has_valid_posting_date": bool(posting_date),
-            "has_valid_deadline": bool(valid_through)
+            "has_structured_company_name_conflict": bool(
+                company and extract_company_html(soup) and company != extract_company_html(soup)
+            ),
+            
+            "has_valid_posting_date": event_ts is not None,
+            "has_valid_deadline": valid_through is not None,
+            
+            "has_salary_info": bool(salary_raw or income),
+            "has_location_info": bool(city),
+            "has_experience_info": bool(exp),
+            
+            "has_requirements": bool(requirements_raw),
+            "has_description": bool(description),
+            "has_benefits": bool(benefits),
+            
+            "has_skills_info": bool(skills_needed or skills_should_have),
+            "has_education_info": bool(education),
+            "has_specialty": bool(specialty),
+            "has_schedule": bool(schedule),
+            "has_employment_type": bool(employment_type),
+            "has_income": bool(income)
         }
     }
-    ex = extract_exp(soup)
-    if not ex:
-        print("null")
-    else: print(ex)
     return record
 
 
@@ -331,7 +505,7 @@ def save_json(data, file="data1.json"):
 # RUN
 # =========================
 def main():
-    url = "https://www.topcv.vn/viec-lam/giao-vien-tieng-anh-giao-tiep-online/2068487.html?ta_source=JobSearchList_LinkDetail&u_sr_id=T3cprHopOa1qJyGx2FWqb6lrbg5klo5bNV0gEvDA_1776741199"
+    url = "https://www.topcv.vn/viec-lam/full-stack-developer-reactjs-fabricjs-da-nang-ha-noi/2117610.html?ta_source=JobSearchList_LinkDetail&u_sr_id=QFf6VTYpflndZ6fgB5yIWy6588anjONYspO4092O_1776958348"
 
     rec = parse_job(url)
 
@@ -339,7 +513,47 @@ def main():
         save_jsonl(rec)
         save_json(rec)
 
+# =======================================================
+# PHẦN 4: HỆ THỐNG ĐIỀU PHỐI (THE BATCH MANAGER)
+# =======================================================
+def save_jsonl(record, file_path="raw_jobs.jsonl"):
+    with open(file_path, "a", encoding="utf-8") as f:
+        f.write(json.dumps(record, ensure_ascii=False) + "\n")
 
+def run_batch_crawler(start_page=1, end_page=3):
+    """
+    Luồng chạy chính của chế độ Batch.
+    """
+    # 1. Khởi tạo 1 Scraper duy nhất cho toàn bộ quá trình
+    scraper = cloudscraper.create_scraper(
+        browser={'browser': 'chrome', 'platform': 'windows', 'desktop': True}
+    )
+    
+    total_jobs_saved = 0
+    
+    # 2. Vòng lặp cào qua các trang danh sách
+    for page in range(start_page, end_page + 1):
+        links = get_job_links(scraper, page)
+        print(f"[-] Tìm thấy {len(links)} links ở trang {page}. Bắt đầu bóc tách...")
+        
+        # 3. Vòng lặp cào chi tiết từng bài đăng
+        for idx, link in enumerate(links):
+            print(f"   + Cào chi tiết {idx+1}/{len(links)}: {link}")
+            
+            record = parse_job(scraper, link)
+            
+            if record:
+                save_jsonl(record, "raw_jobs_batch.jsonl")
+                total_jobs_saved += 1
+            
+            # NGỦ ĐỂ VƯỢT RÀO: Nghỉ 1-3 giây giữa mỗi link chi tiết
+            time.sleep(random.uniform(1.5, 3.5))
+            
+        # Nghỉ dài hơn một chút khi chuyển sang trang danh sách tiếp theo
+        print(f"[zZz] Xong trang {page}, nghỉ ngơi 5 giây...")
+        time.sleep(5)
+        
+    print(f"\n[OK] Batch Crawler hoàn tất! Tổng cộng đã lưu: {total_jobs_saved} jobs.")
 
 if __name__ == "__main__":
     main()
