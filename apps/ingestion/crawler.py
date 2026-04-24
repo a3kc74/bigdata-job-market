@@ -193,7 +193,9 @@ def _create_stealth_browser(pw):
     except ImportError:
         stealth_sync = None
 
-    has_display = bool(os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY"))
+    # On Windows (nt), we always have a display context for Playwright.
+    # On Linux, we check for DISPLAY or WAYLAND_DISPLAY.
+    has_display = os.name == "nt" or bool(os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY"))
     use_headless = not has_display
 
     # headless_env = os.environ.get("CRAWLER_HEADLESS", "true").strip().lower()

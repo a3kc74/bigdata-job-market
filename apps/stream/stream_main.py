@@ -30,7 +30,7 @@ if _project_root not in sys.path:
 
 from apps.stream.aggregations import (build_job_counts_10m,
                                       build_skill_counts_30m)
-from apps.stream.sinks import write_job_counts, write_skill_counts
+from apps.stream.sinks import write_job_counts, write_skill_counts, write_jobs_realtime
 from apps.stream.transform import (clean_events, normalize_events,
                                    validate_raw_events)
 from shared.schemas import RAW_EVENT_SCHEMA
@@ -72,7 +72,7 @@ def main():
     gold_job_counts_df = build_job_counts_10m(main_stream_df)
     gold_skill_counts_df = build_skill_counts_30m(main_stream_df)
 
-    # ── SINK: write gold to Redis ───────────────────────────────────────
+    # ── SINK: write gold aggregates to Cassandra + ES ────────────────────
     query_job_counts = (
         gold_job_counts_df.writeStream.outputMode("update")
         .foreachBatch(write_job_counts)
@@ -89,13 +89,12 @@ def main():
         .start()
     )
 
-    # ── DEBUG: inspect main stream rows in console ──────────────────────
-    query_main_console = (
+    # ── SINK: write main stream events to Cassandra + ES ────────────────
+    query_jobs_realtime = (
         main_stream_df.writeStream.outputMode("append")
-        .format("console")
-        .option("truncate", False)
-        .option("numRows", 10)
-        .option("checkpointLocation", f"{CHECKPOINT_DIR}/main_console")
+        .foreachBatch(write_jobs_realtime)
+        .trigger(processingTime=f"{TRIGGER_SECONDS} seconds")
+        .option("checkpointLocation", f"{CHECKPOINT_DIR}/jobs_realtime")
         .start()
     )
 
