@@ -521,8 +521,10 @@ def save_json(data, file="data1.json"):
 # =========================
 def main():
     url = "https://www.topcv.vn/viec-lam/full-stack-developer-reactjs-fabricjs-da-nang-ha-noi/2117610.html?ta_source=JobSearchList_LinkDetail&u_sr_id=QFf6VTYpflndZ6fgB5yIWy6588anjONYspO4092O_1776958348"
-
-    rec = parse_job(url)
+    scraper = cloudscraper.create_scraper(
+        browser={'browser': 'chrome', 'platform': 'windows', 'desktop': True}
+    )
+    rec = parse_job(scraper, url)
 
     if rec:
         save_jsonl(rec)
@@ -571,4 +573,5 @@ def run_batch_crawler(start_page=1, end_page=3):
     print(f"\n[OK] Batch Crawler hoàn tất! Tổng cộng đã lưu: {total_jobs_saved} jobs.")
 
 if __name__ == "__main__":
-    run_batch_crawler(1, 2)
+    main()
+    #run_batch_crawler(1, 2)
