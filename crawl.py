@@ -5,6 +5,7 @@ import hashlib
 import re
 import time
 import random
+import unicodedata
 from urllib.parse import urlparse, urlunparse
 from datetime import datetime, UTC, timezone, timedelta
 
@@ -130,23 +131,58 @@ def text_or_none(el):
 def extract_company_html(soup):
     return text_or_none(soup.select_one(".company-name, .company a"))
 
+def extract_salary_html(soup):
+    # Bước 1: Tìm qua Class quen thuộc (Đã thêm bẫy chữ "thoả" gõ sai)
+    salary_html = soup.select_one(
+        ".job-detail__info--section-content-value, "
+        ".premium-job-description__box .title-salary, "
+        ".section-salary .job-detail__info--section-content-value"
+    )
+    
+    if salary_html:
+        text = salary_html.get_text(strip=True).lower()
+        if any(k in text for k in ["triệu", "tr", "usd", "thỏa", "thoả", "vnđ"]):
+            return salary_html.get_text(strip=True)
 
+    # Bước 2: Rơi xuống lớp Regex quét toàn bộ text
+    raw_text = soup.get_text(" ", strip=True).lower()
+    
+    # KHIÊN BẢO VỆ 1: Bắt chặt chữ "Thỏa thuận" nếu nó nằm gần chữ "Lương/Thu nhập"
+    # Tránh trường hợp "thời gian làm việc thỏa thuận"
+    if re.search(r'(mức lương|thu nhập|lương)[\s:]*(thỏa thuận|thoả thuận|cạnh tranh)', raw_text):
+        return "Thỏa thuận"
+        
+    # KHIÊN BẢO VỆ 2: Bắt số tiền (Bắt buộc phải đứng sau chữ Lương/Thu nhập để tránh phụ cấp ăn trưa 40.000 VNĐ)
+    context_match = re.search(r'(?:lương|thu nhập)[\s:]*?((?:lên tới\s*)?\d+[\.,]?\d*\s*(?:-\s*\d+[\.,]?\d*\s*)?(triệu|tr|vnđ|usd))', raw_text)
+    if context_match:
+        return context_match.group(1).title()
+
+    # KHIÊN BẢO VỆ 3: Nếu bí quá, quét tìm số "Triệu" hoặc "USD" trơ trọi. 
+    # Tuyệt đối không quét chữ "VNĐ" trơ trọi để tránh tiền gửi xe, tiền ăn trưa nhảm.
+    safe_match = re.search(r'((?:lên tới\s*)?\d+[\.,]?\d*\s*(?:-\s*\d+[\.,]?\d*\s*)?(triệu|tr|usd))', raw_text)
+    if safe_match:
+        return safe_match.group(1).title()
+
+    return "Thỏa thuận / Không hiển thị"
+"""
 def extract_salary_html(soup):
     sec = soup.select_one("div.section-salary")
     if not sec:
         return None
     val = sec.find("div", class_="job-detail__info--section-content-value")
     return val.get_text(strip=True) if val else None
-
+"""
 def extract_level_html(soup):
     return text_or_none(soup.select_one(".job-level"))
 
 def extract_schedule(soup):
-    h3_tag = soup.find(lambda tag: tag.name == "h3" and "Thời gian làm việc" in tag.text)
-
-    if h3_tag:
+    h_tag = soup.find(
+        lambda tag: tag.name in ["h2", "h3"] 
+        and "Thời gian làm việc" in tag.get_text()
+    )
+    if h_tag:
         # 2. Từ thẻ h3, đi ngược lên thẻ cha bao ngoài cùng của khối này
-        parent_item = h3_tag.find_parent("div", class_="job-description__item")
+        parent_item = h_tag.find_parent("div", class_="job-description__item")
         
         if parent_item:
             # 3. Tìm thẻ div chứa nội dung chi tiết
@@ -195,111 +231,68 @@ def extract_location_html(soup):
 def extract_dl(soup):
     dl = soup.select_one(".job-detail__info--deadline-date")
     return text_or_none(dl)
-### Đoạn code thay thế
-def clean_text(text):
-    text = text.strip('"\' ')
-    text = re.sub(r'^[•\-\–\*\d\.\)\s]+', '', text)
-    text = re.sub(r'\s+', ' ', text)
-    return text.strip()
 
-def deduplicate(lines):
-    seen = set()
-    result = []
+def extract_job_requirements(soup):
+    # Dùng CSS Selector để tìm TẤT CẢ các thẻ <li> nằm bên trong khối có class "requirement"
+    li_tags = soup.select(".requirement li")
+    
+    # Dùng List Comprehension để rút chữ ra và bỏ qua các thẻ rỗng
+    return [li.get_text(strip=True) for li in li_tags if li.get_text(strip=True)]
 
-    for line in lines:
-        cleaned = clean_text(line)
-        key = cleaned.lower()
+def extract_income(soup):
+    sections = soup.select(".job-description__item")
 
-        if key and key not in seen:
-            seen.add(key)
-            result.append(cleaned)
+    for sec in sections:
+        title = sec.find("h3")
+        if title and "Thu nhập" in title.get_text(strip=True):
 
-    return result
-def is_meaningful(tag):
-    # tránh lấy div bọc nhiều p/li
-    for child in tag.find_all(["li", "p"], recursive=False):
-        if child.get_text(strip=True):
-            return False
-    return True
-def extract_blocks(container):
-    results = []
+            content = sec.select_one(".job-description__item--content")
+            if not content:
+                return []
 
-    for tag in container.find_all(["li", "p", "div"]):
-        if not is_meaningful(tag):
-            continue
-
-        text = tag.get_text(" ", strip=True)
-
-        if text and len(text) > 20:
-            results.append(text)
-
-    return deduplicate(results)
-# =========================
-# FIND SECTION BY KEYWORD
-# =========================
-def find_section(soup, keywords):
-    for tag in soup.find_all(["h1", "h2", "h3", "h4", "strong"]):
-        text = tag.get_text(strip=True).lower()
-
-        if any(k in text for k in keywords):
-            node = tag.find_next_sibling() or tag.find_next("div")
-            return node
+            return [
+                text for li in content.find_all("li")
+                if (text := li.get_text(strip=True))
+            ]
 
     return None
-
-# =========================
-# 1. REQUIREMENTS
-# =========================
-def extract_job_requirements(soup):
-    keywords = [
-        "yêu cầu", "requirement", "qualification"
-    ]
-
-    container = find_section(soup, keywords)
-    if not container:
-        return []
-
-    return extract_blocks(container)
-# =========================
-# 2. INCOME
-# =========================
-def extract_income(soup):
-    keywords = ["thu nhập", "salary", "income"]
-
-    container = find_section(soup, keywords)
-    if not container:
-        return []
-
-    return extract_blocks(container)
-# =========================
-# 3. DESCRIPTION
-# =========================
 def extract_description(soup):
-    keywords = [
-        "mô tả", "job description", "responsibility"
-    ]
+    container = soup.find(
+        "div",
+        class_=lambda c: c and (
+            "job-description__item--content" in c
+            or "premium-job-description__box--content" in c
+            or "content-tab" in c
+        )
+    )
 
-    container = find_section(soup, keywords)
     if not container:
-        return []
+        return None
 
-    return extract_blocks(container)
+    # ===== CASE 1: có list =====
+    li_tags = container.find_all("li")
+    if li_tags:
+        results = []
+        for li in li_tags:
+            text = li.get_text(" ", strip=True)
+            if text:
+                results.append(text)
+        return results if results else None
 
-# =========================
-# 4. BENEFITS
-# =========================
-def extract_benefits(soup):
-    keywords = [
-        "quyền lợi", "benefit", "phúc lợi"
-    ]
+    # ===== CASE 2: không có list → lấy paragraph/text =====
+    texts = []
 
-    container = find_section(soup, keywords)
-    if not container:
-        return []
+    for tag in container.find_all(["p", "div", "span"]):
+        text = tag.get_text(" ", strip=True)
+        if text:
+            texts.append(text)
 
-    return extract_blocks(container)
-###
+    # fallback nếu không có p/div
+    if not texts:
+        text = container.get_text(" ", strip=True)
+        return text if text else None
 
+    return "\n".join(texts)
 def extract_sections(soup):
     sections = {}
     for sec in soup.select(".job-description__item"):
@@ -308,6 +301,24 @@ def extract_sections(soup):
         if title:
             sections[title.get_text(strip=True)] = content
     return sections
+
+def extract_benefits(html_content):
+    # 1. Parse đoạn HTML (nếu bạn đang truyền vào một chuỗi string)
+    # Lưu ý: Nếu bạn đã có sẵn đối tượng soup của thẻ <ul> này từ bước trước,
+    # bạn có thể bỏ qua dòng BeautifulSoup này.
+    soup = BeautifulSoup(html_content, 'html.parser')
+    
+    # 2. Tìm tất cả các thẻ <li>
+    li_tags = soup.find_all('li')
+    
+    # 3. Duyệt qua từng thẻ <li>, lấy chữ và làm sạch khoảng trắng
+    result_items = []
+    for li in li_tags:
+        text = li.get_text(strip=True)
+        if text: # Chỉ lấy nếu có nội dung, tránh thẻ <li> rỗng
+            result_items.append(text)
+            
+    return result_items
 
 def extract_must(soup):
     for box in soup.find_all("div", class_="box-category"):
@@ -365,6 +376,157 @@ def extract_education(soup):
                 return text if text else None
 
     return None
+
+def normalize(text):
+    text = text.lower().strip()
+    text = unicodedata.normalize('NFD', text)
+    text = ''.join(c for c in text if unicodedata.category(c) != 'Mn')
+    return text
+
+def clean_text(text):
+    return re.sub(r'\s+', ' ', text).strip()
+
+def extract_to_variables(soup):
+    # init biến
+    requirements = []
+    benefits = []
+    description = []
+    income = []
+
+    for sec in soup.select(".job-description__item"):
+        title_tag = sec.find("h3")
+        if not title_tag:
+            continue
+
+        title = normalize(title_tag.get_text(strip=True))
+
+        content = sec.get_text(" ", strip=True)
+        content = content.replace(title_tag.get_text(strip=True), "")
+        content = clean_text(content)
+
+        if not content:
+            continue
+
+        # mapping trực tiếp
+        if any(k in title for k in ["yeu cau ung vien", "requirement"]):
+            requirements.append(content)
+
+        elif any(k in title for k in ["quyen loi", "benefit"]):
+            benefits.append(content)
+
+        elif any(k in title for k in ["mo ta cong viec", "responsibility", "description"]):
+            description.append(content)
+
+        elif any(k in title for k in ["thu nhap", "salary", "luong"]):
+            income.append(content)
+
+    return requirements, benefits, description, income
+
+def extract_custom_form_job(soup):
+    result = {}
+
+    items = soup.select(".custom-form-job__item")
+    
+    for item in items:
+        title_el = item.select_one(".custom-form-job__item--title")
+        content_el = item.select_one(".custom-form-job__item--content")
+        
+        if title_el:
+            title = title_el.get_text(strip=True)
+            content = content_el.get_text(strip=True) if content_el else ""
+
+            if not content:  # bỏ luôn nếu rỗng
+                continue
+
+            if title in result:
+                if isinstance(result[title], list):
+                    result[title].append(content)
+                else:
+                    result[title] = [result[title], content]
+            else:
+                result[title] = content
+
+    return result if result else None
+
+def extract_company_details(soup):
+    """
+    Hàm gom các thông tin chi tiết của công ty thành một Dictionary.
+    Nếu không tìm thấy, trả về None hoặc Dictionary rỗng.
+    """
+    company_info = {}
+    
+    # 1. Lấy Quy mô công ty
+    scale_elem = soup.select_one(".company-scale .company-value")
+    if scale_elem:
+        company_info["scale"] = scale_elem.get_text(strip=True)
+        
+    # 2. Lấy Lĩnh vực hoạt động
+    field_elem = soup.select_one(".company-field .company-value")
+    if field_elem:
+        company_info["field"] = field_elem.get_text(strip=True)
+        
+    # 3. Lấy Địa chỉ công ty
+    address_elem = soup.select_one(".company-address .company-value")
+    if address_elem:
+        company_info["address"] = address_elem.get_text(strip=True)
+        
+    return company_info if company_info else None
+
+def extract_flat_from_pagetext(page_text):
+    """
+    Hàm dùng Regex để bóc tách toàn bộ thông tin từ chuỗi pageText thô.
+    Trả về các biến rời rạc (Tuple) thay vì Dictionary.
+    """
+    clean_text = re.sub(r'\s+', ' ', page_text)
+    
+    # Khởi tạo các biến rời
+    salary = None
+    location = None
+    experience = None
+    deadline = None
+    description = []
+    requirements = []
+    benefits = []
+    schedule = None
+
+
+    # 3. Lấy Lương
+    salary_match = re.search(r'Mức lương\s+(.*?)\s+Địa điểm', clean_text)
+    if salary_match: salary = salary_match.group(1).strip()
+
+    # 4. Lấy Địa điểm
+    location_match = re.search(r'Địa điểm\s+(.*?)\s+Kinh nghiệm', clean_text)
+    if location_match: location = location_match.group(1).strip()
+
+    # 5. Lấy Kinh nghiệm
+    exp_match = re.search(r'Kinh nghiệm\s+(.*?)\s+(?:Tra cứu|Xem mức)', clean_text)
+    if exp_match: experience = exp_match.group(1).strip()
+
+    # 6. Lấy Hạn nộp
+    dl_match = re.search(r'Hạn nộp hồ sơ:\s+(\d{2}/\d{2}/\d{4})', clean_text)
+    if dl_match: deadline = dl_match.group(1).strip()
+
+    # 7. Lấy Mô tả công việc
+    desc_match = re.search(r'Mô tả công việc\s+(.*?)\s+(?=Yêu cầu ứng viên|Trình độ, kinh nghiệm|Yêu cầu công việc)', clean_text, re.IGNORECASE)
+    if desc_match: description = [desc_match.group(1).strip()]
+
+    # 8. Lấy Yêu cầu
+    req_match = re.search(r'(?:Yêu cầu ứng viên|Yêu cầu công việc)\s+(.*?)\s+(?=Quyền lợi được hưởng|Quyền lợi:)', clean_text, re.IGNORECASE)
+    if req_match: requirements = [req_match.group(1).strip()]
+
+    # 9. Lấy Quyền lợi
+    ben_match = re.search(r'(?:Quyền lợi được hưởng|Quyền lợi:)\s+(.*?)\s+(?=Quyền lợi Bảo hiểm|Địa điểm làm việc|Thời gian làm việc)', clean_text, re.IGNORECASE)
+    if ben_match and len(ben_match.group(1)) > 50:
+        benefits = [ben_match.group(1).strip()]
+
+    # 10. Lấy Thời gian làm việc
+    schedule_match = re.search(r'Thời gian làm việc\s+(.*?)\s+(?:Cách thức ứng tuyển|Thời gian check-in|Bạn có hài lòng)', clean_text, re.IGNORECASE)
+    if schedule_match:
+        raw_sched = schedule_match.group(1).strip()
+        schedule = re.sub(r'^Thời gian làm việc:\s*', '', raw_sched)
+
+    # TRẢ VỀ TUPLE CHỨA CÁC BIẾN RỜI
+    return salary, location, experience, deadline, description, requirements, benefits, schedule
 # =========================
 # MAIN PARSER
 # =========================
@@ -391,8 +553,7 @@ def parse_job(scraper, url):
     openings = json_ld.get("totalJobOpenings")
 
     schedule = extract_schedule(soup)
-    benefits = extract_benefits(json_ld.get("jobBenefits"))
-    income = extract_income(soup)
+
     skills_needed = extract_must(soup)
     skills_should_have = extract_should(soup)
     if skills_needed is None and skills_should_have is None:
@@ -431,13 +592,6 @@ def parse_job(scraper, url):
         except ValueError:
             pass # Bỏ qua nếu regex/text không đúng định dạng ngày
 
-    # salary
-    """
-    salary_raw = None
-    salary_obj = json_ld.get("baseSalary", {})
-    if salary_obj:
-        salary_raw = str(salary_obj)
-    """
 
     # location
     """
@@ -462,9 +616,53 @@ def parse_job(scraper, url):
     if not level:
         level = extract_level_html(soup)
 
-    requirements_raw = extract_job_requirements(soup)
-    description = extract_description(soup)
+    requirements_raw, benefits, description, income = extract_to_variables(soup)
+    
+    if not benefits:
+        benefits = extract_benefits(json_ld.get("jobBenefits"))
+    if not income:
+        income = extract_income(soup)
+    if not requirements_raw:
+        requirements_raw = extract_job_requirements(soup)
+    if not description:  
+        description = extract_description(soup)
+    extra_inf = extract_custom_form_job(soup)
+    company_details = extract_company_details(soup)
 
+
+    # Lấy text toàn trang
+    page_text = soup.get_text(" ", strip=True)
+    
+    # Hứng toàn bộ các biến rời rạc
+    ( 
+        regex_salary, 
+        regex_location, 
+        regex_exp, 
+        regex_deadline, 
+        regex_desc, 
+        regex_req, 
+        regex_ben, 
+        regex_schedule
+    ) = extract_flat_from_pagetext(page_text)
+
+    if not salary_raw:
+        salary_raw = regex_salary
+    if not description:
+        description = regex_desc
+    if not schedule:
+        schedule = regex_schedule
+
+    # thời gian hết hạn đăng ký 
+    deadline = extract_dl(soup)
+    if not deadline:
+        deadline = regex_deadline
+    valid_through = None # Mặc định là None nếu không tìm thấy
+    if deadline:
+        try:
+            vt = datetime.strptime(deadline, "%d/%m/%Y").replace(hour=23, minute=59, second=59, tzinfo=vn_tz)
+            valid_through = int(vt.timestamp() * 1000)
+        except ValueError:
+            pass # Bỏ qua nếu regex/text không đúng định dạng ngày
     # =========================
     # KEYS
     # =========================
@@ -503,6 +701,7 @@ def parse_job(scraper, url):
         "payload": {
             "title": title,
             "company_name": company,
+            "company_details": company_details,
             "salary": salary_raw,
             "location": city,
             "monthOfExperience": exp,
@@ -515,6 +714,7 @@ def parse_job(scraper, url):
             "requirements": requirements_raw,
             "income": income, 
             "benefits": benefits,
+            "extra_inf": extra_inf,
             "schedule": schedule,
             "skillsNeeded": skills_needed,
             "skillsShouldHave": skills_should_have,
@@ -549,7 +749,8 @@ def parse_job(scraper, url):
             "has_specialty": bool(specialty),
             "has_schedule": bool(schedule),
             "has_employment_type": bool(employment_type),
-            "has_income": bool(income)
+            "has_income": bool(income),
+            "has_extra_info": bool(extra_inf)
         }
     }
     return record
@@ -570,7 +771,7 @@ def save_json(data, file="data1.json"):
 # RUN
 # =========================
 def main():
-    url = "https://www.topcv.vn/viec-lam/full-stack-developer-reactjs-fabricjs-da-nang-ha-noi/2117610.html?ta_source=JobSearchList_LinkDetail&u_sr_id=QFf6VTYpflndZ6fgB5yIWy6588anjONYspO4092O_1776958348"
+    url = "https://www.topcv.vn/brand/fptis/tuyen-dung/lap-trinh-vien-backend-net-asp-net-core-j2026747.html?ta_source=JobBrandSameCompany_LinkDetail&jr_i=rule-based-v0%3A%3A1777305820005%3A%3A2026747%3A%3A4"
     scraper = cloudscraper.create_scraper(
         browser={'browser': 'chrome', 'platform': 'windows', 'desktop': True}
     )

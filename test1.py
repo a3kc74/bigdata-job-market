@@ -520,7 +520,7 @@ def save_json(data, file="data1.json"):
 # RUN
 # =========================
 def main():
-    url = "https://www.topcv.vn/viec-lam/full-stack-developer-reactjs-fabricjs-da-nang-ha-noi/2117610.html?ta_source=JobSearchList_LinkDetail&u_sr_id=QFf6VTYpflndZ6fgB5yIWy6588anjONYspO4092O_1776958348"
+    url = "https://www.topcv.vn/viec-lam/nhan-vien-lap-trinh-van-hanh-may-cnc/2131930.html?ta_source=JobSearchList_LinkDetail&u_sr_id=QFf6VTYpflndZ6fgB5yIWy6588anjONYspO4092O_1777294162"
     scraper = cloudscraper.create_scraper(
         browser={'browser': 'chrome', 'platform': 'windows', 'desktop': True}
     )
