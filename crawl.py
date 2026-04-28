@@ -771,7 +771,7 @@ def save_json(data, file="data1.json"):
 # RUN
 # =========================
 def main():
-    url = "https://www.topcv.vn/brand/fptis/tuyen-dung/lap-trinh-vien-backend-net-asp-net-core-j2026747.html?ta_source=JobBrandSameCompany_LinkDetail&jr_i=rule-based-v0%3A%3A1777305820005%3A%3A2026747%3A%3A4"
+    url = "https://www.topcv.vn/viec-lam/qa-tester-game-web-thu-nhap-up-to-30m-nhan-viec-ngay/2125006.html?ta_source=JobSearchList_LinkDetail&u_sr_id=QFf6VTYpflndZ6fgB5yIWy6588anjONYspO4092O_1777343898"
     scraper = cloudscraper.create_scraper(
         browser={'browser': 'chrome', 'platform': 'windows', 'desktop': True}
     )
