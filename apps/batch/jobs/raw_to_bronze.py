@@ -100,8 +100,14 @@ from pyspark.sql.types import (
     TimestampType
 )
 
-RAW_BASE_PATH = "hdfs:///raw/jobs"
-BRONZE_BASE_PATH = "hdfs:///bronze/jobs"
+# HDFS NameNode service URL inside Kubernetes:
+#   Format: hdfs://<service-name>.<namespace>.svc:<port>
+#   'hdfs-namenode' = K8s Service name of HDFS NameNode pod
+#   'hdfs'          = namespace where HDFS is deployed
+#   9000            = default HDFS RPC port
+# For local spark-submit (outside K8s): use hdfs://localhost:9000
+RAW_BASE_PATH    = "hdfs://hdfs-namenode.hdfs.svc:9000/raw/jobs"
+BRONZE_BASE_PATH = "hdfs://hdfs-namenode.hdfs.svc:9000/bronze/jobs"
 
 # Config logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
