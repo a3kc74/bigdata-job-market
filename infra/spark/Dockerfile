@@ -1,18 +1,22 @@
 FROM apache/spark:4.1.1-python3
 
 USER root
-RUN pybin="$(command -v python3)" && \
-    ln -sf "$pybin" /usr/bin/python && \
-    ln -sf "$pybin" /usr/local/bin/python && \
-    python --version && \
-    python3 --version && \
-    pip3 install --no-cache-dir cassandra-driver
+
+# Cài thêm Python deps cho batch ETL
+RUN pip3 install --no-cache-dir \
+    cassandra-driver \
+    requests
 
 ENV HOME=/tmp
 ENV PATH="/usr/local/bin:/usr/bin:${PATH}"
 ENV PYSPARK_PYTHON=python3
 ENV PYSPARK_DRIVER_PYTHON=python3
 
-COPY apps/spark/kafka_to_cassandra_es.py /opt/spark/work-dir/kafka_to_cassandra_es.py
+# Copy toàn bộ batch jobs và shared utils
+COPY apps/batch/jobs/          /opt/spark/work-dir/jobs/
+COPY apps/spark/               /opt/spark/work-dir/stream/
+COPY shared/                   /opt/spark/work-dir/shared/
+
+WORKDIR /opt/spark/work-dir
 
 USER spark

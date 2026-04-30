@@ -1,85 +1,103 @@
-# Spark on Kubernetes
+# Spark on Kubernetes — Hướng dẫn tích hợp Batch ETL
 
-Tài liệu này mô tả cách chuẩn bị Spark trên Kubernetes để submit job từ máy local lên cluster Minikube.
+## Kiến trúc
 
-## 1. Thành phần sử dụng
+```
+Kubernetes (Minikube)
+│
+├── namespace: spark
+│   ├── ServiceAccount: spark          (RBAC — infra/spark/10-rbac.yaml)
+│   ├── CronJob: batch-etl-raw-bronze  (infra/kubernetes/batch-etl-cronjob.yaml)
+│   │     ↓ tạo
+│   ├── Job → Pod: spark-driver
+│   │               ↓ tạo
+│   └── Pods: spark-executor-xxx (x2)
+│
+├── namespace: kafka
+├── namespace: streaming
+└── namespace: k8ssandra-operator
+```
 
-- Namespace: `spark`
-- ServiceAccount: `spark`
-- RoleBinding: `spark-edit`
+## Luồng chạy
 
-Các resource này được khai báo trong:
+```
+02:00 AM hàng ngày
+    → CronJob tạo Job
+    → Job tạo Pod "spark-submit"
+    → Pod chạy spark-submit --master k8s://...
+    → Spark Driver Pod khởi động trong namespace spark
+    → Driver tạo 2 Executor Pods
+    → ETL đọc HDFS raw → xử lý → ghi HDFS bronze
+    → Executor Pods tự xóa sau khi xong
+    → Driver Pod ở trạng thái Completed (log vẫn xem được)
+```
 
-- `infra/spark/10-rbac.yaml`
+## Cấu trúc file liên quan
 
-## 2. Apply cấu hình Spark namespace và RBAC
+```
+infra/
+├── spark/
+│   ├── Dockerfile          ← Image Spark + batch ETL code
+│   ├── 10-rbac.yaml        ← Namespace, ServiceAccount, RoleBinding
+│   └── README.md
+│
+├── kubernetes/
+│   └── batch-etl-cronjob.yaml  ← CronJob chạy raw→bronze hàng ngày
+│
+apps/
+└── batch/
+    └── jobs/
+        ├── job_raw_to_bronze.py
+        ├── job_bronze_to_silver.py   (chưa viết)
+        └── job_silver_to_gold.py     (chưa viết)
+```
 
-```powershell
+## Build và deploy (Minikube)
+
+```bash
+# 1. Dùng Docker daemon của Minikube (không cần push registry)
+eval $(minikube docker-env)
+
+# 2. Build image từ root repo (để COPY paths đúng)
+docker build -f infra/spark/Dockerfile -t bigdata-job-market/spark-etl:latest .
+
+# 3. Apply RBAC
 kubectl apply -f infra/spark/10-rbac.yaml
+
+# 4. Apply CronJob
+kubectl apply -f infra/kubernetes/batch-etl-cronjob.yaml
+
+# 5. Kiểm tra
+kubectl get cronjob -n spark
 ```
 
-## 3. Kiểm tra quyền của Spark service account
+## Chạy thủ công (test ngay, không cần đợi schedule)
 
-```powershell
-kubectl auth can-i create pods --as=system:serviceaccount:spark:spark -n spark
-kubectl auth can-i create services --as=system:serviceaccount:spark:spark -n spark
-kubectl auth can-i create configmaps --as=system:serviceaccount:spark:spark -n spark
+```bash
+kubectl create job --from=cronjob/batch-etl-raw-to-bronze \
+    manual-bronze-$(date +%Y%m%d) -n spark
 ```
 
-Kỳ vọng: cả 3 lệnh đều trả về `yes`.
+## Xem log
 
-## 4. Build Spark image cho app Python
+```bash
+# Xem driver pod
+kubectl get pods -n spark
 
-```powershell
-docker build --no-cache -t spark-kafka-es:demo -f infra/spark/Dockerfile .
-docker run --rm spark-kafka-es:demo sh -lc "python --version && python3 --version"
-minikube image load spark-kafka-es:demo
+# Xem log
+kubectl logs <driver-pod-name> -n spark
+
+# Xem executor logs
+kubectl logs <executor-pod-name> -n spark
 ```
 
-## 5. Kiểm tra API server của Kubernetes
+## Lưu ý HDFS + Kubernetes
 
-```powershell
-kubectl cluster-info
-```
+Spark trên K8s cần kết nối được HDFS NameNode. Có 2 cách:
 
-Ví dụ:
+| Cách | Mô tả |
+|---|---|
+| **HDFS trong K8s** | Deploy HDFS bằng Helm chart, expose NameNode qua Service. Spark dùng `hdfs://hdfs-namenode.hdfs.svc:9000` |
+| **HDFS ngoài K8s** | HDFS chạy trên máy host/VM, Spark dùng IP trực tiếp. Cần cấu hình `core-site.xml` trong Spark image |
 
-```text
-Kubernetes control plane is running at https://127.0.0.1:<port>
-```
-
-Giá trị này sẽ được dùng trong lệnh `spark-submit`.
-
-## 6. Submit Spark job lên Kubernetes
-
-Ví dụ submit job streaming:
-
-```cmd
-set PYSPARK_PYTHON=python3
-set PYSPARK_DRIVER_PYTHON=python3
-set SPARK_SUBMIT_OPTS=-Djava.security.manager=allow
-
-spark-submit ^
-  --master k8s://https://127.0.0.1:<port> ^
-  --deploy-mode cluster ^
-  --name kafka-to-es ^
-  --packages org.apache.spark:spark-sql-kafka-0-10_2.13:4.1.1 ^
-  --conf spark.executor.instances=1 ^
-  --conf spark.kubernetes.namespace=spark ^
-  --conf spark.kubernetes.authenticate.driver.serviceAccountName=spark ^
-  --conf spark.kubernetes.container.image=spark-kafka-es:demo ^
-  --conf spark.kubernetes.container.image.pullPolicy=IfNotPresent ^
-  local:///opt/spark/work-dir/kafka_to_es.py
-```
-
-## 7. Theo dõi pod Spark
-
-```powershell
-kubectl get pods -n spark -w
-```
-
-## 8. Ghi chú
-
-- Nếu Minikube restart, cổng API server có thể thay đổi.
-- Khi đó cần chạy lại `kubectl cluster-info` và cập nhật giá trị trong `--master`.
-- Nếu build lại image, cần chạy lại `minikube image load spark-kafka-es:demo`.
+Với Minikube (local dev), thường dùng **HDFS trong K8s** hoặc mount volume local thay thế khi test.
