@@ -8,6 +8,19 @@ import random
 import unicodedata
 from urllib.parse import urlparse, urlunparse
 from datetime import datetime, UTC, timezone, timedelta
+import logging
+import sys
+
+# Cấu hình Logger định dạng chuẩn cho Docker
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s | %(levelname)s | CRAWLER | %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S',
+    handlers=[
+        logging.StreamHandler(sys.stdout) # Ép log đẩy thẳng ra Docker console
+    ]
+)
+logger = logging.getLogger(__name__)
 
 # ===========================================================
 # 1. CRAWL LINKS
@@ -45,19 +58,6 @@ SOURCE = "topcv"
 # =========================
 # FETCH
 # =========================
-"""
-def get_soup(url):
-    scraper = cloudscraper.create_scraper(
-        browser={'browser': 'chrome', 'platform': 'windows', 'desktop': True}
-    )
-    res = scraper.get(url)
-
-    if res.status_code != 200:
-        print("Lỗi request:", res.status_code)
-        return None
-
-    return BeautifulSoup(res.text, "html.parser")
-"""
 def get_soup(scraper, url):
     """
     Hàm fetch dùng chung phiên (session) và bắt lỗi mạng an toàn.
@@ -120,7 +120,6 @@ def extract_meta(soup):
             meta[k] = v
     return meta
 
-
 # =========================
 # HTML FALLBACK
 # =========================
@@ -148,30 +147,27 @@ def extract_salary_html(soup):
     raw_text = soup.get_text(" ", strip=True).lower()
     
     # KHIÊN BẢO VỆ 1: Bắt chặt chữ "Thỏa thuận" nếu nó nằm gần chữ "Lương/Thu nhập"
-    # Tránh trường hợp "thời gian làm việc thỏa thuận"
     if re.search(r'(mức lương|thu nhập|lương)[\s:]*(thỏa thuận|thoả thuận|cạnh tranh)', raw_text):
         return "Thỏa thuận"
         
-    # KHIÊN BẢO VỆ 2: Bắt số tiền (Bắt buộc phải đứng sau chữ Lương/Thu nhập để tránh phụ cấp ăn trưa 40.000 VNĐ)
-    context_match = re.search(r'(?:lương|thu nhập)[\s:]*?((?:lên tới\s*)?\d+[\.,]?\d*\s*(?:-\s*\d+[\.,]?\d*\s*)?(triệu|tr|vnđ|usd))', raw_text)
+    # TẬP HỢP TIỀN TỐ: Bắt các chữ đứng trước số tiền (có thể có hoặc không)
+    # Ví dụ: từ, tới, đến, lên tới, lên đến, khoảng, trên, dưới, hơn...
+    prefix_regex = r'(?:(?:từ|đến|tới|lên\s+tới|lên\s+đến|khoảng|trên|dưới|hơn)\s+)?'
+    
+    # KHIÊN BẢO VỆ 2: Bắt số tiền (Bắt buộc phải đứng sau chữ Lương/Thu nhập)
+    # Gom toàn bộ: (Tiền tố + Số tiền + Đơn vị) vào chung Group 1 để lấy trọn vẹn
+    context_match = re.search(r'(?:lương|thu nhập)[\s:]*?(' + prefix_regex + r'\d+[\.,]?\d*\s*(?:-\s*\d+[\.,]?\d*\s*)?(?:triệu|tr|vnđ|usd))', raw_text)
     if context_match:
         return context_match.group(1).title()
 
     # KHIÊN BẢO VỆ 3: Nếu bí quá, quét tìm số "Triệu" hoặc "USD" trơ trọi. 
-    # Tuyệt đối không quét chữ "VNĐ" trơ trọi để tránh tiền gửi xe, tiền ăn trưa nhảm.
-    safe_match = re.search(r'((?:lên tới\s*)?\d+[\.,]?\d*\s*(?:-\s*\d+[\.,]?\d*\s*)?(triệu|tr|usd))', raw_text)
+    # Vẫn giữ nguyên cụm prefix_regex để lấy được chữ "Khoảng 15 Triệu" thay vì chỉ "15 Triệu"
+    safe_match = re.search(r'(' + prefix_regex + r'\d+[\.,]?\d*\s*(?:-\s*\d+[\.,]?\d*\s*)?(?:triệu|tr|usd))', raw_text)
     if safe_match:
         return safe_match.group(1).title()
 
     return "Thỏa thuận / Không hiển thị"
-"""
-def extract_salary_html(soup):
-    sec = soup.select_one("div.section-salary")
-    if not sec:
-        return None
-    val = sec.find("div", class_="job-detail__info--section-content-value")
-    return val.get_text(strip=True) if val else None
-"""
+
 def extract_level_html(soup):
     return text_or_none(soup.select_one(".job-level"))
 
@@ -232,13 +228,6 @@ def extract_dl(soup):
     dl = soup.select_one(".job-detail__info--deadline-date")
     return text_or_none(dl)
 
-def extract_job_requirements(soup):
-    # Dùng CSS Selector để tìm TẤT CẢ các thẻ <li> nằm bên trong khối có class "requirement"
-    li_tags = soup.select(".requirement li")
-    
-    # Dùng List Comprehension để rút chữ ra và bỏ qua các thẻ rỗng
-    return [li.get_text(strip=True) for li in li_tags if li.get_text(strip=True)]
-
 def extract_income(soup):
     sections = soup.select(".job-description__item")
 
@@ -254,99 +243,429 @@ def extract_income(soup):
                 text for li in content.find_all("li")
                 if (text := li.get_text(strip=True))
             ]
+    return None
+import re
+
+def extract_description(soup):
+    target_classes = [
+        "job-description__item", 
+        "box-info", 
+        "job-detail-content",
+        "job-description",
+        "premium-job-description__box"
+    ]
+    
+    inner_classes = [
+        "job-description__item--content", 
+        "content-tab",
+        "premium-job-description__box--content"
+    ]
+    
+    description_keywords = [
+        "mô tả công việc", "chi tiết công việc", "nhiệm vụ", "job description"
+    ]
+    
+    for item in soup.find_all("div", class_=target_classes):
+        heading_tag = item.find(['h1', 'h2', 'h3'])
+        if not heading_tag:
+            continue
+
+        heading_text = heading_tag.get_text(strip=True).lower()
+
+        if any(keyword in heading_text for keyword in description_keywords):
+            content_div = item.find("div", class_=inner_classes)
+            if not content_div:
+                continue
+
+            # =========================
+            # FIX QUAN TRỌNG: NUKE <br> BẰNG REGEX TRƯỚC KHI XỬ LÝ
+            # =========================
+            # 1. Chuyển toàn bộ khối div bị lỗi thành chuỗi HTML thô
+            html_str = str(content_div)
+            
+            # 2. Tiêu diệt mọi biến thể của thẻ br (<br>, </br>, <br/>) và biến thành \n
+            html_str = re.sub(r'</?br\s*/?>', '\n', html_str, flags=re.IGNORECASE)
+            
+            # 3. Nạp lại HTML "sạch" vào BeautifulSoup để xử lý tiếp
+            clean_soup = BeautifulSoup(html_str, "html.parser")
+
+            # 4. Xóa thẻ inline để tránh gãy text
+            for tag in clean_soup.find_all(['strong', 'b', 'span', 'em', 'i', 'u', 'a']):
+                tag.unwrap()
+
+            # (BỎ QUA BƯỚC XỬ LÝ <br> VÌ ĐÃ LÀM Ở TRÊN RỒI)
+
+            # 5. list → bullet
+            for li in clean_soup.find_all('li'):
+                li.insert_before('\n- ')
+
+            # 6. block → xuống dòng
+            for block in clean_soup.find_all(['p', 'div']):
+                block.append('\n')
+
+            # 7. LẤY TEXT
+            raw_text = clean_soup.get_text()
+
+            # =========================
+            # CLEAN TEXT (Giữ nguyên code cũ của bạn)
+            # =========================
+            text = re.sub(r'[ \t]+', ' ', raw_text)
+            text = re.sub(r'\s+([,.:])', r'\1', text)
+            text = re.sub(r'"\s+', '"', text)
+            text = re.sub(r'\s+"', '"', text)
+            text = re.sub(r'\n\s*-\s*\n', '\n- ', text)
+            text = re.sub(r'\n+', '\n', text)
+
+            return text.strip()
 
     return None
-def extract_description(soup):
-    container = soup.find(
-        "div",
-        class_=lambda c: c and (
-            "job-description__item--content" in c
-            or "premium-job-description__box--content" in c
-            or "content-tab" in c
-        )
-    )
 
-    if not container:
-        return None
 
-    # ===== CASE 1: có list =====
-    li_tags = container.find_all("li")
-    if li_tags:
-        results = []
-        for li in li_tags:
-            text = li.get_text(" ", strip=True)
-            if text:
-                results.append(text)
-        return results if results else None
-
-    # ===== CASE 2: không có list → lấy paragraph/text =====
-    texts = []
-
-    for tag in container.find_all(["p", "div", "span"]):
-        text = tag.get_text(" ", strip=True)
-        if text:
-            texts.append(text)
-
-    # fallback nếu không có p/div
-    if not texts:
-        text = container.get_text(" ", strip=True)
-        return text if text else None
-
-    return "\n".join(texts)
-def extract_sections(soup):
-    sections = {}
-    for sec in soup.select(".job-description__item"):
-        title = sec.find("h3")
-        content = sec.get_text(" ", strip=True)
-        if title:
-            sections[title.get_text(strip=True)] = content
-    return sections
-
-def extract_benefits(html_content):
-    # 1. Parse đoạn HTML (nếu bạn đang truyền vào một chuỗi string)
-    # Lưu ý: Nếu bạn đã có sẵn đối tượng soup của thẻ <ul> này từ bước trước,
-    # bạn có thể bỏ qua dòng BeautifulSoup này.
-    soup = BeautifulSoup(html_content, 'html.parser')
+def extract_job_requirements(soup):
+    # 1. Danh sách các class "vỏ bọc"
+    target_classes = [
+        "premium-job-description__box job-detail-section requirement",
+        "job-description__item job-detail-section requirement",
+        "box-info job-detail-section requirement"
+    ]
     
-    # 2. Tìm tất cả các thẻ <li>
-    li_tags = soup.find_all('li')
+    # 2. Danh sách các class "phần ruột"
+    inner_classes = [
+        "premium-job-description__box--content",
+        "job-description__item--content",
+        "content-tab"
+    ]
     
-    # 3. Duyệt qua từng thẻ <li>, lấy chữ và làm sạch khoảng trắng
-    result_items = []
-    for li in li_tags:
-        text = li.get_text(strip=True)
-        if text: # Chỉ lấy nếu có nội dung, tránh thẻ <li> rỗng
-            result_items.append(text)
+    # 3. Danh sách từ khóa quét tiêu đề (tối ưu hóa để bắt được nhiều case)
+    requirement_keywords = [
+        "yêu cầu ứng viên", "yêu cầu công việc", "kỹ năng", "chuyên môn", "job requirements"
+    ]
+    
+    job_items = soup.find_all("div", class_=target_classes)
+    
+    for item in job_items:
+        heading_tag = item.find(['h1', 'h2', 'h3'])
+        
+        # Luôn check NoneType trước
+        if heading_tag:
+            heading_text = heading_tag.get_text(strip=True).lower()
             
-    return result_items
+            # Quét kiểm tra xem có khớp từ khóa Yêu cầu không
+            if any(keyword in heading_text for keyword in requirement_keywords):
+                content_div = item.find("div", class_=inner_classes)
+                
+                if content_div:
+                    # CÁCH LY DOM
+                    local_soup = BeautifulSoup(str(content_div), "html.parser")
+                    
+                    # 1. Biến các thẻ <br> thành dấu xuống dòng trên Mini Soup
+                    for br in local_soup.find_all('br'):
+                        br.replace_with('\n')
+                    
+                    # 2. Xử lý danh sách
+                    for li in local_soup.find_all('li'):
+                        li.insert(0, '\n- ')
+                        
+                    # 3. Phân tách đoạn văn
+                    for block in local_soup.find_all(['p', 'div']):
+                        block.append('\n')
+
+                    # 4. Lấy text từ Mini Soup
+                    raw_text = local_soup.get_text(separator=' ')
+                    
+                    # 5. Dọn dẹp rác HTML sinh ra do khoảng trắng thừa
+                    clean_text = re.sub(r'[ \t]+', ' ', raw_text)
+                    clean_text = re.sub(r' \n |\n | \n', '\n', clean_text)
+                    clean_text = re.sub(r'\n+', '\n', clean_text)
+                    
+                    return clean_text.strip()
+                
+    return None
+def extract_benefits(soup):
+    target_classes = [
+        "premium-job-description__box job-detail-section benefit",
+        "job-description__item job-detail-section benefit",
+        "box-info job-detail-section benefit"
+    ]
+    
+    inner_classes = [
+        "premium-job-description__box--content",
+        "job-description__item--content",
+        "content-tab"
+    ]
+    
+    benefit_keywords = [
+        "quyền lợi", "quyền lợi được hưởng", "chế độ đãi ngộ", "phúc lợi", "benefit"
+    ]
+    
+    job_items = soup.find_all("div", class_=target_classes)
+    
+    for item in job_items:
+        heading_tag = item.find(['h1', 'h2', 'h3'])
+        
+        if heading_tag:
+            heading_text = heading_tag.get_text(strip=True).lower()
+            
+            if any(keyword in heading_text for keyword in benefit_keywords):
+                content_div = item.find("div", class_=inner_classes)
+                
+                if content_div:
+                    # CÁCH LY DOM
+                    local_soup = BeautifulSoup(str(content_div), "html.parser")
+                    
+                    # 1. Biến các thẻ <br> thành dấu xuống dòng trên Mini Soup
+                    for br in local_soup.find_all('br'):
+                        br.replace_with('\n')
+                    
+                    # 2. Xử lý danh sách
+                    for li in local_soup.find_all('li'):
+                        li.insert(0, '\n- ')
+                        
+                    # 3. Phân tách đoạn văn
+                    for block in local_soup.find_all(['p', 'div']):
+                        block.append('\n')
+
+                    # 4. Lấy text từ Mini Soup
+                    raw_text = local_soup.get_text(separator=' ')
+                    
+                    # 5. Dọn dẹp rác HTML sinh ra do khoảng trắng thừa
+                    clean_text = re.sub(r'[ \t]+', ' ', raw_text)       # Gom nhiều dấu cách/tab thành 1 dấu cách
+                    clean_text = re.sub(r' \n |\n | \n', '\n', clean_text) # Xóa dấu cách thừa dính sát vào dấu xuống dòng
+                    clean_text = re.sub(r'\n+', '\n', clean_text)       # Gom nhiều dòng trống liên tiếp thành 1 dòng
+
+                    return clean_text.strip()
+                
+    return None
+
+def normalize(text):
+    text = text.lower().strip()
+    text = text.replace('đ', 'd')
+    text = unicodedata.normalize('NFD', text)
+    text = ''.join(c for c in text if unicodedata.category(c) != 'Mn')
+    return text
+
+def extract_sections(soup):
+    target_classes = [
+        "job-description__item", 
+        "box-info", #
+        "box-address", #
+        "premium-job-description__box", #1
+        "job-description__custom-form-job" #2
+    ]
+
+    sections = {}
+
+    requirements, benefits, description = [], [], []
+    income, city, schedule = [], [], []
+
+    # ===== STEP 1: gom section =====
+    all_sections = []
+    for cls in target_classes:
+        all_sections.extend(soup.select(f".{cls}"))
+
+    # ===== STEP 2: bỏ section cha (Thuật toán quét nội bộ chính xác 100%) =====
+    filtered_sections = []
+    for sec in all_sections:
+        is_parent = False
+        for cls in target_classes:
+            # Lệnh select_one sẽ đâm sâu vào các thẻ con BÊN TRONG sec.
+            # Nếu phát hiện sec này đang ôm một section con khác -> Nó là thẻ cha (wrapper) -> Bỏ qua.
+            if sec.select_one(f".{cls}"):
+                is_parent = True
+                break
+                
+        # Nếu không chứa section con nào -> Đây chính là thẻ ruột chứa text -> Lấy ngay!
+        if not is_parent:
+            filtered_sections.append(sec)
+
+    # ===== STEP 3: parse =====
+    for sec in filtered_sections:
+        # 1. CÁCH LY DOM
+        local_soup = BeautifulSoup(str(sec), "html.parser")
+        
+        # 2. XÓA TIÊU ĐỀ
+        title_tag = local_soup.find(['h1', 'h2', 'h3', 'h4', 'h5'])
+        if not title_tag:
+            title_tag = local_soup.find(class_=re.compile(r'title', re.I))
+            
+        if not title_tag:
+            continue
+
+        original_title = title_tag.get_text(strip=True)
+        title_tag.extract() # Bứng gốc tiêu đề
+
+        # 3. QUY TRÌNH CHUẨN HÓA THẺ (Format DOM)
+        # Bật gạch đầu dòng cho thẻ <li>
+        for li in local_soup.find_all('li'):
+            li.insert(0, '\n- ')
+            
+        # Biến <br> thành dấu xuống dòng
+        for br in local_soup.find_all('br'):
+            br.replace_with('\n')
+            
+        # Thêm xuống dòng sau mỗi đoạn văn (tránh dính chữ khi dùng separator=' ')
+        for block in local_soup.find_all(['p', 'div']):
+            block.append('\n')
+
+        # Unwrap các thẻ inline để không cản trở việc lấy text
+        for tag in local_soup.find_all(['strong','b','span','em','i','u','a','font']):
+            tag.unwrap()
+
+        # 4. LẤY TEXT BẰNG DẤU CÁCH (Quan trọng nhất để giữ liền mạch câu)
+        cleaned_text = local_soup.get_text(separator=' ')
+
+        # 5. DỌN DẸP RÁC KHOẢNG TRẮNG VÀ XUỐNG DÒNG
+        cleaned_text = re.sub(r'[ \t]+', ' ', cleaned_text)        # Gom nhiều dấu cách thành 1
+        cleaned_text = re.sub(r' \n |\n | \n', '\n', cleaned_text) # Dọn dấu cách thừa dính với \n
+        cleaned_text = re.sub(r'\n+', '\n', cleaned_text)          # Gom nhiều dòng trống thành 1 dòng
+        cleaned_text = cleaned_text.strip()
+
+        # 6. TRẢM TIÊU ĐỀ DÍNH CHẶT (Nếu .extract() sót)
+        if cleaned_text.lower().startswith(original_title.lower()):
+            cleaned_text = cleaned_text[len(original_title):].strip()
+            cleaned_text = re.sub(r'^[:\-]+', '', cleaned_text).strip()
+
+        # 7. CỨU HỘ MỤC QUYỀN LỢI (Bị nuốt chung vào thẻ khác)
+        split_match = re.split(r'\n(?=Quyền lợi\s*\n)', cleaned_text, flags=re.IGNORECASE)
+        if len(split_match) > 1:
+            cleaned_text = split_match[0].strip() 
+            benefits.append(split_match[1].replace("Quyền lợi", "").strip()) 
+
+        sections[original_title] = cleaned_text
+
+        # ===== mapping =====
+        title_norm = normalize(original_title)
+
+        if "yeu cau" in title_norm:
+            requirements.append(cleaned_text)
+        elif "quyen loi" in title_norm:
+            benefits.append(cleaned_text)
+        elif "mo ta" in title_norm:
+            description.append(cleaned_text)
+        elif "luong" in title_norm or "thu nhap" in title_norm:
+            income.append(cleaned_text)
+        elif "dia diem" in title_norm:
+            city.append(cleaned_text)
+        elif "thoi gian" in title_norm:
+            schedule.append(cleaned_text)
+
+    return sections, requirements, benefits, description, income, city, schedule
 
 def extract_must(soup):
-    for box in soup.find_all("div", class_="box-category"):
-        title = box.find("div", class_="box-title")
+    """
+    Trích xuất kỹ năng từ HTML TopCV dựa trên 3 cấu trúc layout cụ thể.
+    """
+    skills = []
 
-        if title and "kỹ năng cần có" in title.text.lower():
-            skills = [
-                tag.text.strip()
-                for tag in box.find_all("span", class_="box-category-tag")
-                if tag.text.strip()
-            ]
-            return skills if skills else None
-    return None
+    # KỊCH BẢN 1 (Theo Ảnh 1): Giao diện Premium Job
+    # Đặc điểm: Nằm trong <div class="premium-job-related-tags__section--tags">
+    # Thẻ chứa kỹ năng: <span class="tag-item"> hoặc <span class="tag-item expanded-tag">
+    premium_container = soup.find('div', class_=re.compile(r'premium-job-related-tags__section--tags'))
+    if premium_container:
+        tags = premium_container.find_all('span', class_=re.compile(r'tag-item'))
+        if tags:
+            skills.extend([tag.get_text(strip=True) for tag in tags])
+            return list(set(skills))
+
+    # KỊCH BẢN 2 (Theo Ảnh 2): Giao diện Cột phải (Box Category)
+    # Đặc điểm: Nằm trong <div class="box-category-tags">
+    # Thẻ chứa kỹ năng: <span class="box-category-tag">
+    box_category_tags = soup.find('div', class_='box-category-tags')
+    if box_category_tags:
+        tags = box_category_tags.find_all('span', class_=re.compile(r'box-category-tag'))
+        if tags:
+            skills.extend([tag.get_text(strip=True) for tag in tags])
+            return list(set(skills))
+
+    # KỊCH BẢN 3 (Theo Ảnh 3): Giao diện Box Skill cơ bản
+    # Đặc điểm: Thẻ <h4>Kỹ năng cần có</h4>, bên dưới là <div class="item"> chứa các thẻ <span> trơn
+    box_skill = soup.find('div', class_=re.compile(r'box-skill'))
+    if box_skill:
+        # Tìm div class="item" bên trong box-skill
+        item_div = box_skill.find('div', class_='item')
+        if item_div:
+            # Lấy tất cả các thẻ span bên trong div.item
+            tags = item_div.find_all('span')
+            if tags:
+                skills.extend([tag.get_text(strip=True) for tag in tags])
+                return list(set(skills))
+
+    # DỰ PHÒNG: Quét theo text "Kỹ năng cần có" nếu cấu trúc bị lệch đôi chút
+    # Tìm thẻ h2, h4, hoặc div có chứa text "Kỹ năng cần có"
+    titles = soup.find_all(['h2', 'h4', 'div'], string=re.compile(r'Kỹ năng cần có', re.IGNORECASE))
+    for title in titles:
+        # Lấy phần tử cha bao ngoài (thường là box-category hoặc tương tự)
+        parent = title.parent
+        if parent:
+            # Tìm tất cả các thẻ span bên trong phần tử cha này
+            spans = parent.find_all('span')
+            for span in spans:
+                text = span.get_text(strip=True)
+                # Bỏ qua nếu text chính là tiêu đề
+                if text and text.lower() != 'kỹ năng cần có':
+                    skills.append(text)
+            if skills:
+                return list(set(skills))
+
+    return []
 
 def extract_should(soup):
-    for box in soup.find_all("div", class_="box-category"):
-        title = box.find("div", class_="box-title")
+    """
+    Trích xuất kỹ năng từ HTML TopCV dựa trên 3 cấu trúc layout cụ thể.
+    """
+    skills = []
 
-        if title and "kỹ năng nên có" in title.text.lower():
-            skills = [
-                tag.text.strip()
-                for tag in box.find_all("span", class_="box-category-tag")
-                if tag.text.strip()
-            ]
-            return skills if skills else None
+    # KỊCH BẢN 1 (Theo Ảnh 1): Giao diện Premium Job
+    # Đặc điểm: Nằm trong <div class="premium-job-related-tags__section--tags">
+    # Thẻ chứa kỹ năng: <span class="tag-item"> hoặc <span class="tag-item expanded-tag">
+    premium_container = soup.find('div', class_=re.compile(r'premium-job-related-tags__section--tags'))
+    if premium_container:
+        tags = premium_container.find_all('span', class_=re.compile(r'tag-item'))
+        if tags:
+            skills.extend([tag.get_text(strip=True) for tag in tags])
+            return list(set(skills))
 
-    return None
+    # KỊCH BẢN 2 (Theo Ảnh 2): Giao diện Cột phải (Box Category)
+    # Đặc điểm: Nằm trong <div class="box-category-tags">
+    # Thẻ chứa kỹ năng: <span class="box-category-tag">
+    box_category_tags = soup.find('div', class_='box-category-tags')
+    if box_category_tags:
+        tags = box_category_tags.find_all('span', class_=re.compile(r'box-category-tag'))
+        if tags:
+            skills.extend([tag.get_text(strip=True) for tag in tags])
+            return list(set(skills))
 
+    # KỊCH BẢN 3 (Theo Ảnh 3): Giao diện Box Skill cơ bản
+    # Đặc điểm: Thẻ <h4>Kỹ năng cần có</h4>, bên dưới là <div class="item"> chứa các thẻ <span> trơn
+    box_skill = soup.find('div', class_=re.compile(r'box-skill'))
+    if box_skill:
+        # Tìm div class="item" bên trong box-skill
+        item_div = box_skill.find('div', class_='item')
+        if item_div:
+            # Lấy tất cả các thẻ span bên trong div.item
+            tags = item_div.find_all('span')
+            if tags:
+                skills.extend([tag.get_text(strip=True) for tag in tags])
+                return list(set(skills))
+
+    # DỰ PHÒNG: Quét theo text "Kỹ năng cần có" nếu cấu trúc bị lệch đôi chút
+    # Tìm thẻ h2, h4, hoặc div có chứa text "Kỹ năng cần có"
+    titles = soup.find_all(['h2', 'h4', 'div'], string=re.compile(r'Kỹ năng nên có', re.IGNORECASE))
+    for title in titles:
+        # Lấy phần tử cha bao ngoài (thường là box-category hoặc tương tự)
+        parent = title.parent
+        if parent:
+            # Tìm tất cả các thẻ span bên trong phần tử cha này
+            spans = parent.find_all('span')
+            for span in spans:
+                text = span.get_text(strip=True)
+                # Bỏ qua nếu text chính là tiêu đề
+                if text and text.lower() != 'kỹ năng cần có':
+                    skills.append(text)
+            if skills:
+                return list(set(skills))
+
+    return []
 def extract_specializations(soup):
     for group in soup.select(".job-tags__group"):
         name = group.select_one(".job-tags__group-name")
@@ -365,62 +684,46 @@ def extract_specializations(soup):
     return None
 
 def extract_education(soup):
-    for group in soup.select(".box-general-group"):
-        title = group.select_one(".box-general-group-info-title")
-        
-        if title and "học vấn" in title.text.lower():
-            value = group.select_one(".box-general-group-info-value")
-            
+    def norm(s):
+        return s.lower().strip()
+
+    # =========================
+    # 1. PREMIUM (xịn nhất)
+    # =========================
+    for item in soup.select(".general-information-data"):
+        label = item.select_one(".general-information-data__label")
+        value = item.select_one(".general-information-data__value")
+
+        if label and "học vấn" in norm(label.get_text()):
             if value:
-                text = value.text.strip()
-                return text if text else None
+                return value.get_text(strip=True)
+
+    # =========================
+    # 2. BOX-GENERAL
+    # =========================
+    for item in soup.select(".box-general-group-info"):
+        title = item.select_one(".box-general-group-info-title")
+        value = item.select_one(".box-general-group-info-value")
+
+        if title and "học vấn" in norm(title.get_text()):
+            if value:
+                return value.get_text(strip=True)
+
+    # =========================
+    # 3. BOX-INFO 
+    # =========================
+    box = soup.select_one(".box-info")
+    if box:
+        title = box.select_one(".title")
+        if title and "thông tin" in norm(title.get_text()):
+            for item in box.select(".box-item"):
+                strong = item.find("strong")
+                if strong and "học vấn" in norm(strong.get_text()):
+                    span = item.find("span")
+                    if span:
+                        return span.get_text(strip=True)
 
     return None
-
-def normalize(text):
-    text = text.lower().strip()
-    text = unicodedata.normalize('NFD', text)
-    text = ''.join(c for c in text if unicodedata.category(c) != 'Mn')
-    return text
-
-def clean_text(text):
-    return re.sub(r'\s+', ' ', text).strip()
-
-def extract_to_variables(soup):
-    # init biến
-    requirements = []
-    benefits = []
-    description = []
-    income = []
-
-    for sec in soup.select(".job-description__item"):
-        title_tag = sec.find("h3")
-        if not title_tag:
-            continue
-
-        title = normalize(title_tag.get_text(strip=True))
-
-        content = sec.get_text(" ", strip=True)
-        content = content.replace(title_tag.get_text(strip=True), "")
-        content = clean_text(content)
-
-        if not content:
-            continue
-
-        # mapping trực tiếp
-        if any(k in title for k in ["yeu cau ung vien", "requirement"]):
-            requirements.append(content)
-
-        elif any(k in title for k in ["quyen loi", "benefit"]):
-            benefits.append(content)
-
-        elif any(k in title for k in ["mo ta cong viec", "responsibility", "description"]):
-            description.append(content)
-
-        elif any(k in title for k in ["thu nhap", "salary", "luong"]):
-            income.append(content)
-
-    return requirements, benefits, description, income
 
 def extract_custom_form_job(soup):
     result = {}
@@ -535,7 +838,8 @@ def parse_job(scraper, url):
     soup = get_soup(scraper, url)
     if not soup:
         return None
-
+    with open("debug.html", "w", encoding="utf-8") as f:
+        f.write(soup.prettify())
     json_ld = extract_json_ld(soup)
     meta_tags = extract_meta(soup)
 
@@ -591,43 +895,44 @@ def parse_job(scraper, url):
             valid_through = int(vt.timestamp() * 1000)
         except ValueError:
             pass # Bỏ qua nếu regex/text không đúng định dạng ngày
+    if not valid_through:
+        valid_through = int(datetime.fromisoformat(json_ld.get("validThrough")).timestamp() * 1000)
 
-
-    # location
-    """
-    addr = json_ld.get("jobLocation", {}).get("address", {})
-    city = addr.get("addressRegion")
-    """
     # experience
     exp = json_ld.get("experienceRequirements", {}).get("monthsOfExperience")
 
     # ===== FALLBACK HTML =====
     if not exp:
         exp = extract_exp(soup)
+    if not exp:
+        exp = "Không yêu cầu"
     if not company:
         company = extract_company_html(soup)
 
     #if not salary_raw:
     salary_raw = extract_salary_html(soup)
-
-    #if not city:
-    city = extract_location_html(soup)
-
     if not level:
         level = extract_level_html(soup)
-
-    requirements_raw, benefits, description, income = extract_to_variables(soup)
-    
-    if not benefits:
-        benefits = extract_benefits(json_ld.get("jobBenefits"))
-    if not income:
-        income = extract_income(soup)
-    if not requirements_raw:
-        requirements_raw = extract_job_requirements(soup)
-    if not description:  
-        description = extract_description(soup)
     extra_inf = extract_custom_form_job(soup)
     company_details = extract_company_details(soup)
+    benefits = extract_benefits(soup)
+    income = extract_income(soup)
+    requirements_raw = extract_job_requirements(soup)
+    description = extract_description(soup)
+    city = extract_location_html(soup)
+    sections, requirements_raw_1, benefits_1, description_1, income_1, city_1, schedule_1 = extract_sections(soup)
+    if not city:
+        city = city_1
+    if not benefits:
+        benefits = benefits_1
+    if not income:
+        income = income_1
+    if not requirements_raw:
+        requirements_raw = requirements_raw_1
+    if not description:  
+        description = description_1
+    if not schedule:
+        schedule = schedule_1
 
 
     # Lấy text toàn trang
@@ -651,18 +956,6 @@ def parse_job(scraper, url):
         description = regex_desc
     if not schedule:
         schedule = regex_schedule
-
-    # thời gian hết hạn đăng ký 
-    deadline = extract_dl(soup)
-    if not deadline:
-        deadline = regex_deadline
-    valid_through = None # Mặc định là None nếu không tìm thấy
-    if deadline:
-        try:
-            vt = datetime.strptime(deadline, "%d/%m/%Y").replace(hour=23, minute=59, second=59, tzinfo=vn_tz)
-            valid_through = int(vt.timestamp() * 1000)
-        except ValueError:
-            pass # Bỏ qua nếu regex/text không đúng định dạng ngày
     # =========================
     # KEYS
     # =========================
@@ -721,7 +1014,7 @@ def parse_job(scraper, url):
             "specialty": specialty,
             "meta_tags": meta_tags,
             "json_ld": json_ld,
-            "sectionsByHeading": extract_sections(soup),
+            "sectionsByHeading": sections,
             "pageText": soup.get_text(" ", strip=True)
         },
 
@@ -759,6 +1052,7 @@ def parse_job(scraper, url):
 # =========================
 # SAVE JSONL
 # =========================
+"""
 def save_jsonl(record, file="raw_jobs.jsonl"):
     with open(file, "a", encoding="utf-8") as f:
         f.write(json.dumps(record, ensure_ascii=False) + "\n")
@@ -766,12 +1060,15 @@ def save_jsonl(record, file="raw_jobs.jsonl"):
 def save_json(data, file="data1.json"):
     with open(file, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
-
+"""
 # =========================
 # RUN
 # =========================
+def save_json(data, file="data1.json"):
+    with open(file, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
 def main():
-    url = "https://www.topcv.vn/viec-lam/qa-tester-game-web-thu-nhap-up-to-30m-nhan-viec-ngay/2125006.html?ta_source=JobSearchList_LinkDetail&u_sr_id=QFf6VTYpflndZ6fgB5yIWy6588anjONYspO4092O_1777343898"
+    url = "https://www.topcv.vn/brand/fptis/tuyen-dung/frontend-developer-angular-reactjs-j2125875.html?ta_source=SuggestSimilarJob_LinkDetail&jr_i=job-es-v1%3A%3A1777810062389-63b9e3%3A%3A5a5e162c44b14d76912a6a4a1f2226d6%3A%3A5%3A%3A0.9500"
     scraper = cloudscraper.create_scraper(
         browser={'browser': 'chrome', 'platform': 'windows', 'desktop': True}
     )
@@ -788,6 +1085,52 @@ def save_jsonl(record, file_path="raw_jobs.jsonl"):
     with open(file_path, "a", encoding="utf-8") as f:
         f.write(json.dumps(record, ensure_ascii=False) + "\n")
 
+import os
+from datetime import datetime
+
+import os
+from datetime import datetime
+
+def log_missing_fields(record, url, log_file="missing_jobs.log"):
+    """
+    Hàm kiểm tra lỗi dựa trên quality_flags đã được tạo sẵn trong record.
+    """
+    if not record or "quality_flags" not in record:
+        return False
+        
+    flags = record["quality_flags"]
+    
+    # 1. Từ điển ánh xạ: Tên trường -> Tên cờ tương ứng trong quality_flags
+    critical_flags = {
+        "salary": "has_salary_info",
+        "location": "has_location_info",
+        "experience": "has_experience_info",
+        "requirements": "has_requirements",
+        "description": "has_description",
+        "benefits": "has_benefits",
+        "schedule": "has_schedule",
+        "deadline": "has_valid_deadline"
+    }
+    
+    missing_fields = []
+    
+    # 2. Duyệt qua các cờ quan trọng, nếu cờ mang giá trị False => Thiếu data
+    for field_name, flag_name in critical_flags.items():
+        if flags.get(flag_name) is False:
+            missing_fields.append(field_name)
+            
+    # 3. Ghi Log nếu có trường bị thiếu
+    if missing_fields:
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        log_message = f"[{timestamp}] THIẾU {missing_fields} | URL: {url}\n"
+        
+        with open(log_file, "a", encoding="utf-8") as f:
+            f.write(log_message)
+            
+        return True # Báo hiệu Job bị thiếu data
+    
+    return False # Job hoàn hảo
+
 def run_batch_crawler(start_page=1, end_page=3):
     """
     Luồng chạy chính của chế độ Batch.
@@ -798,7 +1141,7 @@ def run_batch_crawler(start_page=1, end_page=3):
     )
     
     total_jobs_saved = 0
-    
+    jobs_with_missing_data = 0  
     # 2. Vòng lặp cào qua các trang danh sách
     for page in range(start_page, end_page + 1):
         links = get_job_links(scraper, page)
@@ -811,6 +1154,13 @@ def run_batch_crawler(start_page=1, end_page=3):
             record = parse_job(scraper, link)
             
             if record:
+                # ----------------------------------------------------
+                # VŨ KHÍ MỚI: QUÉT LỖI TRƯỚC KHI LƯU
+                # ----------------------------------------------------
+                is_missing = log_missing_fields(record, link)
+                if is_missing:
+                    jobs_with_missing_data += 1
+                    print(f"      [!] Cảnh báo: Job này thiếu data. Đã lưu vào log!")
                 save_jsonl(record, "raw_jobs_batch.jsonl")
                 total_jobs_saved += 1
             
@@ -821,8 +1171,14 @@ def run_batch_crawler(start_page=1, end_page=3):
         print(f"[zZz] Xong trang {page}, nghỉ ngơi 5 giây...")
         time.sleep(5)
         
-    print(f"\n[OK] Batch Crawler hoàn tất! Tổng cộng đã lưu: {total_jobs_saved} jobs.")
+    # Thay cho các câu print cũ của bạn:
+    logger.info("Batch Crawler hoàn tất!")
+    logger.info(f"Tổng số Job đã lưu: {total_jobs_saved}")
+    
+    if jobs_with_missing_data > 0:
+        # Dùng level WARNING để đánh dấu có sự cố (Docker/Kibana sẽ bôi màu vàng/đỏ)
+        logger.warning(f"Có {jobs_with_missing_data} Job bị thiếu dữ liệu. Vui lòng check missing_jobs.log!")
 
 if __name__ == "__main__":
     main()
-    #run_batch_crawler(1, 2)
+    run_batch_crawler(5, 6)
