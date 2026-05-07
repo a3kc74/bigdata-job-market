@@ -70,7 +70,7 @@ spec:
 
               env:
                 # HDFS namenode — thay bằng service name thực tế
-                - name: HADOOP_USER_NAME
+                - name: HADOOP_NAME_NODE
                   value: "spark"
 
               resources:

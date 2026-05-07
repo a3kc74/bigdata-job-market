@@ -16,28 +16,28 @@ Hệ thống thu thập và phân tích dữ liệu thị trường lao động 
 │                   │                          │                          │
 └───────────────────┼──────────────────────────┼──────────────────────────┘
                     │                          │
-        ┌───────────▼──────────┐   ┌───────────▼──────────┐
+        ┌───────────▼──────────┐   ┌───────────▼───────────┐
         │     BATCH LAYER      │   │     SPEED LAYER       │
         │                      │   │                       │
-        │  HDFS Raw Zone       │   │  Kafka                │
-        │       ↓              │   │       ↓               │
-        │  Spark Batch ETL     │   │  Spark Structured     │
-        │       ↓              │   │  Streaming            │
-        │  Silver/Gold         │   │       ↓               │
-        │  Analytics           │   │  Realtime Aggregates  │
+        │    HDFS Raw Zone     │   │         Kafka         │
+        │          ↓           │   │           ↓           │
+        │    Spark Batch ETL   │   │    Spark Structured   │
+        │          ↓           │   │       Streaming       │
+        │      Silver/Gold     │   │           ↓           │
+        │       Analytics      │   │  Realtime Aggregates  │
         └──────────┬───────────┘   └──────────┬────────────┘
                    │                          │
-        ┌──────────▼──────────────────────────▼────────────┐
+        ┌──────────▼──────────────────────────▼─────────────┐
         │                  SERVING LAYER                    │
         │                                                   │
         │         Cassandra          Elasticsearch          │
-        │              └──────────┬──────────┘             │
-        │                         ↓                        │
+        │              └──────────┬──────────┘              │
+        │                         ↓                         │
         │            FastAPI / Kibana / Grafana             │
         └───────────────────────────────────────────────────┘
 
 ┌─────────────────────────────┐
-│       PLATFORM / OPS        │
+│       PLATFORM / OPS        │        
 │  Monitoring / Config /      │
 │  Security                   │
 │           ↓                 │

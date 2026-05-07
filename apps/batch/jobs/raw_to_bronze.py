@@ -2,86 +2,20 @@
 Spark Batch ETL: Raw JSONL (HDFS) -> Bronze Parquet (HDFS)
 
 Data Flow:
-    /raw/jobs/ingest_date=YYYY-MM-DD/*.jsonl
-        -> flatten payload
-        -> cast timestamps (Unix ms -> Timestamp)
-        -> merge skills
-        -> add metadata (record_version, is_deleted, crawl_domain, ingest_date)
-        -> add count metrics
-        -> dedup (job_id, hash_content) keep latest ingest_ts
-        -> write Parquet /bronze/jobs/ingest_date=YYYY-MM-DD/
+    raw/jobs/ingest_date=YYYY-MM-DD/  ->  bronze/jobs/ingest_date=YYYY-MM-DD/
+    Steps: flatten, cast timestamps, merge skills, add metadata, dedup.
 
-=======================================================================
-How to run — LOCAL (spark-submit)
-=======================================================================
-    # Incremental (one day)
+Run locally:
     spark-submit raw_to_bronze.py --date 2026-04-30
-
-    # Full load (all partitions)
     spark-submit raw_to_bronze.py
 
-=======================================================================
-How to run — KUBERNETES (Minikube)
-=======================================================================
+Trigger on Kubernetes:
+    kubectl create job --from=cronjob/batch-etl-raw-to-bronze manual-DATE -n spark
 
---- FIRST TIME SETUP ---
-
-    # 1. Start Minikube
-    minikube start --memory=4096 --cpus=4
-
-    # 2. Point Docker CLI to Minikube's daemon (build image inside Minikube)
-    eval $(minikube docker-env)          # Linux/macOS
-    & minikube -p minikube docker-env --shell powershell | Invoke-Expression  # Windows PowerShell
-
-    # 3. Build Spark image from repo root
-    docker build -f infra/spark/Dockerfile -t bigdata-job-market/spark-etl:latest .
-
-    # 4. Apply RBAC (ServiceAccount + RoleBinding)
-    kubectl apply -f infra/spark/10-rbac.yaml
-
-    # 5. Deploy CronJob (runs daily at 02:00 AM)
-    kubectl apply -f infra/kubernetes/batch-etl-cronjob.yaml
-
---- TRIGGER JOB MANUALLY ---
-
-    # Run job immediately without waiting for schedule
-    kubectl create job --from=cronjob/batch-etl-raw-to-bronze \
-        manual-$(date +%Y%m%d) -n spark
-
---- RESUME AFTER MACHINE RESTART ---
-
-    # 1. Restart Minikube
-    minikube start
-
-    # 2. Rebuild image if Dockerfile changed (Minikube loses images on restart)
-    eval $(minikube docker-env)
-    docker build -f infra/spark/Dockerfile -t bigdata-job-market/spark-etl:latest .
-
-    # 3. CronJob persists — no need to re-apply unless YAML changed
-    kubectl get cronjob -n spark
-
---- MONITORING & LOGS ---
-
-    # List all pods in spark namespace
-    kubectl get pods -n spark
-
-    # Stream logs of a running/completed driver pod
-    kubectl logs -f <driver-pod-name> -n spark
-
-    # Describe pod for events/errors
-    kubectl describe pod <pod-name> -n spark
-
-    # List recent jobs
-    kubectl get jobs -n spark
-
-    # Delete a failed/completed job manually
-    kubectl delete job <job-name> -n spark
-
-    # Check CronJob schedule
-    kubectl get cronjob batch-etl-raw-to-bronze -n spark
-
-    # Minikube dashboard (web UI)
-    minikube dashboard
+Docs:
+    docs/raw_to_bronze_runbook.md  - full run guide
+    docs/spark_on_minikube.md      - Spark + Minikube ops
+    docs/hdfs_data_ingestion.md    - loading raw data into HDFS
 """
 import argparse
 import logging
