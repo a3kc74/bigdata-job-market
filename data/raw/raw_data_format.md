@@ -31,24 +31,25 @@
 | **Thông tin cơ bản** | | | |
 | `title` | String | JSON-LD / HTML | Tiêu đề công việc. |
 | `company_name` | String | JSON-LD / HTML | Tên công ty tuyển dụng. |
-| `company_scale` | String | HTML | Quy mô nhân sự (VD: `"100-499 nhân viên"`). |
-| `company_field` | String | HTML | Lĩnh vực hoạt động của công ty. |
-| `company_address`| String | HTML | Địa chỉ chi tiết của công ty. |
+| `company_details` | Object | HTML | Object chứa thông tin công ty (xem bên dưới). |
+| `company_details.scale` | String | HTML | Quy mô nhân sự (VD: `"10-24 nhân viên"`). |
+| `company_details.field` | String | HTML | Lĩnh vực hoạt động của công ty. |
+| `company_details.address`| String | HTML | Địa chỉ chi tiết của công ty. |
 | `salary` | String | HTML (Regex) | Mức lương hiển thị (VD: `"10 - 15 Triệu"`, `"Thỏa thuận"`). |
 | `location` | Array[String] | HTML | Danh sách địa điểm làm việc (Thường là mảng Tỉnh/Thành phố). |
-| `monthOfExperience`| String| JSON-LD / HTML | Yêu cầu số tháng/năm kinh nghiệm. |
+| `monthOfExperience`| Integer \| String | JSON-LD / HTML | Số tháng kinh nghiệm (VD: `3`) hoặc chuỗi `"Không yêu cầu"`. Nullable. |
 | `deadline` | Long (Unix ms)| HTML (Regex) | Hạn nộp hồ sơ (Timestamp 23:59:59 của ngày hết hạn). |
 | `occupationalCategory`| String | JSON-LD / HTML | Cấp bậc công việc (VD: `"Nhân viên"`, `"Trưởng phòng"`). |
 | `education` | String | HTML | Yêu cầu học vấn (VD: `"Đại Học trở lên"`). |
-| `employmentType` | String | JSON-LD | Hình thức làm việc (VD: `"Toàn thời gian"`). |
-| `openings` | String| JSON-LD | Số lượng tuyển dụng (Nếu có). |
+| `employmentType` | String | JSON-LD | Hình thức làm việc (VD: `"FULL_TIME"`). |
+| `openings` | Integer | JSON-LD | Số lượng tuyển dụng (VD: `1`). Nullable. |
 | **Thông tin nội dung (Văn bản dài)** | | | |
-| `description` | Array[String] | HTML (Heuristic) | Mảng các chuỗi mô tả công việc. Mỗi phần tử là 1 gạch đầu dòng. |
-| `requirements` | Array[String] | HTML (Heuristic) | Mảng các chuỗi yêu cầu ứng viên. |
-| `benefits` | Array[String] | HTML (Heuristic) | Mảng các chuỗi quyền lợi ứng viên. |
+| `description` | String | HTML (Heuristic) | Mô tả công việc dạng text, các mục phân cách bằng `\n`. |
+| `requirements` | String | HTML (Heuristic) | Yêu cầu ứng viên dạng text, các mục phân cách bằng `\n`. |
+| `benefits` | String | HTML (Heuristic) | Quyền lợi ứng viên dạng text, các mục phân cách bằng `\n`. |
 | `income` | Array[String] | HTML | Mảng các chuỗi phụ cấp/thu nhập thêm (nếu tách riêng khỏi salary). |
 | `schedule` | String | HTML (Heuristic) | Thời gian làm việc (VD: `"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00)"`). |
-Lưu ý: các trường này sẽ có thể có nhiều định dạng khác nhau, tùy theo việc có thể crawl nó bằng cách nào.
+Lưu ý: `description`, `requirements`, `benefits` là chuỗi text nhiều dòng, các mục phân cách bằng ký tự `\n`. Không phải mảng.
 | **Kỹ năng & Chuyên môn** | | | |
 | `skillsNeeded` | Array[String] | HTML | Kỹ năng BẮT BUỘC (Must-have skills). |
 | `skillsShouldHave`| Array[String] | HTML | Kỹ năng NÊN CÓ (Nice-to-have skills). |
@@ -56,7 +57,7 @@ Lưu ý: các trường này sẽ có thể có nhiều định dạng khác nha
 | **Siêu dữ liệu thô (Raw Meta)** | | | |
 | `extra_inf` | Object | HTML | Các trường thông tin tùy chỉnh khác (Custom forms). |
 | `meta_tags` | Object | HTML | Toàn bộ meta tags của trang web (phục vụ debug/SEO tracking). |
-| `json_ld` | Object | JSON-LD | Toàn bộ khối JSON-LD gốc của TopCV (Để backup nếu cần bóc lại). |
+| `json_ld` | Object | JSON-LD | Toàn bộ khối JSON-LD gốc của TopCV (schema.org JobPosting). Nested object. |
 | `pageText` | String | HTML | Toàn bộ văn bản thô của trang (Vét máng Regex cuối cùng). |
 
 ---

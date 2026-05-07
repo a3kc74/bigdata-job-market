@@ -49,23 +49,28 @@ logger = logging.getLogger("raw_to_bronze")
 
 ### RAW JSON SCHEMA, TYPE CAST WHEN READING DATA
 # Schema in file 'payload'
+# Schema for nested company_details object
+COMPANY_DETAILS_SCHEMA = StructType([
+    StructField("scale",    StringType(), True),
+    StructField("field",    StringType(), True),
+    StructField("address",  StringType(), True)
+])
+
 PAYLOAD_SCHEMA = StructType([
     StructField("title",                 StringType(),              True), # Third element = Allow null or not
     StructField("company_name",          StringType(),              True),
-    StructField("company_scale",         StringType(),              True),
-    StructField("company_field",         StringType(),              True),
-    StructField("company_address",       StringType(),              True),
+    StructField("company_details",       COMPANY_DETAILS_SCHEMA,    True), # Nested: {scale, field, address}
     StructField("salary",                StringType(),              True),
     StructField("location",              ArrayType(StringType()),   True),
-    StructField("monthOfExperience",     StringType(),              True),
+    StructField("monthOfExperience",     StringType(),              True), # Mixed type: Integer (3) or String ("Không yêu cầu") → read as String
     StructField("deadline",              LongType(),                True), # Long (Unix ms)
     StructField("occupationalCategory",  StringType(),              True),
     StructField("education",             StringType(),              True),
     StructField("employmentType",        StringType(),              True),
-    StructField("openings",              StringType(),              True),
-    StructField("description",           ArrayType(StringType()),   True),
-    StructField("requirements",          ArrayType(StringType()),   True),
-    StructField("benefits",              ArrayType(StringType()),   True),
+    StructField("openings",              IntegerType(),             True), # Integer in raw
+    StructField("description",           StringType(),              True), # Multi-line text, '\n' separated
+    StructField("requirements",          StringType(),              True), # Multi-line text, '\n' separated
+    StructField("benefits",              StringType(),              True), # Multi-line text, '\n' separated
     StructField("income",                ArrayType(StringType()),   True),
     StructField("schedule",              StringType(),              True),
     StructField("skillsNeeded",          ArrayType(StringType()),   True),
@@ -73,7 +78,8 @@ PAYLOAD_SCHEMA = StructType([
     StructField("specialty",             ArrayType(StringType()),   True),
     StructField("extra_inf",             StringType(),              True),
     StructField("meta_tags",             MapType(StringType(), StringType()), True),
-    StructField("json_ld",               StringType(),              True),
+    # json_ld is NOT in this schema — extracted separately via get_json_object
+    # because raw data has json_ld as a nested JSON object, not a string.
     StructField("pageText",              StringType(),              True)
 ])
 
@@ -109,7 +115,8 @@ _STRING_FIELDS_PAYLOAD = [
     "title", "company_name", "company_scale", "company_field",
     "company_address", "salary", "monthOfExperience",
     "occupationalCategory", "education", "employmentType",
-    "openings", "schedule", "extra_inf", "json_ld", "pageText",
+    "openings", "description", "requirements", "benefits",
+    "schedule", "extra_inf", "json_ld", "pageText",
 ]
 
 def fillna_str(col_expr, alias_name: str):
@@ -136,11 +143,17 @@ def transform_raw_to_bronze(raw_df):
         # Payload data — String fields: null → ""
         fillna_str(F.col(f"{p}.title"),            "title"),
         fillna_str(F.col(f"{p}.company_name"),     "company_name"),
-        fillna_str(F.col(f"{p}.company_scale"),    "company_scale"),
-        fillna_str(F.col(f"{p}.company_field"),    "company_field"),
-        fillna_str(F.col(f"{p}.company_address"),  "company_address"),
+
+        # company_details: nested object → flatten to company_scale/field/address
+        fillna_str(F.col(f"{p}.company_details.scale"),    "company_scale"),
+        fillna_str(F.col(f"{p}.company_details.field"),    "company_field"),
+        fillna_str(F.col(f"{p}.company_details.address"),  "company_address"),
+
         fillna_str(F.col(f"{p}.salary"),           "salary"),
         F.col(f"{p}.location"),
+
+        # monthOfExperience: mixed type in raw (Integer 3 or String "Không yêu cầu")
+        # Schema reads as StringType → both coerced to string automatically
         fillna_str(F.col(f"{p}.monthOfExperience"), "monthOfExperience"),
 
         ms_to_timestamp(f"{p}.deadline").alias("deadline"),
@@ -148,10 +161,14 @@ def transform_raw_to_bronze(raw_df):
         fillna_str(F.col(f"{p}.occupationalCategory"), "occupationalCategory"),
         fillna_str(F.col(f"{p}.education"),             "education"),
         fillna_str(F.col(f"{p}.employmentType"),        "employmentType"),
-        fillna_str(F.col(f"{p}.openings"),              "openings"),
-        F.col(f"{p}.description"),
-        F.col(f"{p}.requirements"),
-        F.col(f"{p}.benefits"),
+
+        # openings: Integer in raw → cast to String for Bronze
+        F.coalesce(F.col(f"{p}.openings").cast(StringType()), F.lit("")).alias("openings"),
+
+        # description/requirements/benefits: String (multi-line, '\n' separated)
+        fillna_str(F.col(f"{p}.description"),    "description"),
+        fillna_str(F.col(f"{p}.requirements"),   "requirements"),
+        fillna_str(F.col(f"{p}.benefits"),        "benefits"),
         F.col(f"{p}.income"),
         fillna_str(F.col(f"{p}.schedule"),  "schedule"),
 
@@ -166,7 +183,11 @@ def transform_raw_to_bronze(raw_df):
         F.col(f"{p}.specialty"),
         fillna_str(F.col(f"{p}.extra_inf"),  "extra_inf"),
         F.col(f"{p}.meta_tags"),
-        fillna_str(F.col(f"{p}.json_ld"),    "json_ld"),
+
+        # json_ld: extracted separately via get_json_object (see run())
+        # because raw data stores it as a nested JSON object, not a string.
+        fillna_str(F.col("_json_ld_str"),    "json_ld"),
+
         fillna_str(F.col(f"{p}.pageText"),   "pageText"),
 
         F.col("quality_flags"),
@@ -176,9 +197,10 @@ def transform_raw_to_bronze(raw_df):
         parse_crawl_domain("source_url").alias("crawl_domain"),
 
         # Count metrics
-        F.size(F.coalesce(F.col(f"{p}.description"),   F.array())).alias("description_count"),
-        F.size(F.coalesce(F.col(f"{p}.requirements"),  F.array())).alias("requirements_count"),
-        F.size(F.coalesce(F.col(f"{p}.benefits"),      F.array())).alias("benefits_count"),
+        # description/requirements/benefits are strings → count lines by splitting on '\n'
+        F.size(F.split(F.coalesce(F.col(f"{p}.description"),  F.lit("")), "\n")).alias("description_count"),
+        F.size(F.split(F.coalesce(F.col(f"{p}.requirements"), F.lit("")), "\n")).alias("requirements_count"),
+        F.size(F.split(F.coalesce(F.col(f"{p}.benefits"),     F.lit("")), "\n")).alias("benefits_count"),
         F.size(F.coalesce(F.col(f"{p}.income"),        F.array())).alias("income_count"),
 
         F.size(
@@ -247,13 +269,20 @@ def run(date: str | None = None):
 
     logger.info(f"Reading raw data from {raw_path}...")
 
-    # Read raw JSONL data
+    # Read raw JSONL data as text first, then parse.
+    # Two-step read because json_ld is a nested JSON object in raw,
+    # which cannot be captured by StringType() in a fixed schema.
+    # Step 1: Read each line as a raw JSON string
+    raw_text = spark.read.text(raw_path)
+
+    # Step 2: Parse structured fields with from_json + extract json_ld separately
     raw_df = (
-        spark.read
-        .schema(RAW_SCHEMA)
-        .option("mode", "PERMISSIVE")     # Read data even if encounter erroneous rows
-        .option("columnNameOfCorruptRecord", "_corrupt_record")   # Push erroneous rows into '_corrupt_record' column
-        .json(raw_path)
+        raw_text
+        .select(
+            F.from_json(F.col("value"), RAW_SCHEMA).alias("data"),
+            F.get_json_object(F.col("value"), "$.payload.json_ld").alias("_json_ld_str")
+        )
+        .select("data.*", "_json_ld_str")
     )
 
     total_raw = raw_df.count()

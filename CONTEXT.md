@@ -57,7 +57,7 @@ HDFS NameNode URL trong K8s: `hdfs://hdfs-namenode.hdfs.svc:9000`
 | `payload` | Object | Toàn bộ business data (xem bên dưới) |
 | `quality_flags` | Object | Map[String, Boolean] đánh giá chất lượng |
 
-**Payload fields (chính):** `title`, `company_name`, `company_scale`, `company_field`, `company_address`, `salary` (String), `location` (Array[String]), `monthOfExperience` (String), `deadline` (Long Unix ms), `occupationalCategory`, `education`, `employmentType`, `openings`, `description/requirements/benefits/income` (Array[String]), `schedule`, `skillsNeeded` (Array[String]), `skillsShouldHave` (Array[String]), `specialty` (Array[String]), `extra_inf` (String), `meta_tags` (Map), `json_ld` (String), `pageText` (String)
+**Payload fields (chính):** `title`, `company_name`, `company_details` (Object: `scale`, `field`, `address`), `salary` (String), `location` (Array[String]), `monthOfExperience` (Integer `3` hoặc String `"Không yêu cầu"`), `deadline` (Long Unix ms), `occupationalCategory`, `education`, `employmentType`, `openings` (Integer), `description/requirements/benefits` (String, nhiều dòng phân cách bằng `\n`), `income` (Array[String]), `schedule`, `skillsNeeded` (Array[String]), `skillsShouldHave` (Array[String]), `specialty` (Array[String]), `extra_inf` (String), `meta_tags` (Map), `json_ld` (Object — nested JSON-LD), `pageText` (String)
 
 ---
 
@@ -65,10 +65,16 @@ HDFS NameNode URL trong K8s: `hdfs://hdfs-namenode.hdfs.svc:9000`
 
 **Nguyên tắc:**
 - Passthrough 100% tên field từ Raw (không đổi tên, không thêm suffix)
+- `company_details` (Object) → flatten thành `company_scale`, `company_field`, `company_address`
+- `monthOfExperience`: mixed type (Integer/String) → đọc như String, giữ nguyên giá trị
+- `openings`: Integer → cast String
+- `json_ld`: Object trong raw → trích xuất bằng `get_json_object` → JSON string tại Bronze
 - `job_id`, `hash_content` giữ nguyên từ crawler, không tính lại
 - Cast: `ingest_ts`, `event_ts`, `deadline` từ Long (Unix ms) → Timestamp
+- `description`, `requirements`, `benefits`: giữ dạng String (nhiều dòng, `\n` phân cách)
 - `skillsNeeded` + `skillsShouldHave` gộp thành `skills` (array_distinct)
 - `json_ld`, `extra_inf` giữ dạng String tại Bronze — Silver mới parse
+- Null String fields → empty string `""`
 - Không có business canonicalization tại Bronze
 
 **Fields thêm mới bởi Bronze ETL:**
@@ -79,7 +85,7 @@ HDFS NameNode URL trong K8s: `hdfs://hdfs-namenode.hdfs.svc:9000`
 | `record_version` | Integer | dense_rank theo (job_id, ingest_ts) — version tăng khi content thay đổi |
 | `is_deleted` | Boolean | Mặc định false |
 | `crawl_domain` | String | Parse từ source_url → `"www.topcv.vn"` |
-| `*_count` | Integer | size() của description, requirements, benefits, income, skills, specialty |
+| `*_count` | Integer | description/requirements/benefits: đếm số dòng (`split('\n')`); income/skills/specialty: `size()` |
 | `ingest_date` | String | Partition column: `date_format(ingest_ts, 'yyyy-MM-dd')` |
 
 **Dedup:** Cùng `(job_id, hash_content)` → giữ bản có `ingest_ts` mới nhất.

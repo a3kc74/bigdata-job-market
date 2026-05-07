@@ -41,27 +41,27 @@
 | :--- | :--- | :--- |
 | `title` | String | |
 | `company_name` | String | |
-| `company_scale` | String | |
-| `company_field` | String | |
-| `company_address` | String | |
+| `company_scale` | String | Flatten từ `company_details.scale` |
+| `company_field` | String | Flatten từ `company_details.field` |
+| `company_address` | String | Flatten từ `company_details.address` |
 | `salary` | String | |
 | `location` | Array\<String\> | |
-| `monthOfExperience` | String | |
+| `monthOfExperience` | String | Mixed type trong raw (Integer/String) → đọc như String |
 | `deadline` | Timestamp | Cast: Unix ms → timestamp |
 | `occupationalCategory` | String | |
 | `education` | String | |
 | `employmentType` | String | JSON-LD enum: `"FULL_TIME"`, `"PART_TIME"`... Audit only tại Bronze |
-| `openings` | String | |
-| `description` | Array\<String\> | |
-| `requirements` | Array\<String\> | |
-| `benefits` | Array\<String\> | |
+| `openings` | String | Cast từ Integer → String |
+| `description` | String | Multi-line text, các dòng phân cách bằng `\n` |
+| `requirements` | String | Multi-line text, các dòng phân cách bằng `\n` |
+| `benefits` | String | Multi-line text, các dòng phân cách bằng `\n` |
 | `income` | Array\<String\> | |
 | `schedule` | String | |
 | `skills` | Array\<String\> | **Gộp:** `array_union(skillsNeeded, skillsShouldHave)` |
 | `specialty` | Array\<String\> | |
 | `extra_inf` | String | Custom form data, giữ raw string |
 | `meta_tags` | Map\<String, String\> | |
-| `json_ld` | String | Raw JSON string — Silver dùng `from_json()` |
+| `json_ld` | String | Trích xuất từ Object bằng `get_json_object` → JSON string |
 | `pageText` | String | |
 
 ### Từ quality_flags — passthrough
@@ -82,9 +82,9 @@
 
 | Tên trường | Kiểu | Công thức |
 | :--- | :--- | :--- |
-| `description_count` | Integer | `size(description)` |
-| `requirements_count` | Integer | `size(requirements)` |
-| `benefits_count` | Integer | `size(benefits)` |
+| `description_count` | Integer | `size(split(description, '\n'))` — số dòng |
+| `requirements_count` | Integer | `size(split(requirements, '\n'))` — số dòng |
+| `benefits_count` | Integer | `size(split(benefits, '\n'))` — số dòng |
 | `income_count` | Integer | `size(income)` |
 | `skills_count` | Integer | `size(skills)` (sau khi gộp) |
 | `specialty_count` | Integer | `size(specialty)` |
