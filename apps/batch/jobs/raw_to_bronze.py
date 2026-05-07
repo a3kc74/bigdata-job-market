@@ -102,6 +102,21 @@ def parse_crawl_domain(col_name: str):
     """Parse domain from URL."""
     return F.parse_url(F.col(col_name), F.lit("HOST"))
 
+### Helpers — null handling
+# String fields from raw payload that should be empty string instead of null in Bronze.
+# Array/Map/Timestamp fields are excluded (handled separately with coalesce or cast).
+_STRING_FIELDS_PAYLOAD = [
+    "title", "company_name", "company_scale", "company_field",
+    "company_address", "salary", "monthOfExperience",
+    "occupationalCategory", "education", "employmentType",
+    "openings", "schedule", "extra_inf", "json_ld", "pageText",
+]
+
+def fillna_str(col_expr, alias_name: str):
+    """Replace null String with empty string ''."""
+    return F.coalesce(col_expr, F.lit("")).alias(alias_name)
+
+
 ### CORE TRANSFORMATION
 def transform_raw_to_bronze(raw_df):
     """Use DataFrame (from JSONL), return Bronze DataFrame."""
@@ -118,27 +133,27 @@ def transform_raw_to_bronze(raw_df):
         F.col("job_id"),
         F.col("hash_content"),
 
-        # Payload data
-        F.col(f"{p}.title"),
-        F.col(f"{p}.company_name"),
-        F.col(f"{p}.company_scale"),
-        F.col(f"{p}.company_field"),
-        F.col(f"{p}.company_address"),
-        F.col(f"{p}.salary"),
+        # Payload data — String fields: null → ""
+        fillna_str(F.col(f"{p}.title"),            "title"),
+        fillna_str(F.col(f"{p}.company_name"),     "company_name"),
+        fillna_str(F.col(f"{p}.company_scale"),    "company_scale"),
+        fillna_str(F.col(f"{p}.company_field"),    "company_field"),
+        fillna_str(F.col(f"{p}.company_address"),  "company_address"),
+        fillna_str(F.col(f"{p}.salary"),           "salary"),
         F.col(f"{p}.location"),
-        F.col(f"{p}.monthOfExperience"),
+        fillna_str(F.col(f"{p}.monthOfExperience"), "monthOfExperience"),
 
         ms_to_timestamp(f"{p}.deadline").alias("deadline"),
 
-        F.col(f"{p}.occupationalCategory"),
-        F.col(f"{p}.education"),
-        F.col(f"{p}.employmentType"),
-        F.col(f"{p}.openings"),
+        fillna_str(F.col(f"{p}.occupationalCategory"), "occupationalCategory"),
+        fillna_str(F.col(f"{p}.education"),             "education"),
+        fillna_str(F.col(f"{p}.employmentType"),        "employmentType"),
+        fillna_str(F.col(f"{p}.openings"),              "openings"),
         F.col(f"{p}.description"),
         F.col(f"{p}.requirements"),
         F.col(f"{p}.benefits"),
         F.col(f"{p}.income"),
-        F.col(f"{p}.schedule"),
+        fillna_str(F.col(f"{p}.schedule"),  "schedule"),
 
         # skills - merge skillsNeeded and skillsShouldHave (remove null + dedup)
         F.array_distinct(
@@ -149,10 +164,10 @@ def transform_raw_to_bronze(raw_df):
         ).alias("skills"),
 
         F.col(f"{p}.specialty"),
-        F.col(f"{p}.extra_inf"),
+        fillna_str(F.col(f"{p}.extra_inf"),  "extra_inf"),
         F.col(f"{p}.meta_tags"),
-        F.col(f"{p}.json_ld"),
-        F.col(f"{p}.pageText"),
+        fillna_str(F.col(f"{p}.json_ld"),    "json_ld"),
+        fillna_str(F.col(f"{p}.pageText"),   "pageText"),
 
         F.col("quality_flags"),
 
