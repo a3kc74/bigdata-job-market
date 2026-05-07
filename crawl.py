@@ -1180,5 +1180,5 @@ def run_batch_crawler(start_page=1, end_page=3):
         logger.warning(f"Có {jobs_with_missing_data} Job bị thiếu dữ liệu. Vui lòng check missing_jobs.log!")
 
 if __name__ == "__main__":
-    main()
-    run_batch_crawler(5, 6)
+    #main()
+    run_batch_crawler(7, 8)
