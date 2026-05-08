@@ -1,6 +1,11 @@
 # ============================================================
-# Spark Batch ETL — CronJob on Kubernetes (Minikube)
-# Chạy job_raw_to_bronze.py mỗi ngày lúc 02:00 AM
+# Spark Batch ETL — CronJobs on Kubernetes (Minikube)
+# Chạy chuỗi job raw -> bronze -> silver -> gold mỗi ngày
+#
+# Lịch trình (Dựa trên UTC, tức là lùi 7 tiếng so với VN):
+# - 19:00 UTC (02:00 AM VN): raw -> bronze
+# - 19:30 UTC (02:30 AM VN): bronze -> silver
+# - 20:00 UTC (03:00 AM VN): silver -> gold
 #
 # Apply: kubectl apply -f infra/kubernetes/batch-etl-cronjob.yaml
 # ============================================================
@@ -14,15 +19,12 @@ metadata:
     app: batch-etl
     layer: bronze
 spec:
-  # Chạy hàng ngày lúc 02:00 AM (UTC+7 → 19:00 UTC ngày hôm trước)
   schedule: "0 19 * * *"
-  concurrencyPolicy: Forbid        # Không cho chạy song song nếu job trước chưa xong
+  concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3
-
   jobTemplate:
     spec:
-      # Retry tối đa 2 lần nếu thất bại
       backoffLimit: 2
       template:
         metadata:
@@ -30,15 +32,12 @@ spec:
             app: batch-etl
             job: raw-to-bronze
         spec:
-          serviceAccountName: spark   # RBAC đã có trong infra/spark/10-rbac.yaml
+          serviceAccountName: spark
           restartPolicy: Never
-
           containers:
             - name: spark-submit
               image: bigdata-job-market/spark-etl:latest
-              imagePullPolicy: IfNotPresent  # dùng local image với Minikube
-
-              # spark-submit với Kubernetes master
+              imagePullPolicy: IfNotPresent
               command:
                 - /opt/spark/bin/spark-submit
                 - --master
@@ -63,20 +62,131 @@ spec:
                 - spark.sql.shuffle.partitions=50
                 - --conf
                 - spark.kubernetes.file.upload.path=local:///opt/spark/work-dir
-                # Truyền ngày hôm qua làm ingest_date
-                - local:///opt/spark/work-dir/jobs/job_raw_to_bronze.py
+                - local:///opt/spark/work-dir/apps/batch/jobs/raw_to_bronze.py
                 - --date
                 - $(date -d 'yesterday' +%Y-%m-%d)
-
               env:
-                # HDFS namenode — thay bằng service name thực tế
                 - name: HADOOP_NAME_NODE
                   value: "spark"
 
-              resources:
-                requests:
-                  cpu: "500m"
-                  memory: "512Mi"
-                limits:
-                  cpu: "1"
-                  memory: "1Gi"
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: batch-etl-bronze-to-silver
+  namespace: spark
+  labels:
+    app: batch-etl
+    layer: silver
+spec:
+  # Chạy lúc 02:30 AM (VN)
+  schedule: "30 19 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        metadata:
+          labels:
+            app: batch-etl
+            job: bronze-to-silver
+        spec:
+          serviceAccountName: spark
+          restartPolicy: Never
+          containers:
+            - name: spark-submit
+              image: bigdata-job-market/spark-etl:latest
+              imagePullPolicy: IfNotPresent
+              command:
+                - /opt/spark/bin/spark-submit
+                - --master
+                - k8s://https://kubernetes.default.svc:443
+                - --deploy-mode
+                - cluster
+                - --name
+                - bronze-to-silver
+                - --conf
+                - spark.kubernetes.namespace=spark
+                - --conf
+                - spark.kubernetes.authenticate.driver.serviceAccountName=spark
+                - --conf
+                - spark.kubernetes.container.image=bigdata-job-market/spark-etl:latest
+                - --conf
+                - spark.executor.instances=2
+                - --conf
+                - spark.executor.memory=2g
+                - --conf
+                - spark.driver.memory=1g
+                - --conf
+                - spark.sql.shuffle.partitions=50
+                - --conf
+                - spark.kubernetes.file.upload.path=local:///opt/spark/work-dir
+                - local:///opt/spark/work-dir/apps/batch/jobs/bronze_to_silver.py
+                - --date
+                - $(date -d 'yesterday' +%Y-%m-%d)
+              env:
+                - name: HADOOP_NAME_NODE
+                  value: "spark"
+
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: batch-etl-silver-to-gold
+  namespace: spark
+  labels:
+    app: batch-etl
+    layer: gold
+spec:
+  # Chạy lúc 03:00 AM (VN)
+  schedule: "0 20 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        metadata:
+          labels:
+            app: batch-etl
+            job: silver-to-gold
+        spec:
+          serviceAccountName: spark
+          restartPolicy: Never
+          containers:
+            - name: spark-submit
+              image: bigdata-job-market/spark-etl:latest
+              imagePullPolicy: IfNotPresent
+              command:
+                - /opt/spark/bin/spark-submit
+                - --master
+                - k8s://https://kubernetes.default.svc:443
+                - --deploy-mode
+                - cluster
+                - --name
+                - silver-to-gold
+                - --conf
+                - spark.kubernetes.namespace=spark
+                - --conf
+                - spark.kubernetes.authenticate.driver.serviceAccountName=spark
+                - --conf
+                - spark.kubernetes.container.image=bigdata-job-market/spark-etl:latest
+                - --conf
+                - spark.executor.instances=2
+                - --conf
+                - spark.executor.memory=2g
+                - --conf
+                - spark.driver.memory=1g
+                - --conf
+                - spark.sql.shuffle.partitions=50
+                - --conf
+                - spark.kubernetes.file.upload.path=local:///opt/spark/work-dir
+                - local:///opt/spark/work-dir/apps/batch/jobs/silver_to_gold.py
+                - --date
+                - $(date -d 'yesterday' +%Y-%m-%d)
+              env:
+                - name: HADOOP_NAME_NODE
+                  value: "spark"
