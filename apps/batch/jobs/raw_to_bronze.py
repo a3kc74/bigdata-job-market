@@ -249,6 +249,8 @@ def build_spark():
         .appName("raw_to_bronze")
         .config("spark.sql.parquet.compression.codec", "snappy")  # Use snappy compression to write data
         .config("spark.sql.shuffle.partitions", "200")            # Number of partitions used for parallel processing
+        # Spark only overwrites partitions with ingest_date that are included in raw_df
+        .config('spark.sql.sources.partitionOverWriteMode', 'dynamic')
         .getOrCreate()     # If exists -> use, if not -> create new
     )
 

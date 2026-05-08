@@ -96,8 +96,8 @@ HDFS NameNode URL trong K8s: `hdfs://hdfs-namenode.hdfs.svc:9000`
 
 **Nguyên tắc:**
 - Passthrough các field từ Bronze — không đổi tên, không xóa (ngoại trừ đổi `event_ts` thành `date_posted`)
-- `json_ld` parse bằng `get_json_object` → các field `ld_*` (đã bỏ các field bị lặp như `deadline`, `occupationalCategory`)
-- Salary quy về VNĐ/tháng: primary `ld_salary_min/max`, fallback regex `salary`
+- `json_ld` parse bằng `get_json_object` → các field tương ứng (đã bỏ các field bị lặp như `deadline`, `occupationalCategory`)
+- Salary quy về VNĐ/tháng: primary `salary_min/max`, fallback regex `salary`
 - Location: parse `location_detail` từ `location` Bronze + `has_remote`
 - Không thêm field tự quy ước (enum tự định nghĩa, threshold tùy chỉnh)
 - Dedup theo `job_id` — giữ `record_version` cao nhất (1 bản per job)
@@ -106,21 +106,21 @@ HDFS NameNode URL trong K8s: `hdfs://hdfs-namenode.hdfs.svc:9000`
 
 | Field | Type | Nguồn | Mô tả |
 |---|---|---|---|
-| `ld_company_url` | String | `$.hiringOrganization.sameAs` | Website công ty (đã unescape `\/`) |
-| `ld_company_logo` | String | `$.hiringOrganization.logo` | URL logo (đã unescape `\/`) |
-| `ld_work_country` | String | `$.jobLocation.address.addressCountry` | Mã quốc gia ISO |
-| `ld_job_location_type` | String | `$.jobLocationType` | `"TELECOMMUTE"` = remote |
-| `ld_salary_currency` | String | `$.baseSalary.currency` | `"VND"` / `"USD"` |
-| `ld_salary_min` | Double | `$.baseSalary.value.minValue` | Raw từ JSON-LD |
-| `ld_salary_max` | Double | `$.baseSalary.value.maxValue` | Raw từ JSON-LD |
-| `ld_salary_unit` | String | `$.baseSalary.value.unitText` | `"MONTH"` / `"YEAR"` |
-| `ld_job_id_platform` | String | `$.identifier.value` | TopCV internal ID (hoạt động như ID công ty) |
-| `salary_min_vnd` | Long | `ld_salary_min` → regex | Lương tối thiểu (VNĐ/tháng) |
-| `salary_max_vnd` | Long | `ld_salary_max` → regex | Lương tối đa (VNĐ/tháng) |
+| `company_url` | String | `$.hiringOrganization.sameAs` | Website công ty (đã unescape `\/`) |
+| `company_logo` | String | `$.hiringOrganization.logo` | URL logo (đã unescape `\/`) |
+| `work_country` | String | `$.jobLocation.address.addressCountry` | Mã quốc gia ISO |
+| `job_location_type` | String | `$.jobLocationType` | `"TELECOMMUTE"` = remote |
+| `salary_currency` | String | `$.baseSalary.currency` | `"VND"` / `"USD"` |
+| `salary_min` | Double | `$.baseSalary.value.minValue` | Raw từ JSON-LD |
+| `salary_max` | Double | `$.baseSalary.value.maxValue` | Raw từ JSON-LD |
+| `salary_unit` | String | `$.baseSalary.value.unitText` | `"MONTH"` / `"YEAR"` |
+| `job_id_platform` | String | `$.identifier.value` | TopCV internal ID (hoạt động như ID công ty) |
+| `salary_min_vnd` | Long | `salary_min` → regex | Lương tối thiểu (VNĐ/tháng) |
+| `salary_max_vnd` | Long | `salary_max` → regex | Lương tối đa (VNĐ/tháng) |
 | `salary_is_negotiable` | Boolean | Derived | True nếu string chứa "Thỏa thuận" hoặc min/max null (baseSalary luôn tồn tại, negotiable khi thiếu min/max) |
 | `location_detail` | Array[Struct] | Derived | Parse trực tiếp từ `location` của Bronze thành struct (city, address) |
 | `location_count` | Integer | Derived | `size(location)` |
-| `has_remote` | Boolean | `ld_job_location_type` | True khi `= "TELECOMMUTE"` |
+| `has_remote` | Boolean | `job_location_type` | True khi `= "TELECOMMUTE"` |
 | `experience_required` | Boolean | Derived | False nếu `monthOfExperience` là "Thỏa thuận", mặc định True |
 | `has_remote` | Boolean | `ld_job_location_type` | True khi `= "TELECOMMUTE"` |
 
@@ -135,7 +135,7 @@ HDFS NameNode URL trong K8s: `hdfs://hdfs-namenode.hdfs.svc:9000`
 - Trigger thủ công: `kubectl create job --from=cronjob/batch-etl-raw-to-bronze manual-DATE -n spark`
 
 ### `apps/batch/jobs/bronze_to_silver.py` ✅
-- Parse `json_ld` → các field `ld_*` bằng `get_json_object`
+- Parse `json_ld` → các field tương ứng bằng `get_json_object`
 - Salary → `salary_min/max_vnd` (primary json_ld, fallback regex); `salary_is_negotiable`
 - Location → `location_detail`, `has_remote`
 - Dedup: `job_id` giữ `record_version` max

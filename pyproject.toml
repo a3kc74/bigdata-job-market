@@ -7,5 +7,7 @@ requires-python = ">=3.13"
 dependencies = [
     "findspark>=2.0.1",
     "pandas>=3.0.2",
+    "pydantic-settings>=2.14.0",
     "pyspark>=4.1.1",
+    "python-dotenv>=1.2.2",
 ]
