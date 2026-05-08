@@ -95,8 +95,8 @@ HDFS NameNode URL trong K8s: `hdfs://hdfs-namenode.hdfs.svc:9000`
 ## Silver Schema (source of truth: `data/silver/silver_data_format.md`)
 
 **Nguyên tắc:**
-- Passthrough 100% tên field từ Bronze — không đổi tên, không xóa
-- `json_ld` parse bằng `get_json_object` → 14 field `ld_*`
+- Passthrough các field từ Bronze — không đổi tên, không xóa (ngoại trừ đổi `event_ts` thành `date_posted`)
+- `json_ld` parse bằng `get_json_object` → các field `ld_*` (đã bỏ các field bị lặp như `deadline`, `occupationalCategory`)
 - Salary quy về VNĐ/tháng: primary `ld_salary_min/max`, fallback regex `salary`
 - Location: parse `location_detail` từ `location` Bronze + `has_remote`
 - Không thêm field tự quy ước (enum tự định nghĩa, threshold tùy chỉnh)
@@ -106,9 +106,8 @@ HDFS NameNode URL trong K8s: `hdfs://hdfs-namenode.hdfs.svc:9000`
 
 | Field | Type | Nguồn | Mô tả |
 |---|---|---|---|
-| `ld_deadline` | Timestamp | `$.validThrough` | Hạn tuyển từ JSON-LD |
-| `ld_company_url` | String | `$.hiringOrganization.sameAs` | Website công ty |
-| `ld_company_logo` | String | `$.hiringOrganization.logo` | URL logo |
+| `ld_company_url` | String | `$.hiringOrganization.sameAs` | Website công ty (đã unescape `\/`) |
+| `ld_company_logo` | String | `$.hiringOrganization.logo` | URL logo (đã unescape `\/`) |
 | `ld_work_country` | String | `$.jobLocation.address.addressCountry` | Mã quốc gia ISO |
 | `ld_job_location_type` | String | `$.jobLocationType` | `"TELECOMMUTE"` = remote |
 | `ld_salary_currency` | String | `$.baseSalary.currency` | `"VND"` / `"USD"` |
@@ -116,7 +115,6 @@ HDFS NameNode URL trong K8s: `hdfs://hdfs-namenode.hdfs.svc:9000`
 | `ld_salary_max` | Double | `$.baseSalary.value.maxValue` | Raw từ JSON-LD |
 | `ld_salary_unit` | String | `$.baseSalary.value.unitText` | `"MONTH"` / `"YEAR"` |
 | `ld_job_id_platform` | String | `$.identifier.value` | TopCV internal ID (hoạt động như ID công ty) |
-| `ld_occupational_category` | String | `$.occupationalCategory` | Ngành nghề theo JSON-LD |
 | `salary_min_vnd` | Long | `ld_salary_min` → regex | Lương tối thiểu (VNĐ/tháng) |
 | `salary_max_vnd` | Long | `ld_salary_max` → regex | Lương tối đa (VNĐ/tháng) |
 | `salary_is_negotiable` | Boolean | Derived | True nếu string chứa "Thỏa thuận" hoặc min/max null (baseSalary luôn tồn tại, negotiable khi thiếu min/max) |

@@ -65,9 +65,8 @@ def parse_json_ld(df):
         return F.coalesce(single, array0)
 
     return df.withColumns({
-        "ld_deadline":              F.to_timestamp(F.get_json_object(jl, "$.validThrough")),
-        "ld_company_url":           F.get_json_object(jl, "$.hiringOrganization.sameAs"),
-        "ld_company_logo":          F.get_json_object(jl, "$.hiringOrganization.logo"),
+        "ld_company_url":           F.regexp_replace(F.get_json_object(jl, "$.hiringOrganization.sameAs"), r"\\/", "/"),
+        "ld_company_logo":          F.regexp_replace(F.get_json_object(jl, "$.hiringOrganization.logo"), r"\\/", "/"),
         "ld_work_country":          work_addr("addressCountry"),
         "ld_job_location_type":     F.get_json_object(jl, "$.jobLocationType"),
         "ld_salary_currency":       F.get_json_object(jl, "$.baseSalary.currency"),
@@ -75,7 +74,6 @@ def parse_json_ld(df):
         "ld_salary_max":            F.get_json_object(jl, "$.baseSalary.value.maxValue").cast(DoubleType()),
         "ld_salary_unit":           F.get_json_object(jl, "$.baseSalary.value.unitText"),
         "ld_job_id_platform":       F.get_json_object(jl, "$.identifier.value"),
-        "ld_occupational_category": F.get_json_object(jl, "$.occupationalCategory"),
     })
 
 
@@ -185,7 +183,8 @@ def dedup_silver(df):
 # ---------------------------------------------------------------------------
 
 def transform_bronze_to_silver(bronze_df):
-    df = parse_json_ld(bronze_df)
+    df = bronze_df.withColumnRenamed("event_ts", "date_posted")
+    df = parse_json_ld(df)
     df = resolve_experience(df)
     df = canonicalize_salary(df)
     df = process_location(df)

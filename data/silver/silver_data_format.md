@@ -11,7 +11,7 @@
 ## Nguyên tắc thiết kế
 
 - **Silver = Bronze + json_ld parsing + salary VNĐ normalization + location normalization + Dedup theo job_id**
-- Passthrough 100% tên field từ Bronze — không đổi tên, không xóa
+- Passthrough các field từ Bronze — không đổi tên, không xóa (ngoại trừ đổi `event_ts` thành `date_posted`)
 - Chỉ thêm field mới: prefix `ld_` (từ json_ld) hoặc suffix mô tả rõ ràng
 - Không thêm field "tự quy ước" (enum tự định nghĩa, threshold tùy chỉnh)
 - Chỉ dùng **native Spark functions** — không dùng Python UDF
@@ -28,7 +28,7 @@
 | `normalized_source_url` | String |
 | `crawl_version` | Integer |
 | `ingest_ts` | Timestamp |
-| `event_ts` | Timestamp |
+| `date_posted` | Timestamp | (Đổi tên từ `event_ts` của Bronze) |
 | `job_id` | String |
 | `hash_content` | String |
 | `title` | String |
@@ -77,9 +77,8 @@ Dùng `F.get_json_object(col("json_ld"), "$.path")` — không dùng `from_json`
 
 | Tên trường | Kiểu | JSON-LD path | Ghi chú |
 | :--- | :--- | :--- | :--- |
-| `ld_deadline` | Timestamp | `$.validThrough` | Hạn tuyển dụng chuẩn từ JSON-LD |
-| `ld_company_url` | String | `$.hiringOrganization.sameAs` | Website chính thức công ty |
-| `ld_company_logo` | String | `$.hiringOrganization.logo` | URL logo công ty |
+| `ld_company_url` | String | `$.hiringOrganization.sameAs` | Website chính thức công ty (đã unescape `\/`) |
+| `ld_company_logo` | String | `$.hiringOrganization.logo` | URL logo công ty (đã unescape `\/`) |
 | `ld_work_country` | String | `$.jobLocation.address.addressCountry` | Mã quốc gia ISO (thường `"VN"`) |
 | `ld_job_location_type` | String | `$.jobLocationType` | `"TELECOMMUTE"` = remote, null = onsite |
 | `ld_salary_currency` | String | `$.baseSalary.currency` | `"VND"` hoặc `"USD"` |
@@ -87,7 +86,6 @@ Dùng `F.get_json_object(col("json_ld"), "$.path")` — không dùng `from_json`
 | `ld_salary_max` | Double | `$.baseSalary.value.maxValue` | Raw từ JSON-LD. Null nếu vắng mặt. |
 | `ld_salary_unit` | String | `$.baseSalary.value.unitText` | `"MONTH"`, `"YEAR"`, `"HOUR"` |
 | `ld_job_id_platform` | String | `$.identifier.value` | TopCV internal job ID — hoạt động như ID công ty, dùng để xây bảng dimension |
-| `ld_occupational_category` | String | `$.occupationalCategory` | Ngành nghề theo JSON-LD |
 
 ### B. Salary canonical
 

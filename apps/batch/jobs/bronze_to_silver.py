@@ -48,9 +48,14 @@ logger = logging.getLogger("bronze_to_silver")
 #   If monthOfExperience = "Thỏa thuận" -> experience_required = False, else True
 #
 # [jobLocation]
-#   Case A: field absent (remote job)          → ld_work_* = null; check ld_job_location_type
-#   Case B: single Place object                → get_json_object works directly
-#   Case C: Array of Place objects             → $.jobLocation.address fails;
-#                                                 → fallback: $.jobLocation[0].address.*
+#   Case A: field absent (remote job)          -> ld_work_* = null; check ld_job_location_type
+#   Case B: single Place object                -> get_json_object works directly
+#   Case C: Array of Place objects             -> $.jobLocation.address fails;
+#                                              -> fallback: $.jobLocation[0].address.*
 # ---------------------------------------------------------------------------
 
+
+def parse_json_ld(df):
+    """
+    Extract structured fields from raw JSON_LD 
+    """
