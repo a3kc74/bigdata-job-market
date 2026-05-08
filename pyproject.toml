@@ -13,4 +13,7 @@ dependencies = [
     "pyspark>=4.1.1",
     "pymongo>=4.10.1",
     "elasticsearch>=8.13.2",
+    "pyarrow>=18.0.0",
+    "fastapi>=0.115.6",
+    "uvicorn[standard]>=0.32.1",
 ]

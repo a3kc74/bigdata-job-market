@@ -1,12 +1,15 @@
 TV1_workspace/
-__pycache__
+__pycache__/
 
-.venv
-.python-version
-
-uv.lock
+.venv/
 .env
-.log
+*.log
 
+data/mock/
+spark-warehouse/
+metastore_db/
+derby.log
 
-data/mock
+_SUCCESS
+.*.crc
+*.crc
