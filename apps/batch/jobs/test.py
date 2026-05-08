@@ -1,19 +1,17 @@
 """
 Spark Batch ETL: Bronze Parquet (HDFS) -> Silver Parquet (HDFS)
 
-Data Flow:
-    bronze/jobs/ingest_date=YYYY-MM-DD/  ->  silver/jobs/ingest_date=YYYY-MM-DD/
-    Steps: parse json_ld, canonicalize salary (VND), normalize location, dedup.
+data/bronze/jobs/ingest_date=YYYY-MM-DD/ -> data/silver/jobs/ingest_date=YYYY-MM-DD/
 
 Run locally:
-    spark-submit bronze_to_silver.py --date 2026-04-30
-    spark-submit bronze_to_silver.py
+    spark-submit bronze_to_silver.py --date 2026-04-29   (incremental)
+    spark-submit bronze_to_silver.py                     (full load)
 
 Trigger on Kubernetes:
     kubectl create job --from=cronjob/batch-etl-bronze-to-silver manual-DATE -n spark
 
 Docs:
-    data/silver/silver_data_format.md  - Silver schema spec
+    data/silver/silver_data_format.md -> Silver data schema
 """
 import argparse
 import logging
@@ -22,18 +20,35 @@ from pyspark.sql import SparkSession, Window
 from pyspark.sql import functions as F
 from pyspark.sql.types import DoubleType, IntegerType, LongType
 
-BRONZE_BASE_PATH = "hdfs://hdfs-namenode.hdfs.svc:9000/bronze/jobs"
-SILVER_BASE_PATH = "hdfs://hdfs-namenode.hdfs.svc:9000/silver/jobs"
+BRONZE_PATH = "hdfs://hdfs-namenode.hdfs.svc:9000/bronze/jobs"
+SILVER_PATH = "hdfs://hdfs-namenode.hdfs.svc:9000/silver/jobs"
 
-# Exchange rate constant — update periodically
+# Exchange rate
 USD_TO_VND = 25_000
 
+# Config logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger("bronze_to_silver")
 
 
 # ---------------------------------------------------------------------------
 # Step 1: Parse json_ld → ld_* fields
+#
+# Outlier cases handled per field:
+#
+# [salary]
+#   Case A: baseSalary always exists. Negotiable salary means $.baseSalary.value.minValue and $.baseSalary.value.maxValue are absent (null).
+#   Case B: currency = USD                     → salary_min/max_vnd convert × USD_TO_VND
+#   Case C: unitText = YEAR                    → ÷ 12 in canonicalize_salary()
+#
+# [experience_required]
+#   If monthOfExperience = "Thỏa thuận" -> experience_required = False, else True
+#
+# [jobLocation]
+#   Case A: field absent (remote job)          → ld_work_* = null; check ld_job_location_type
+#   Case B: single Place object                → get_json_object works directly
+#   Case C: Array of Place objects             → $.jobLocation.address fails;
+#                                                 → fallback: $.jobLocation[0].address.*
 # ---------------------------------------------------------------------------
 
 def parse_json_ld(df):
@@ -42,98 +57,69 @@ def parse_json_ld(df):
     No fixed StructType schema — resilient to TopCV JSON-LD schema evolution.
     """
     jl = F.col("json_ld")
+
+    # jobLocation: try single Object first, fallback to Array[0] if null
+    def work_addr(field):
+        single = F.get_json_object(jl, f"$.jobLocation.address.{field}")
+        array0 = F.get_json_object(jl, f"$.jobLocation[0].address.{field}")
+        return F.coalesce(single, array0)
+
     return df.withColumns({
         "ld_deadline":              F.to_timestamp(F.get_json_object(jl, "$.validThrough")),
         "ld_company_url":           F.get_json_object(jl, "$.hiringOrganization.sameAs"),
         "ld_company_logo":          F.get_json_object(jl, "$.hiringOrganization.logo"),
-        "ld_work_locality":         F.get_json_object(jl, "$.jobLocation.address.addressLocality"),
-        "ld_work_region":           F.get_json_object(jl, "$.jobLocation.address.addressRegion"),
-        "ld_work_country":          F.get_json_object(jl, "$.jobLocation.address.addressCountry"),
+        "ld_work_country":          work_addr("addressCountry"),
         "ld_job_location_type":     F.get_json_object(jl, "$.jobLocationType"),
         "ld_salary_currency":       F.get_json_object(jl, "$.baseSalary.currency"),
         "ld_salary_min":            F.get_json_object(jl, "$.baseSalary.value.minValue").cast(DoubleType()),
         "ld_salary_max":            F.get_json_object(jl, "$.baseSalary.value.maxValue").cast(DoubleType()),
         "ld_salary_unit":           F.get_json_object(jl, "$.baseSalary.value.unitText"),
-        "ld_experience_months":     F.get_json_object(jl, "$.experienceRequirements.monthsOfExperience").cast(IntegerType()),
         "ld_job_id_platform":       F.get_json_object(jl, "$.identifier.value"),
         "ld_occupational_category": F.get_json_object(jl, "$.occupationalCategory"),
     })
 
 
 # ---------------------------------------------------------------------------
-# Step 2: Enrich ld_experience_months with fallback regex
+# Step 2: Resolve experience_required
 # ---------------------------------------------------------------------------
 
-def enrich_experience_months(df):
+def resolve_experience(df):
     """
-    When ld_experience_months IS NULL, fallback to regex on Bronze.monthOfExperience.
-
-    Patterns handled (in priority order):
-        "Không yêu cầu" / "Fresher"  → 0
-        "3-5 năm"                     → 36  (min of range × 12)
-        "Trên 3 năm"                  → 36
-        "2 năm"                       → 24
-        "12 tháng"                    → 12
+    experience_required = False if monthOfExperience == "Thỏa thuận", else True
     """
-    col_exp = F.col("monthOfExperience")
-
-    no_exp      = col_exp.rlike(r"(?i)(không yêu cầu|chưa có|fresher)")
-    range_years = F.regexp_extract(col_exp, r"(\d+)\s*-\s*\d+\s*năm",   1).cast(IntegerType()) * F.lit(12)
-    over_years  = F.regexp_extract(col_exp, r"(?i)trên\s*(\d+)\s*năm",  1).cast(IntegerType()) * F.lit(12)
-    exact_years = F.regexp_extract(col_exp, r"(\d+)\s*năm",              1).cast(IntegerType()) * F.lit(12)
-    months      = F.regexp_extract(col_exp, r"(\d+)\s*tháng",            1).cast(IntegerType())
-
-    fallback = (
-        F.when(no_exp,           F.lit(0))
-         .when(range_years > 0,  range_years)
-         .when(over_years  > 0,  over_years)
-         .when(exact_years > 0,  exact_years)
-         .when(months      > 0,  months)
-    )
-
     return df.withColumn(
-        "ld_experience_months",
-        F.coalesce(F.col("ld_experience_months"), fallback)
+        "experience_required",
+        F.when(F.lower(F.col("monthOfExperience")).contains("thỏa thuận"), F.lit(False))
+         .otherwise(F.lit(True))
     )
 
 
 # ---------------------------------------------------------------------------
 # Step 3: Salary canonical → salary_min_vnd, salary_max_vnd, salary_is_negotiable
+#
+# Outlier handling:
+#   - ld_salary_min/max = null (negotiable salary)    → salary_min/max_vnd = null
+#   - salary string "Thỏa thuận"                       → salary_is_negotiable = true
+#   - Regex fallback: "10 - 15 Triệu"                  → min=10M, max=15M VND
+#   - If both json_ld and regex fail                    → null (acceptable, downstream handles)
 # ---------------------------------------------------------------------------
 
 def canonicalize_salary(df):
-    """
-    Normalize salary to VNĐ/month.
-
-    Priority:
-        1. ld_salary_min/max from json_ld (structured, preferred)
-        2. Regex on Bronze.salary string  (fallback)
-
-    Conversion:
-        currency = USD  → × USD_TO_VND
-        unit     = YEAR → ÷ 12
-        unit     = MONTH (default) → no change
-    """
+    """Normalize salary to VNĐ/month."""
     currency_factor = F.when(
         F.upper(F.col("ld_salary_currency")) == F.lit("USD"),
         F.lit(float(USD_TO_VND))
-    ).otherwise(F.lit(1.0))
+    ).otherwise(F.lit(1.0))   # VND: no conversion needed
 
     period_factor = F.when(
         F.upper(F.col("ld_salary_unit")) == F.lit("YEAR"),
         F.lit(1.0 / 12)
-    ).otherwise(F.lit(1.0))
+    ).otherwise(F.lit(1.0))   # MONTH (default): no change
 
-    ld_min_vnd = F.when(
-        F.col("ld_salary_min") > 0,
-        (F.col("ld_salary_min") * currency_factor * period_factor).cast(LongType())
-    )
-    ld_max_vnd = F.when(
-        F.col("ld_salary_max") > 0,
-        (F.col("ld_salary_max") * currency_factor * period_factor).cast(LongType())
-    )
+    ld_min_vnd = (F.col("ld_salary_min") * currency_factor * period_factor).cast(LongType())
+    ld_max_vnd = (F.col("ld_salary_max") * currency_factor * period_factor).cast(LongType())
 
-    # Fallback regex: "10 - 15 Triệu" → min=10_000_000, max=15_000_000
+    # Fallback regex on Bronze.salary string
     _RANGE_TRIEU = r"(\d+(?:[.,]\d+)?)\s*-\s*(\d+(?:[.,]\d+)?)\s*[Tt]ri\u1ec7u"
     regex_min = (
         F.regexp_extract(F.col("salary"), _RANGE_TRIEU, 1)
@@ -147,39 +133,34 @@ def canonicalize_salary(df):
     return df.withColumns({
         "salary_min_vnd":       F.coalesce(ld_min_vnd, F.when(regex_min > 0, regex_min)),
         "salary_max_vnd":       F.coalesce(ld_max_vnd, F.when(regex_max > 0, regex_max)),
-        "salary_is_negotiable": F.col("salary").rlike(r"(?i)th\u1ecfa\s*thu\u1eadn"),
+        # salary_is_negotiable: true khi salary string chứa "Thỏa thuận" hoặc cả min và max đều null (vì baseSalary luôn tồn tại)
+        "salary_is_negotiable": (
+            F.col("salary").rlike(r"(?i)th\u1ecfa\s*thu\u1eadn") |
+            (F.col("ld_salary_min").isNull() & F.col("ld_salary_max").isNull())
+        ),
     })
 
 
 # ---------------------------------------------------------------------------
-# Step 4: Location canonical → location_normalized, location_count, has_remote
+# Step 4: Location canonical → location_count, location_detail, has_remote
 # ---------------------------------------------------------------------------
 
-def normalize_location(df):
+def process_location(df):
     """
-    Fix common province name typos/variants in the location array.
+    Parse location_detail directly from the location array.
     has_remote: derived from ld_job_location_type = "TELECOMMUTE".
     """
-    def _fix(col_expr):
-        return (
-            F.regexp_replace(
-                F.regexp_replace(
-                    F.regexp_replace(
-                        F.regexp_replace(
-                            col_expr,
-                            r"TP\.?\s*HCM|H\u1ed3 Ch\u00ed Minh City", "H\u1ed3 Ch\u00ed Minh"),
-                        r"H\u00e0 n\u1ed9i", "H\u00e0 N\u1ed9i"),
-                    r"\u0110\u00e0 n\u1eb5ng", "\u0110\u00e0 N\u1eb5ng"),
-                r"H\u1ea3i ph\u00f2ng", "H\u1ea3i Ph\u00f2ng")
-        )
-
-    loc_normalized = F.transform(
+    location_detail_expr = F.transform(
         F.coalesce(F.col("location"), F.array()),
-        lambda x: _fix(x)
+        lambda x: F.struct(
+            F.trim(F.split(x, ":", 2).getItem(0)).alias("city"),
+            F.when(F.size(F.split(x, ":", 2)) > 1, F.trim(F.split(x, ":", 2).getItem(1)))
+             .otherwise(F.lit(None).cast("string")).alias("address")
+        )
     )
 
-    df = df.withColumn("location_normalized", loc_normalized)
-    df = df.withColumn("location_count",      F.size(F.col("location_normalized")))
+    df = df.withColumn("location_count",      F.size(F.col("location")))
+    df = df.withColumn("location_detail",     location_detail_expr)
     df = df.withColumn("has_remote",          F.col("ld_job_location_type") == F.lit("TELECOMMUTE"))
     return df
 
@@ -205,9 +186,9 @@ def dedup_silver(df):
 
 def transform_bronze_to_silver(bronze_df):
     df = parse_json_ld(bronze_df)
-    df = enrich_experience_months(df)
+    df = resolve_experience(df)
     df = canonicalize_salary(df)
-    df = normalize_location(df)
+    df = process_location(df)
     return df
 
 
@@ -238,12 +219,12 @@ def run(date: str | None = None):
     spark.sparkContext.setLogLevel("WARN")
 
     if date:
-        bronze_path = f"{BRONZE_BASE_PATH}/ingest_date={date}/"
-        silver_path = f"{SILVER_BASE_PATH}/ingest_date={date}/"
+        bronze_path = f"{BRONZE_PATH}/ingest_date={date}/"
+        silver_path = f"{SILVER_PATH}/ingest_date={date}/"
         logger.info(f"Incremental load: date={date}")
     else:
-        bronze_path = f"{BRONZE_BASE_PATH}/"
-        silver_path = f"{SILVER_BASE_PATH}/"
+        bronze_path = f"{BRONZE_PATH}/"
+        silver_path = f"{SILVER_PATH}/"
         logger.info("Full load: all dates...")
 
     logger.info(f"Reading Bronze data from {bronze_path}...")
