@@ -1,0 +1,38 @@
+apiVersion: sparkoperator.k8s.io/v1beta2
+kind: SparkApplication
+metadata:
+  name: silver-job
+  namespace: job-market
+spec:
+  type: Python
+  pythonVersion: "3"
+  mode: cluster
+  image: spark-job-market:latest
+  imagePullPolicy: IfNotPresent
+  mainApplicationFile: local:///opt/spark/work-dir/bronze_to_silver.py
+  sparkVersion: "4.0.0"
+  restartPolicy:
+    type: Never
+  sparkConf:
+    "spark.sql.shuffle.partitions": "2"
+    "spark.kubernetes.container.image.pullPolicy": "IfNotPresent"
+    "spark.hadoop.fs.s3a.endpoint": "http://minio:9000"
+    "spark.hadoop.fs.s3a.access.key": "minioadmin"
+    "spark.hadoop.fs.s3a.secret.key": "minioadmin123"
+    "spark.hadoop.fs.s3a.path.style.access": "true"
+    "spark.hadoop.fs.s3a.connection.ssl.enabled": "false"
+    "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem"
+    "spark.hadoop.fs.AbstractFileSystem.s3a.impl": "org.apache.hadoop.fs.s3a.S3A"
+  driver:
+    cores: 1
+    memory: "1g"
+    serviceAccount: spark
+    env:
+      - name: BRONZE_PATH
+        value: "s3a://bronze/job_postings/"
+      - name: SILVER_PATH
+        value: "s3a://silver/job_postings/"
+  executor:
+    instances: 1
+    cores: 1
+    memory: "1g"
