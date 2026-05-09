@@ -30,18 +30,23 @@ Hệ thống thu thập và phân tích dữ liệu thị trường lao động 
         ┌──────────▼──────────────────────────▼─────────────┐
         │                  SERVING LAYER                    │
         │                                                   │
-        │         Cassandra          Elasticsearch          │
-        │              └──────────┬──────────┘              │
-        │                         ↓                         │
-        │            FastAPI / Kibana / Grafana             │
+        │      MongoDB                 Elasticsearch        │
+        │      - Gold collections      - Search indices     │
+        │      - Backend/API serving   - Kibana analytics   │
+        │                                                   │
+        │          └──────────┬──────────┬──────────┘       │
+        │                     │          │                  │
+        │                     ▼          ▼                  │
+        │                 FastAPI      Kibana               │
+        │                 Search API   Dashboard            │
         └───────────────────────────────────────────────────┘
 
 ┌─────────────────────────────┐
 │       PLATFORM / OPS        │        
-│  Monitoring / Config /      │
-│  Security                   │
+│  Docker / Kubernetes        │
+│  Minikube local deployment  │
 │           ↓                 │
-│      Kubernetes             │──────► (manages all layers above)
+│      manages all layers     │
 └─────────────────────────────┘
 ```
 
@@ -54,7 +59,7 @@ Hệ thống thu thập và phân tích dữ liệu thị trường lao động 
 | **Data Sources** | Python (Requests, BeautifulSoup), Kafka Producer, HDFS Loader |
 | **Batch Layer** | PySpark, HDFS, Parquet |
 | **Speed Layer** | Kafka, Spark Structured Streaming |
-| **Serving Layer** | Cassandra, Elasticsearch, FastAPI, Kibana, Grafana |
+| **Serving Layer** | MongoDB, Elasticsearch, FastAPI, Kibana |
 | **Platform / Ops** | Kubernetes (Minikube), Docker |
 
 ---
@@ -121,5 +126,5 @@ All services are containerized with **Docker** and orchestrated by **Kubernetes 
 | `spark` | Spark Driver Pods, Executor Pods, CronJobs |
 | `hdfs` | HDFS NameNode, DataNode |
 | `kafka` | Kafka Broker, Zookeeper |
-| `cassandra` | Cassandra StatefulSet |
+| `mongodb` | MongoDB |
 | `elastic` | Elasticsearch, Kibana |

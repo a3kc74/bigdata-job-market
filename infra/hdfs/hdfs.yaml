@@ -1,0 +1,150 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: hdfs
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hdfs-namenode
+  namespace: hdfs
+spec:
+  selector:
+    app: hdfs-namenode
+  ports:
+    - name: rpc
+      port: 9000
+      targetPort: 9000
+    - name: web
+      port: 9870
+      targetPort: 9870
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hdfs-namenode-pvc
+  namespace: hdfs
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: hdfs-namenode
+  namespace: hdfs
+spec:
+  serviceName: hdfs-namenode
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hdfs-namenode
+  template:
+    metadata:
+      labels:
+        app: hdfs-namenode
+    spec:
+      containers:
+        - name: namenode
+          image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9000
+              name: rpc
+            - containerPort: 9870
+              name: web
+          env:
+            - name: CLUSTER_NAME
+              value: job-market-hdfs
+            - name: CORE_CONF_fs_defaultFS
+              value: hdfs://hdfs-namenode:9000
+          volumeMounts:
+            - name: hdfs-namenode-storage
+              mountPath: /hadoop/dfs/name
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1"
+              memory: "1Gi"
+      volumes:
+        - name: hdfs-namenode-storage
+          persistentVolumeClaim:
+            claimName: hdfs-namenode-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hdfs-datanode
+  namespace: hdfs
+spec:
+  selector:
+    app: hdfs-datanode
+  ports:
+    - name: data
+      port: 9866
+      targetPort: 9866
+    - name: web
+      port: 9864
+      targetPort: 9864
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hdfs-datanode-pvc
+  namespace: hdfs
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: hdfs-datanode
+  namespace: hdfs
+spec:
+  serviceName: hdfs-datanode
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hdfs-datanode
+  template:
+    metadata:
+      labels:
+        app: hdfs-datanode
+    spec:
+      containers:
+        - name: datanode
+          image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9866
+              name: data
+            - containerPort: 9864
+              name: web
+          env:
+            - name: SERVICE_PRECONDITION
+              value: hdfs-namenode:9870
+            - name: CORE_CONF_fs_defaultFS
+              value: hdfs://hdfs-namenode:9000
+          volumeMounts:
+            - name: hdfs-datanode-storage
+              mountPath: /hadoop/dfs/data
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1"
+              memory: "1Gi"
+      volumes:
+        - name: hdfs-datanode-storage
+          persistentVolumeClaim:
+            claimName: hdfs-datanode-pvc
