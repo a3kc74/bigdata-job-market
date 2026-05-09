@@ -18,7 +18,7 @@ Crawl và phân tích dữ liệu thị trường lao động từ **TopCV** (jo
 | Crawler | Python (Requests, BeautifulSoup), Kafka Producer |
 | Batch | PySpark, HDFS, Parquet |
 | Speed | Kafka, Spark Structured Streaming |
-| Serving | Cassandra, Elasticsearch, FastAPI, Kibana, Grafana |
+| Serving | Elasticsearch, Kibana |
 | Ops | Docker, Kubernetes (Minikube) |
 
 ---
@@ -26,7 +26,7 @@ Crawl và phân tích dữ liệu thị trường lao động từ **TopCV** (jo
 ## Mô hình dữ liệu — Medallion 4 lớp
 
 ```
-Raw (JSONL) → Bronze (Parquet) → Silver (Parquet) → Gold (Parquet/Cassandra)
+Raw (JSONL) → Bronze (Parquet) → Silver (Parquet) → Gold (Parquet/Elasticsearch)
 ```
 
 | Layer | HDFS Path | Mô tả |
@@ -34,7 +34,7 @@ Raw (JSONL) → Bronze (Parquet) → Silver (Parquet) → Gold (Parquet/Cassandr
 | **Raw** | `/raw/jobs/ingest_date=YYYY-MM-DD/` | Crawler output, immutable, passthrough |
 | **Bronze** | `/bronze/jobs/ingest_date=YYYY-MM-DD/` | Flatten + cast types + dedup + count metrics |
 | **Silver** | `/silver/jobs/ingest_date=YYYY-MM-DD/` | Parse json_ld → `ld_*` fields; salary → VNĐ; location normalize; dedup per `job_id` |
-| **Gold** | `/gold/` | Aggregated analytics tables (TODO) |
+| **Gold** | `/gold/` | Denormalized table for Serving (job_market_index) |
 
 HDFS NameNode URL trong K8s: `hdfs://hdfs-namenode.hdfs.svc:9000`
 
@@ -126,6 +126,18 @@ HDFS NameNode URL trong K8s: `hdfs://hdfs-namenode.hdfs.svc:9000`
 
 ---
 
+## Gold Schema (Denormalized)
+
+**Nguyên tắc:**
+- Tối ưu cho Elasticsearch: Phi chuẩn hóa (Denormalized). Gộp chung thông tin của `job` và `company` vào một bản ghi duy nhất.
+- Bỏ qua pre-aggregation ở Batch Layer, giao việc tính toán metric cho Kibana xử lý on-the-fly.
+
+**Fields chính (job_market_index):**
+- **Job Info:** `job_id`, `title`, `skills`, `salary_min_vnd`, `salary_max_vnd`, `salary_is_negotiable`, `location_detail`, `has_remote`, `experience_required`, `date_posted`, `deadline`, `ingest_date`, `is_active`
+- **Company Info (Embedded):** `company_id`, `company_name`, `company_url`, `company_logo`, `company_scale`, `company_field`, `company_address`
+
+---
+
 ## ETL Jobs đã implement
 
 ### `apps/batch/jobs/raw_to_bronze.py` ✅
@@ -154,7 +166,6 @@ HDFS NameNode URL trong K8s: `hdfs://hdfs-namenode.hdfs.svc:9000`
 | `spark` | Driver/Executor Pods, CronJobs |
 | `hdfs` | NameNode (port 9000), DataNode |
 | `kafka` | Broker, Zookeeper |
-| `cassandra` | StatefulSet |
 | `elastic` | Elasticsearch, Kibana |
 
 **Lưu ý Minikube:** Image bị mất sau khi tắt máy. Rebuild bắt buộc sau mỗi lần restart:

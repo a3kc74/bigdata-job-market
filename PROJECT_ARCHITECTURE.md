@@ -21,19 +21,21 @@ Hệ thống thu thập và phân tích dữ liệu thị trường lao động 
         │                      │   │                       │
         │    HDFS Raw Zone     │   │         Kafka         │
         │          ↓           │   │           ↓           │
-        │    Spark Batch ETL   │   │    Spark Structured   │
+        │   Spark Batch ETL    │   │    Spark Structured   │
         │          ↓           │   │       Streaming       │
-        │      Silver/Gold     │   │           ↓           │
-        │       Analytics      │   │  Realtime Aggregates  │
+        │   HDFS Bronze Zone   │   │           ↓           │
+        │          ↓           │   │  Realtime Aggregation │
+        │   Spark Batch ETL    │   │                       │
+        │          ↓           │   │                       │
+        │ HDFS Silver/Gold Zone│   │                       │
         └──────────┬───────────┘   └──────────┬────────────┘
                    │                          │
         ┌──────────▼──────────────────────────▼─────────────┐
         │                  SERVING LAYER                    │
         │                                                   │
-        │         Cassandra          Elasticsearch          │
-        │              └──────────┬──────────┘              │
+        │                  Elastic Search                   │
         │                         ↓                         │
-        │            FastAPI / Kibana / Grafana             │
+        │                       Kibana                      │
         └───────────────────────────────────────────────────┘
 
 ┌─────────────────────────────┐
@@ -54,7 +56,7 @@ Hệ thống thu thập và phân tích dữ liệu thị trường lao động 
 | **Data Sources** | Python (Requests, BeautifulSoup), Kafka Producer, HDFS Loader |
 | **Batch Layer** | PySpark, HDFS, Parquet |
 | **Speed Layer** | Kafka, Spark Structured Streaming |
-| **Serving Layer** | Cassandra, Elasticsearch, FastAPI, Kibana, Grafana |
+| **Serving Layer** | Elasticsearch, Kibana |
 | **Platform / Ops** | Kubernetes (Minikube), Docker |
 
 ---
@@ -62,7 +64,7 @@ Hệ thống thu thập và phân tích dữ liệu thị trường lao động 
 ## Data Model — 4-Layer Medallion Architecture
 
 ```
-Raw (JSONL)  →  Bronze (Parquet)  →  Silver (Parquet)  →  Gold (Parquet/Cassandra)
+Raw (JSONL)  →  Bronze (Parquet)  →  Silver (Parquet)  →  Gold (Parquet/Elasticsearch)
 ```
 
 | Layer | Format | Location | Description |
@@ -70,7 +72,7 @@ Raw (JSONL)  →  Bronze (Parquet)  →  Silver (Parquet)  →  Gold (Parquet/Ca
 | **Raw** | JSONL | `hdfs:///raw/jobs/ingest_date=YYYY-MM-DD/` | Crawler output, passthrough, immutable |
 | **Bronze** | Parquet (Snappy) | `hdfs:///bronze/jobs/ingest_date=YYYY-MM-DD/` | Flatten + cast types + dedup + count metrics |
 | **Silver** | Parquet (Snappy) | `hdfs:///silver/jobs/ingest_date=YYYY-MM-DD/` | Canonicalization (salary, location, experience) |
-| **Gold** | Parquet / Cassandra | `hdfs:///gold/` | Aggregated analytics tables |
+| **Gold** | Parquet / Elasticsearch | `hdfs:///gold/` | Denormalized tables for Serving |
 
 ---
 
@@ -121,5 +123,4 @@ All services are containerized with **Docker** and orchestrated by **Kubernetes 
 | `spark` | Spark Driver Pods, Executor Pods, CronJobs |
 | `hdfs` | HDFS NameNode, DataNode |
 | `kafka` | Kafka Broker, Zookeeper |
-| `cassandra` | Cassandra StatefulSet |
 | `elastic` | Elasticsearch, Kibana |
