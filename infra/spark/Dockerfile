@@ -6,7 +6,8 @@ USER root
 # Cài thêm Python deps cho batch ETL
 RUN pip3 install --no-cache-dir \
     cassandra-driver \
-    requests
+    requests \
+    pydantic-settings
 
 ENV HOME=/tmp
 ENV PATH="/usr/local/bin:/usr/bin:${PATH}"
@@ -15,8 +16,10 @@ ENV PYSPARK_DRIVER_PYTHON=python3
 
 # Copy toàn bộ batch jobs và shared utils vào container của Spark
 COPY apps/batch/jobs/          /opt/spark/work-dir/jobs/
-COPY apps/spark/               /opt/spark/work-dir/stream/
+COPY configs/                  /opt/spark/work-dir/configs/
 COPY shared/                   /opt/spark/work-dir/shared/
+
+ENV PYTHONPATH="/opt/spark/work-dir:/opt/spark/work-dir/shared"
 
 WORKDIR /opt/spark/work-dir
 

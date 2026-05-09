@@ -42,17 +42,26 @@ Nhẹ hơn so với Elasticsearch do chỉ là UI.
 
 **File:** `infra/elastic/20-kibana.yaml`
 
-## Tối ưu 3: MongoDB/MinIO Single Replica
+## Tối ưu 3: MongoDB/HDFS Single Replica
 
-Chỉ chạy 1 replica để tiết kiệm tài nguyên:
+Trong môi trường local Minikube, hệ thống được cấu hình ở mức tối thiểu để tiết kiệm tài nguyên.
 
-```yaml
-# MongoDB
-count: 1
+Các thành phần lưu trữ chính:
 
-# MinIO
-replicas: 1
+- MongoDB: 1 replica, dùng để lưu dữ liệu serving cho backend/API.
+- HDFS NameNode: 1 replica, quản lý metadata cho Raw/Bronze/Silver/Gold.
+- HDFS DataNode: 1 replica trong môi trường local, dùng để lưu dữ liệu thực tế.
+
+HDFS được sử dụng làm storage chính cho pipeline batch ETL. Các tầng dữ liệu được tổ chức theo dạng:
+
+```text
+hdfs://hdfs-namenode.hdfs.svc:9000/raw/jobs
+hdfs://hdfs-namenode.hdfs.svc:9000/bronze/jobs
+hdfs://hdfs-namenode.hdfs.svc:9000/silver/jobs
+hdfs://hdfs-namenode.hdfs.svc:9000/gold
 ```
+
+Cấu hình này phù hợp cho môi trường đồ án/local vì vẫn mô phỏng được distributed storage nhưng giảm số lượng replica để tránh quá tải tài nguyên.
 
 ## Tối ưu 4: Elasticsearch Storage
 
@@ -68,7 +77,8 @@ storage: 2Gi
 
 Tất cả services chỉ chạy 1 instance:
 - MongoDB: 1 replica
-- MinIO: 1 replica  
+- HDFS NameNode: 1 instance
+- HDFS DataNode: 1 instance
 - Elasticsearch: 1 node
 - Kibana: 1 pod
 - Spark executors: 1 instance/job
@@ -209,7 +219,7 @@ Tổng tài nguyên tối thiểu cho full setup:
 
 - Kafka/Zookeeper: ~400Mi
 - MongoDB: ~300Mi
-- MinIO: ~200Mi
+- HDFS: tùy dung lượng dữ liệu Raw/Bronze/Silver/Gold, cấu hình tối thiểu cho local
 - Elasticsearch: ~768Mi
 - Kibana: ~384Mi (optional)
 - Spark jobs: ~2Gi (giờ đó là peak)

@@ -6,6 +6,12 @@ __pycache__/
 *.log
 
 data/mock/
+data/raw/*.jsonl
+data/raw/*.json
+data/raw/*.csv
+data/bronze/
+data/silver/
+data/gold/
 spark-warehouse/
 metastore_db/
 derby.log

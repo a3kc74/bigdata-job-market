@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: job-search-api
-  namespace: job-market
+  namespace: serving
 spec:
   replicas: 1
   selector:
@@ -21,7 +21,7 @@ spec:
             - containerPort: 8000
           env:
             - name: ELASTICSEARCH_URL
-              value: "http://elasticsearch:9200"
+              value: "http://elasticsearch.search.svc:9200"
             - name: JOBS_INDEX
               value: "gold-jobs-flat"
           resources:

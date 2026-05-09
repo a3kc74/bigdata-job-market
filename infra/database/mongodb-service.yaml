@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: mongodb
-  namespace: job-market
+  namespace: database
 spec:
   selector:
     app: mongodb
