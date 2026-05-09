@@ -76,8 +76,8 @@ def parse_json_ld(df):
         "work_country":            work_address("addressCountry"),
         "job_location_type":       F.get_json_object(jl, "$.jobLocationType"),
         "salary_currency":         F.get_json_object(jl, "$.baseSalary.currency"),
-        "salary_min":              F.get_json_object(jl, "$.baseSalary.value.minValue").cast(DoubleType()),
-        "salary_max":              F.get_json_object(jl, "$.baseSalary.value.maxValue").cast(DoubleType()),
+        "salary_min":              F.expr("try_cast(nullif(get_json_object(json_ld, '$.baseSalary.value.minValue'), '') as double)"),
+        "salary_max":              F.expr("try_cast(nullif(get_json_object(json_ld, '$.baseSalary.value.maxValue'), '') as double)"),
         "salary_unit":             F.get_json_object(jl, "$.baseSalary.value.unitText"),
         "job_id_platform":         F.get_json_object(jl, "$.identifier.value"),
     })
@@ -118,25 +118,32 @@ def canonicalize_salary(df):
     json_max_vnd = (F.col("salary_max") * currency_factor * period_factor).cast(LongType())
 
     # Fallback regex on Bronze.salary string
-    _RANGE_TRIEU = r"(\d+(?:[.,]\d+)?)\s*-\s*(\d+(?:[.,]\d+)?)\s*[Tt]ri\u1ec7u"
-    regex_min = (
-        F.regexp_extract(F.col("salary"), _RANGE_TRIEU, 1)
-        .cast(DoubleType()) * F.lit(1_000_000.0)
-    ).cast(LongType())
-    regex_max = (
-        F.regexp_extract(F.col("salary"), _RANGE_TRIEU, 2)
-        .cast(DoubleType()) * F.lit(1_000_000.0)
-        .cast(LongType())
+    _RANGE_TRIEU = r"(\d+(?:[.,]\d+)?)\s*-\s*(\d+(?:[.,]\d+)?)\s*[Tt]riệu"
+    df = (
+        df
+        .withColumn("_regex_min_raw", F.regexp_replace(F.regexp_extract(F.col("salary"), _RANGE_TRIEU, 1), ",", "."))
+        .withColumn("_regex_max_raw", F.regexp_replace(F.regexp_extract(F.col("salary"), _RANGE_TRIEU, 2), ",", "."))
     )
 
-    return df.withColumns({
-        "salary_min_vnd":         F.coalesce(json_min_vnd, F.when(regex_min > 0, regex_min)),
-        "salary_max_vnd":         F.coalesce(json_max_vnd, F.when(regex_max > 0, regex_max)),
-        "salary_is_negotiable": (
-            F.col("salary").rlike(r"(?i)th\u1ecfa\s*thu\u1eadn") |
-            (F.col("salary_min").isNull() & F.col("salary_max").isNull())
-        ),
-    })
+    regex_min = (
+        F.expr("try_cast(nullif(_regex_min_raw, '') as double)") * F.lit(1_000_000.0)
+    ).cast(LongType())
+
+    regex_max = (
+        F.expr("try_cast(nullif(_regex_max_raw, '') as double)") * F.lit(1_000_000.0)
+    ).cast(LongType())
+
+    return (
+        df.withColumns({
+            "salary_min_vnd":         F.coalesce(json_min_vnd, F.when(regex_min > 0, regex_min)),
+            "salary_max_vnd":         F.coalesce(json_max_vnd, F.when(regex_max > 0, regex_max)),
+            "salary_is_negotiable": (
+                F.col("salary").rlike(r"(?i)thỏa\s*thuận") |
+                (F.col("salary_min").isNull() & F.col("salary_max").isNull())
+            ),
+        })
+        .drop("_regex_min_raw", "_regex_max_raw")
+    )
 
 
 ### 4. Location canonical -> location_count, location_detail, has_remote
