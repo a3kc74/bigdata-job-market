@@ -133,8 +133,13 @@ HDFS NameNode URL trong K8s: `hdfs://hdfs-namenode.hdfs.svc:9000`
 - Bỏ qua pre-aggregation ở Batch Layer, giao việc tính toán metric cho Kibana xử lý on-the-fly.
 
 **Fields chính (job_market_index):**
-- **Job Info:** `job_id`, `title`, `skills`, `salary_min_vnd`, `salary_max_vnd`, `salary_is_negotiable`, `location_detail`, `has_remote`, `experience_required`, `date_posted`, `deadline`, `ingest_date`, `is_active`
-- **Company Info (Embedded):** `company_id`, `company_name`, `company_url`, `company_logo`, `company_scale`, `company_field`, `company_address`
+- **Meta:** `job_id`, `company_id`, `source_url`, `date_posted`, `deadline`, `ingest_date`, `is_active`
+- **Job Info:** `title`, `description`, `requirements`, `benefits`, `occupationalCategory`, `employmentType`, `education`
+- **Filters/Categorical:** `has_remote`, `experience_required`, `salary_is_negotiable`, `is_weekend_free`, `schedule_type`, `skills`, `specialty`, `location`, `location_detail`
+- **Metrics:** `salary_min_vnd`, `salary_max_vnd`, `salary_currency`, `salary_unit`, `monthOfExperience`, `openings`, các trường `*_count`
+- **Raw/Display:** `salary`, `schedule`
+- **Company Info (Embedded):** `company_name`, `company_url`, `company_logo`, `company_scale`, `company_field`, `company_address`
+*(Chi tiết xem thêm tại `data/gold/gold_data_format.md`)*
 
 ---
 
@@ -154,7 +159,13 @@ HDFS NameNode URL trong K8s: `hdfs://hdfs-namenode.hdfs.svc:9000`
 - Chạy local: `spark-submit bronze_to_silver.py --date 2026-04-30`
 - Trigger K8s: CronJob `batch-etl-bronze-to-silver` (TODO: tạo CronJob)
 
-### `apps/batch/jobs/silver_to_gold.py` ❌ TODO
+### `apps/batch/jobs/silver_to_gold.py` ✅
+- Đọc Parquet từ Silver, thực hiện Denormalization
+- Đổi tên `job_id_platform` thành `company_id`
+- Parse `schedule` ra `is_weekend_free` và `schedule_type`
+- Lọc các trường cần thiết theo chuẩn Gold Schema
+- Output Parquet Gold (tương lai đẩy vào Elasticsearch)
+
 ### `apps/spark/kafka_to_cassandra_es.py` — Structured Streaming (Speed Layer)
 
 ---
@@ -186,6 +197,7 @@ bigdata-job-market/
 ├── data/raw/raw_data_format.md          # Raw schema spec
 ├── data/bronze/bronze_data_format.md    # Bronze schema spec
 ├── data/silver/silver_data_format.md    # Silver schema spec
+├── data/gold/gold_data_format.md        # Gold schema spec
 ├── infra/spark/Dockerfile               # Spark image (base: apache/spark:4.1.1-python3)
 ├── infra/spark/10-rbac.yaml            # K8s RBAC cho Spark
 ├── infra/kubernetes/batch-etl-cronjob.yaml  # CronJob daily ETL
