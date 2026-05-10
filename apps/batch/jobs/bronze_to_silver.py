@@ -29,8 +29,8 @@ from pyspark.sql import SparkSession, Window
 from pyspark.sql import functions as F
 from pyspark.sql.types import DoubleType, IntegerType, LongType
 
-BRONZE_PATH = "hdfs://hdfs-namenode.hdfs.svc:9000/bronze/jobs"
-SILVER_PATH = "hdfs://hdfs-namenode.hdfs.svc:9000/silver/jobs"
+BRONZE_PATH = settings.BRONZE_PATH
+SILVER_PATH = settings.SILVER_PATH
 
 # Config logging
 logger = get_logger("bronze_to_silver")

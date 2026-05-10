@@ -19,6 +19,16 @@ Docs:
 """
 import argparse
 import logging
+import sys
+from pathlib import Path
+
+# Configure project root
+project_root = Path(__file__).resolve().parents[3]
+if str(project_root) not in sys.path:
+    sys.path.append(str(project_root))
+
+from configs.logger import get_logger
+from configs.settings import settings
 
 from pyspark.sql import SparkSession, Window
 from pyspark.sql import functions as F
@@ -40,12 +50,11 @@ from pyspark.sql.types import (
 #   'hdfs'          = namespace where HDFS is deployed
 #   9000            = default HDFS RPC port
 # For local spark-submit (outside K8s): use hdfs://localhost:9000
-RAW_BASE_PATH    = "hdfs://hdfs-namenode.hdfs.svc:9000/raw/jobs"
-BRONZE_BASE_PATH = "hdfs://hdfs-namenode.hdfs.svc:9000/bronze/jobs"
+RAW_BASE_PATH    = settings.RAW_PATH
+BRONZE_BASE_PATH = settings.BRONZE_PATH
 
 # Config logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
-logger = logging.getLogger("raw_to_bronze")
+logger = get_logger("raw_to_bronze")
 
 ### RAW JSON SCHEMA, TYPE CAST WHEN READING DATA
 # Schema in file 'payload'
