@@ -42,15 +42,15 @@ Nhẹ hơn so với Elasticsearch do chỉ là UI.
 
 **File:** `infra/elastic/20-kibana.yaml`
 
-## Tối ưu 3: MongoDB/HDFS Single Replica
+## Tối ưu 3: HDFS/Elasticsearch Single Replica
 
-Trong môi trường local Minikube, hệ thống được cấu hình ở mức tối thiểu để tiết kiệm tài nguyên.
+Trong môi trường local Minikube, hệ thống được cấu hình ở mức tối thiểu để tiết kiếm tài nguyên.
 
-Các thành phần lưu trữ chính:
+Các thành phần lưu trữ chín:
 
-- MongoDB: 1 replica, dùng để lưu dữ liệu serving cho backend/API.
 - HDFS NameNode: 1 replica, quản lý metadata cho Raw/Bronze/Silver/Gold.
 - HDFS DataNode: 1 replica trong môi trường local, dùng để lưu dữ liệu thực tế.
+- Elasticsearch: 1 node, lưu dữ liệu Gold để phục vụ FastAPI và search queries.
 
 HDFS được sử dụng làm storage chính cho pipeline batch ETL. Các tầng dữ liệu được tổ chức theo dạng:
 
@@ -76,7 +76,6 @@ storage: 2Gi
 ## Tối ưu 5: Single Instance Everywhere
 
 Tất cả services chỉ chạy 1 instance:
-- MongoDB: 1 replica
 - HDFS NameNode: 1 instance
 - HDFS DataNode: 1 instance
 - Elasticsearch: 1 node
@@ -85,19 +84,15 @@ Tất cả services chỉ chạy 1 instance:
 
 ## Tối ưu 6: Non-Overlapping Batch Jobs
 
-Spark Operator jobs được schedule để **không chạy chồng nhau**:
+Spark Operator jobs được schedule để **không chạy chửn nhau**:
 
 ```
-silver-job:        0 * * * *  (giờ thứ 0)
 gold-job:         10 * * * *  (giờ thứ 10)
-gold-sync-mongo:  20 * * * *  (giờ thứ 20)
 gold-sync-es:     30 * * * *  (giờ thứ 30)
 ```
 
 **Files:** 
-- `infra/spark-operator/silver-job.yaml`
 - `infra/spark-operator/gold-job.yaml`
-- `infra/spark-operator/gold-sync-mongo-job.yaml`
 - `infra/spark-operator/gold-sync-es-job.yaml`
 
 ## Tối ưu 7: Reduced Spark Resources
@@ -120,7 +115,7 @@ executor:
   memory: "1g"
 ```
 
-### gold-sync-mongo-job, gold-sync-es-job (lightweight sync)
+### gold-sync-es-job (lightweight sync)
 ```yaml
 driver:
   memory: "512m"
@@ -129,13 +124,10 @@ executor:
   memory: "512m"
 ```
 
-Cả 4 job đều giảm `spark.sql.shuffle.partitions` từ 4 xuống 2.
+Cả jobs đều giảm `spark.sql.shuffle.partitions` từ 4 xuống 2.
 
 **Files:**
-- `infra/spark-operator/speed-job.yaml`
-- `infra/spark-operator/silver-job.yaml`
 - `infra/spark-operator/gold-job.yaml`
-- `infra/spark-operator/gold-sync-mongo-job.yaml`
 - `infra/spark-operator/gold-sync-es-job.yaml`
 
 ## Tối ưu 8: Optional Kibana Deployment
@@ -218,7 +210,6 @@ make kibana-up
 Tổng tài nguyên tối thiểu cho full setup:
 
 - Kafka/Zookeeper: ~400Mi
-- MongoDB: ~300Mi
 - HDFS: tùy dung lượng dữ liệu Raw/Bronze/Silver/Gold, cấu hình tối thiểu cho local
 - Elasticsearch: ~768Mi
 - Kibana: ~384Mi (optional)

@@ -1,4 +1,4 @@
-# Run HDFS + Spark Batch ETL Pipeline tới Silver
+﻿# Run HDFS + Spark Batch ETL Pipeline tới Silver
 
 Tài liệu này hướng dẫn setup Minikube và chạy pipeline Batch ETL từ raw data JSONL tới Silver trên HDFS trong môi trường Kubernetes local.
 
@@ -29,13 +29,12 @@ Cấu hình này đủ để demo local ở mức nhẹ:
 ```text
 HDFS
 Spark driver + 1 executor
-MongoDB
 Elasticsearch
 Kibana
 FastAPI
 ```
 
-Nếu chỉ chạy pipeline tới Silver thì bắt buộc cần `hdfs` và `spark`. Các namespace `database`, `search`, `serving` chỉ cần khi chạy Serving/Search layer.
+Nếu chỉ chạy pipeline tới Silver thì bắt buộc cần `hdfs` và `spark`. Các namespace `search`, `serving` chỉ cần khi chạy Serving/Search layer.
 
 Kiểm tra Minikube:
 
@@ -56,16 +55,13 @@ Ready
 
 ## 1. Namespace architecture
 
-## 1. Namespace architecture
-
 Project dùng namespace theo layer:
 
 | Namespace | Vai trò |
 |---|---|
 | `hdfs` | Lưu dữ liệu Raw/Bronze/Silver/Gold bằng HDFS |
 | `spark` | Chạy Spark CronJob, driver, executor |
-| `database` | MongoDB |
-| `search` | Elasticsearch + Kibana |
+| `search` | Elasticsearch + Kibana/Grafana |
 | `serving` | FastAPI search API |
 | `kafka` | Streaming/speed layer nếu dùng sau |
 
@@ -76,18 +72,15 @@ hdfs
 spark
 ```
 
-Các namespace `database`, `search`, `serving` dùng cho Serving/Search layer sau khi có Gold data.
+Các namespace `search`, `serving` dùng cho Serving/Search layer sau khi có Gold data.
 
 ---
-
-## 2. Kiểm tra trạng thái cluster
 
 ## 2. Kiểm tra trạng thái cluster
 
 ```powershell
 kubectl get pods -n hdfs
 kubectl get pods -n spark
-kubectl get pods -n database
 kubectl get pods -n search
 kubectl get pods -n serving
 ```
@@ -102,8 +95,6 @@ hdfs-datanode-0   1/1   Running
 Với namespace `spark`, bình thường có thể không có pod nào đang chạy. Spark pod chỉ xuất hiện khi chạy job.
 
 ---
-
-## 3. Deploy namespace và HDFS
 
 ## 3. Deploy namespace và HDFS
 
@@ -160,8 +151,6 @@ Kỳ vọng:
 
 ## 4. Copy raw data vào HDFS
 
-## 4. Copy raw data vào HDFS
-
 Ví dụ raw file local:
 
 ```text
@@ -207,8 +196,6 @@ Kỳ vọng:
 
 ## 5. Build Spark image
 
-## 5. Build Spark image
-
 Mỗi khi sửa code trong các thư mục sau thì cần build lại image:
 
 ```text
@@ -237,8 +224,6 @@ docker.io/library/spark-job-market:latest
 ```
 
 ---
-
-## 6. Apply Spark RBAC và CronJob
 
 ## 6. Apply Spark RBAC và CronJob
 
@@ -285,8 +270,6 @@ batch-etl-bronze-to-silver
 ```
 
 ---
-
-## 7. Chạy Raw → Bronze
 
 ## 7. Chạy Raw → Bronze
 
@@ -358,8 +341,6 @@ Kỳ vọng:
 ```
 
 ---
-
-## 8. Chạy Bronze → Silver
 
 ## 8. Chạy Bronze → Silver
 
@@ -554,10 +535,9 @@ hdfs
 spark
 ```
 
-Có thể tạm scale down Serving/Search/Database:
+Có thể tạm scale down Search/Serving:
 
 ```powershell
-kubectl scale statefulset mongodb -n database --replicas=0
 kubectl scale statefulset elasticsearch -n search --replicas=0
 kubectl scale deployment kibana -n search --replicas=0
 kubectl scale deployment job-search-api -n serving --replicas=0
@@ -566,7 +546,6 @@ kubectl scale deployment job-search-api -n serving --replicas=0
 Bật lại sau:
 
 ```powershell
-kubectl scale statefulset mongodb -n database --replicas=1
 kubectl scale statefulset elasticsearch -n search --replicas=1
 kubectl scale deployment kibana -n search --replicas=1
 kubectl scale deployment job-search-api -n serving --replicas=1
@@ -627,7 +606,7 @@ minikube dashboard -p job-market
 | Symptom | Likely cause | Fix |
 |---|---|---|
 | Pod stuck in `ImagePullBackOff` | Image not found in Minikube | Run `minikube image build -f infra\spark\Dockerfile -t spark-job-market:latest .` |
-| Executor pod stuck `Pending` | Not enough CPU/RAM | Reduce Spark resources or scale down database/search/serving |
+| Executor pod stuck `Pending` | Not enough CPU/RAM | Reduce Spark resources or scale down search/serving |
 | `Insufficient cpu` | Executor request too high | Use `spark.kubernetes.executor.request.cores=250m` |
 | HDFS connection refused | NameNode not running | Check `kubectl get pods -n hdfs` |
 | HDFS permission denied | Spark user cannot write to HDFS path | Run `hdfs dfs -chmod -R 777 /raw /bronze /silver /gold` |
@@ -656,8 +635,7 @@ Pipeline hiện tại chỉ chạy tới Silver.
 
 ```text
 Silver → Gold
-Gold → MongoDB
 Gold → Elasticsearch
 ```
 
-Kibana và FastAPI không đọc trực tiếp HDFS. Chúng đọc dữ liệu từ Elasticsearch và MongoDB.
+Kibana, Grafana và FastAPI không đọc trực tiếp HDFS. Chúng đọc dữ liệu từ Elasticsearch.
