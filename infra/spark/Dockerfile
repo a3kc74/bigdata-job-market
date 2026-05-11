@@ -1,4 +1,4 @@
-FROM apache/spark:4.1.1-python3
+FROM apache/spark:3.5.3-scala2.12-java17-python3-ubuntu
 
 # Đặt quyền quản trị cao nhất
 USER root   

@@ -1,0 +1,75 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: batch-etl-gold-to-elasticsearch
+  namespace: spark
+spec:
+  schedule: "30 20 * * *"
+  suspend: true
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        metadata:
+          labels:
+            app: batch-etl
+            job: gold-to-elasticsearch
+        spec:
+          serviceAccountName: spark
+          restartPolicy: Never
+          containers:
+            - name: spark-submit
+              image: spark-job-market:latest
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: HOME
+                  value: /tmp
+              command:
+                - /opt/spark/bin/spark-submit
+                - --master
+                - k8s://https://kubernetes.default.svc:443
+                - --deploy-mode
+                - cluster
+                - --name
+                - gold-to-elasticsearch
+                - --packages
+                - org.elasticsearch:elasticsearch-spark-30_2.12:8.13.4
+                - --conf
+                - spark.jars.ivy=/tmp/.ivy2
+                - --conf
+                - spark.kubernetes.namespace=spark
+                - --conf
+                - spark.kubernetes.authenticate.driver.serviceAccountName=spark
+                - --conf
+                - spark.kubernetes.container.image=spark-job-market:latest
+                - --conf
+                - spark.kubernetes.container.image.pullPolicy=IfNotPresent
+                - --conf
+                - spark.executor.instances=1
+                - --conf
+                - spark.executor.cores=1
+                - --conf
+                - spark.kubernetes.executor.request.cores=250m
+                - --conf
+                - spark.kubernetes.executor.limit.cores=500m
+                - --conf
+                - spark.kubernetes.driver.request.cores=250m
+                - --conf
+                - spark.kubernetes.driver.limit.cores=500m
+                - --conf
+                - spark.executor.memory=768m
+                - --conf
+                - spark.driver.memory=768m
+                - --conf
+                - spark.sql.shuffle.partitions=8
+                - local:///opt/spark/work-dir/jobs/gold_to_elasticsearch.py
+              resources:
+                requests:
+                  cpu: "500m"
+                  memory: "512Mi"
+                limits:
+                  cpu: "1"
+                  memory: "1Gi"

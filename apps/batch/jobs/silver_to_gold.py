@@ -71,7 +71,10 @@ def normalize_gold_fields(df):
     df = df.withColumnRenamed("job_id_platform", "company_id")
 
     # We will convert string value to null since "Không yêu cầu" means no strict experience required
-    df = df.withColumn("monthOfExperience", F.col("monthOfExperience").cast(IntegerType()))
+    df = df.withColumn(
+        "monthOfExperience",
+        F.expr("try_cast(monthOfExperience as int)")
+    )
 
     df = df.withColumn("is_active", F.lit(True))
 
@@ -149,7 +152,7 @@ def run(date: str | None = None):
     
     logger.info(f"Reading silver data from {silver_path}...")
     silver_df = spark.read.parquet(silver_path)
-    logger.info(f"Silver records read: {len(silver_df)} rows.")
+    logger.info(f"Silver records read: {silver_df.count()} rows.")
 
     gold_df = transform_silver_to_gold(silver_df)
     logger.info("Silver data transformed to gold data successfully!")
