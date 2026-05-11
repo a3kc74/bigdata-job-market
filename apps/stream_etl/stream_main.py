@@ -16,7 +16,11 @@ if PROJECT_ROOT not in sys.path:
 load_dotenv()
 
 from apps.stream_etl.sinks.elasticsearch_sink import write_jobs_realtime
+from apps.stream_etl.sinks.jobs_per_10m_sink import write_jobs_per_10m
 from apps.stream_etl.sinks.kafka_sink import clean_jobs_to_kafka, dead_letter_to_kafka
+from apps.stream_etl.sinks.top_skills_hourly_sink import write_top_skills_hourly
+from apps.stream_etl.stateful_jobs.jobs_per_10m import build_jobs_per_10m
+from apps.stream_etl.stateful_jobs.top_skills_hourly import build_skill_counts_hourly
 from apps.stream_etl.transform import (
     build_clean_jobs,
     build_dead_letter,
@@ -33,6 +37,12 @@ TRIGGER_SECONDS = os.getenv("TRIGGER_SECONDS", "10")
 STARTING_OFFSETS = os.getenv("STARTING_OFFSETS", "earliest")
 WRITE_ELASTICSEARCH = os.getenv("WRITE_ELASTICSEARCH", "true").lower() in {"1", "true", "yes"}
 WRITE_CONSOLE_DEBUG = os.getenv("WRITE_CONSOLE_DEBUG", "false").lower() in {"1", "true", "yes"}
+ENABLE_JOBS_PER_10M = os.getenv("ENABLE_JOBS_PER_10M", "true").lower() in {"1", "true", "yes"}
+ENABLE_TOP_SKILLS_HOURLY = os.getenv("ENABLE_TOP_SKILLS_HOURLY", "true").lower() in {
+    "1",
+    "true",
+    "yes",
+}
 
 
 def build_spark() -> SparkSession:
@@ -51,7 +61,9 @@ def main() -> None:
         f"bootstrap={BOOTSTRAP} raw_topic={RAW_TOPIC} clean_topic={CLEAN_TOPIC} "
         f"dead_letter_topic={DEAD_LETTER_TOPIC} checkpoint_dir={CHECKPOINT_DIR} "
         f"starting_offsets={STARTING_OFFSETS} trigger_seconds={TRIGGER_SECONDS} "
-        f"write_elasticsearch={WRITE_ELASTICSEARCH} write_console_debug={WRITE_CONSOLE_DEBUG}",
+        f"write_elasticsearch={WRITE_ELASTICSEARCH} write_console_debug={WRITE_CONSOLE_DEBUG} "
+        f"enable_jobs_per_10m={ENABLE_JOBS_PER_10M} "
+        f"enable_top_skills_hourly={ENABLE_TOP_SKILLS_HOURLY}",
         flush=True,
     )
 
@@ -64,9 +76,8 @@ def main() -> None:
     )
 
     validated_df = validate_raw_jobs(parse_raw_kafka(raw_kafka_df))
-    clean_df = build_clean_jobs(validated_df).withWatermark("event_time", "60 minutes").dropDuplicates(
-        ["job_id", "hash_content"]
-    )
+    clean_base_df = build_clean_jobs(validated_df)
+    clean_df = clean_base_df.withWatermark("event_time", "60 minutes").dropDuplicates(["job_id", "hash_content"])
     dead_letter_df = build_dead_letter(validated_df)
 
     queries = [
@@ -96,6 +107,28 @@ def main() -> None:
             .queryName("phase3_jobs_realtime_to_elasticsearch")
             .option("checkpointLocation", f"{CHECKPOINT_DIR}/jobs_realtime_es")
             .outputMode("append")
+            .trigger(processingTime=f"{TRIGGER_SECONDS} seconds")
+            .start()
+        )
+
+    if ENABLE_JOBS_PER_10M:
+        jobs_per_10m_df = build_jobs_per_10m(clean_base_df)
+        queries.append(
+            jobs_per_10m_df.writeStream.foreachBatch(write_jobs_per_10m)
+            .queryName("phase4_jobs_per_10m_to_cassandra_elasticsearch")
+            .option("checkpointLocation", f"{CHECKPOINT_DIR}/jobs_per_10m")
+            .outputMode("update")
+            .trigger(processingTime=f"{TRIGGER_SECONDS} seconds")
+            .start()
+        )
+
+    if ENABLE_TOP_SKILLS_HOURLY:
+        skill_counts_hourly_df = build_skill_counts_hourly(clean_base_df)
+        queries.append(
+            skill_counts_hourly_df.writeStream.foreachBatch(write_top_skills_hourly)
+            .queryName("phase5_top_skills_hourly_to_cassandra_elasticsearch")
+            .option("checkpointLocation", f"{CHECKPOINT_DIR}/top_skills_hourly")
+            .outputMode("update")
             .trigger(processingTime=f"{TRIGGER_SECONDS} seconds")
             .start()
         )
