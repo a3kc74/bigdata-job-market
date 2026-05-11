@@ -8,6 +8,7 @@ metadata:
     layer: silver
 spec:
   schedule: "30 19 * * *"
+  suspend: false
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3

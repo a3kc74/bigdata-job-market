@@ -5,7 +5,7 @@ metadata:
   namespace: spark
 spec:
   schedule: "30 20 * * *"
-  suspend: true
+  suspend: false
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 2
   failedJobsHistoryLimit: 2

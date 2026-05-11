@@ -16,6 +16,7 @@ metadata:
 spec:
   # Chạy hàng ngày lúc 02:00 AM (UTC+7 → 19:00 UTC ngày hôm trước)
   schedule: "0 19 * * *"
+  suspend: false
   concurrencyPolicy: Forbid        # Không cho chạy song song nếu job trước chưa xong
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3
