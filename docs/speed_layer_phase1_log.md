@@ -23,6 +23,10 @@ Implemented Phase 1 from `Speed layer.md`: local infrastructure for the Speed La
     - `jobs_dead_letter`
   - Applies 7-day retention to raw/clean topics and 14-day retention to the dead-letter topic.
 
+- `scripts/create_kafka_topics.ps1`
+  - Windows PowerShell equivalent of `scripts/create_kafka_topics.sh`.
+  - Avoids relying on WSL or Git Bash when creating Kafka topics from Windows.
+
 - `scripts/init_cassandra.cql`
   - Creates keyspace `job_market_speed`.
   - Creates realtime tables for:
@@ -36,11 +40,17 @@ Implemented Phase 1 from `Speed layer.md`: local infrastructure for the Speed La
 - `scripts/init_cassandra.sh`
   - Convenience wrapper to apply `scripts/init_cassandra.cql` through the Cassandra container.
 
+- `scripts/init_cassandra.ps1`
+  - Windows PowerShell equivalent of `scripts/init_cassandra.sh`.
+
 - `scripts/smoke_test_speed_layer.sh`
   - Checks that all Phase 1 services are running.
   - Verifies the three Kafka topics exist.
   - Verifies the Cassandra keyspace/tables exist.
   - Checks basic HTTP readiness for Elasticsearch, Kafka UI, and Prometheus.
+
+- `scripts/smoke_test_speed_layer.ps1`
+  - Windows PowerShell equivalent of `scripts/smoke_test_speed_layer.sh`.
 
 ## How To Run
 
@@ -49,6 +59,15 @@ docker compose -f infra/docker-compose/docker-compose.speed.yml up -d
 bash scripts/create_kafka_topics.sh
 bash scripts/init_cassandra.sh
 bash scripts/smoke_test_speed_layer.sh
+```
+
+On Windows PowerShell, use:
+
+```powershell
+docker compose -f infra/docker-compose/docker-compose.speed.yml up -d
+.\scripts\create_kafka_topics.ps1
+.\scripts\init_cassandra.ps1
+.\scripts\smoke_test_speed_layer.ps1
 ```
 
 ## Expected Result
