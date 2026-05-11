@@ -8,4 +8,7 @@ uv.lock
 .env
 .log
 
-
+.agents
+.codex
+.pytest_cache
+.state

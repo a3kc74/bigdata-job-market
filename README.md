@@ -1,171 +1,205 @@
-# Speed Layer — Real-Time Job Market Pipeline
+# Big Data Job Market — Lambda Architecture
 
-Real-time streaming pipeline that **crawls live job postings from TopCV**, pushes them through **Kafka**, processes them with **Spark Structured Streaming**, and serves aggregated results via **Cassandra + Elasticsearch + Kibana**.
+This project analyzes IT job postings from Vietnamese job boards using a **Lambda Architecture** with batch, speed, and serving layers.
 
-## Architecture
+## What Was Implemented
 
+### Speed Layer (Spark Structured Streaming)
+
+- **Kafka topics**: `jobs_raw`, `jobs_clean`, `jobs_dead_letter`
+- **Producer**: File-based producer reads crawler JSON output → `jobs_raw`
+- **Spark Structured Streaming**: Reads `jobs_raw`, parses raw schema, normalizes fields
+- **Dead-letter handling**: Malformed JSON and missing required fields → `jobs_dead_letter`
+- **Watermarking**: 1-hour event-time watermark for late data
+- **Deduplication**: By `job_id` within the watermark window
+- **Realtime aggregations**:
+  - Jobs per 10 minutes (by source, province)
+  - Top skills by hour (ranked top 10)
+  - Salary bins per 10 minutes (by province)
+- **Checkpointing**: Per-query checkpoint paths for crash recovery
+- **Idempotent sinks**: Deterministic keys for Cassandra and Elasticsearch upserts
+- **Scripts**: Setup, run, stop, test, smoke test, and cleanup scripts
+- **Unit tests**: Salary parser, skill normalizer, event time fallback, validation
+
+### Design Explanation
+
+The speed layer is designed as the realtime part of a Lambda Architecture. The existing crawler remains unchanged and is treated as a legacy data source. A Kafka producer reads crawler output and publishes raw job events to the `jobs_raw` topic using `job_id` as the Kafka key. Spark Structured Streaming consumes `jobs_raw`, parses the raw JSON schema, normalizes event time, salary, location, experience, and skills, and separates invalid records into the `jobs_dead_letter` topic. Valid records are written to `jobs_clean`. The stream then applies event-time watermarking and deduplication by `job_id` before computing realtime aggregations: jobs per 10 minutes, top skills by hour, and salary bins. Checkpoints provide recovery, while deterministic sink keys and upserts make external writes idempotent.
+
+## Repository Structure
+
+```text
+.
+├── README.md
+├── configs/
+│   ├── .env.example          # Environment variable template
+│   ├── streaming.dev.yaml    # Spark streaming config
+│   ├── kafka.dev.yaml        # Kafka topic definitions
+│   └── app.dev.yaml          # App-level config
+├── infra/
+│   ├── docker-compose/
+│   │   └── docker-compose.dev.yml
+│   ├── compose/
+│   │   └── docker-compose.yml  (legacy)
+│   └── kafka/
+├── apps/
+│   ├── producer/
+│   │   ├── kafka_job_producer.py       # Live crawl → Kafka
+│   │   └── crawler_output_producer.py  # File → Kafka
+│   ├── stream_etl/
+│   │   ├── stream_main.py             # Main streaming pipeline
+│   │   ├── schemas/
+│   │   │   ├── job_raw_schema.py      # Raw JSON PySpark schema
+│   │   │   └── job_clean_schema.py    # Clean output fields
+│   │   ├── transforms/
+│   │   │   ├── normalize_event_time.py
+│   │   │   ├── normalize_salary.py
+│   │   │   ├── normalize_skills.py
+│   │   │   ├── normalize_location.py
+│   │   │   └── validate_job.py
+│   │   ├── aggregations/
+│   │   │   ├── jobs_per_10m.py
+│   │   │   ├── top_skills_hourly.py
+│   │   │   └── salary_bins.py
+│   │   ├── sinks/
+│   │   │   ├── kafka_sink.py
+│   │   │   ├── dead_letter_sink.py
+│   │   │   ├── cassandra_sink.py
+│   │   │   └── elasticsearch_sink.py
+│   │   └── tests/
+│   │       ├── test_salary_parser.py
+│   │       ├── test_skill_normalizer.py
+│   │       ├── test_event_time.py
+│   │       └── test_validation.py
+│   ├── stream/                # Legacy stream code
+│   └── ingestion/             # Legacy ingestion code
+├── scripts/
+│   ├── setup_all.sh
+│   ├── run_all.sh
+│   ├── stop_all.sh
+│   ├── create_kafka_topics.sh
+│   ├── run_crawler.sh
+│   ├── run_producer.sh
+│   ├── run_streaming.sh
+│   ├── run_batch.sh
+│   ├── run_tests.sh
+│   ├── smoke_test_pipeline.sh
+│   └── clean_checkpoints.sh
+├── docs/
+│   ├── speed_layer_design.md
+│   └── runbook.md
+└── TV1_workspace/
+    ├── crawler.py             # Original crawler (NOT modified)
+    └── job_posting.json       # Sample data
 ```
-TopCV Website ──► StreamingCrawler ──► process.py ──► Kafka ──► Spark Streaming ──► Cassandra & Elasticsearch
-  (live data)     (configurable       (schema       (raw_events   (validate →       (durable      (search &
-                   throughput)          mapping)      topic)        clean →           store)        Kibana)
-                                                                   normalize →
-                                                                   aggregate)
-```
 
-## What's Here
+## Prerequisites
 
-| File | Location | Purpose |
-|------|----------|---------|
-| `docker-compose.yml` | `infra/compose/` | Starts Kafka, Cassandra, Elasticsearch, Kibana |
-| `.env` | `/` | Environment variables configuration |
-| `pyproject.toml` | `/` | Python dependencies managed by `uv` |
-| `producer.py` | `apps/ingestion/` | Crawls TopCV, maps to schema, publishes to Kafka |
-| `process.py` | `apps/ingestion/` | Maps raw crawler JSON to `RAW_EVENT_SCHEMA` |
-| `schemas.py` | `shared/` | Spark schema definition for raw events |
-| `transform.py` | `apps/stream/` | Validate → Clean → Normalize transforms |
-| `aggregations.py` | `apps/stream/` | Gold-layer window aggregations |
-| `sinks.py` | `apps/stream/` | Writes main stream and aggregates to Cassandra & ES |
-| `stream_main.py` | `apps/stream/` | Spark Structured Streaming entry point |
-| `kafka_to_cassandra.py`| `apps/spark/` | Standalone job: Kafka → Cassandra |
-| `kafka_to_es.py` | `apps/spark/` | Standalone job: Kafka → Elasticsearch |
+| Tool | Required |
+|------|----------|
+| Docker | Yes |
+| Docker Compose | Yes |
+| Python 3.10+ | Yes |
+| Java 11+ | For Spark |
+| Apache Spark 3.5.x | For streaming |
+| PySpark | `pip install pyspark` |
+| confluent-kafka | `pip install confluent-kafka` |
+| pytest | `pip install pytest` |
+| python-dotenv | `pip install python-dotenv` |
+| cassandra-driver | Optional, for Cassandra sinks |
 
 ## Quick Start
 
-### 1. Start infrastructure
+```bash
+# 1. Setup environment
+cp configs/.env.example .env
+
+# 2. Setup infrastructure
+bash scripts/setup_all.sh
+
+# 3. Run the system
+bash scripts/run_all.sh
+```
+
+## Run Components Separately
 
 ```bash
-cd infra/compose
-docker compose up -d
-cd ../..
+# Run crawler (single URL)
+bash scripts/run_crawler.sh https://www.topcv.vn/viec-lam/example.html
+
+# Run producer (file-based)
+bash scripts/run_producer.sh file TV1_workspace/job_posting.json
+
+# Run producer (live crawl)
+bash scripts/run_producer.sh live --keyword "react native"
+
+# Run Spark streaming
+bash scripts/run_streaming.sh
+
+# Run unit tests
+bash scripts/run_tests.sh
+
+# Run smoke test
+bash scripts/smoke_test_pipeline.sh
 ```
 
-This starts:
-- **Kafka** (Zookeeper + Broker) on `localhost:9092`
-- **Cassandra** on `localhost:9042`
-- **Elasticsearch** on `http://localhost:9200`
-- **Kibana** on `http://localhost:5601`
+## Kafka Topics
 
-*(Note: Wait 1-2 minutes for Cassandra and Elasticsearch to fully initialize).*
+| Topic | Purpose | Key |
+|-------|---------|-----|
+| `jobs_raw` | Raw job postings from crawler | `job_id` |
+| `jobs_clean` | Validated, normalized postings | `job_id` |
+| `jobs_dead_letter` | Failed/invalid records | original key |
 
-### 2. Install Python dependencies with `uv`
-
-We use `uv` for lightning-fast dependency management.
+### Consumer Commands
 
 ```bash
-# Sync dependencies and create .venv
-uv sync
+# Consume clean jobs
+docker exec speed-kafka kafka-console-consumer \
+  --bootstrap-server localhost:9092 --topic jobs_clean --from-beginning
 
-# Install Playwright browser (required for crawling TopCV)
-uv run playwright install chromium
+# Consume dead-letter
+docker exec speed-kafka kafka-console-consumer \
+  --bootstrap-server localhost:9092 --topic jobs_dead_letter --from-beginning
 ```
 
-> **Note:** The crawler uses Playwright in **headed mode** (non-headless) to bypass Cloudflare bot detection. A display server is required.
+## Data Contracts
 
-### 3. Start the producer (real crawler → Kafka)
+### Raw Schema (jobs_raw)
+See [job_raw_schema.py](apps/stream_etl/schemas/job_raw_schema.py) — nested JSON with `source`, `job_id`, `payload` (title, salary, skills, etc.), and `quality_flags`.
 
-Run from the **project root** directory using `uv run`:
+### Clean Schema (jobs_clean)
+See [job_clean_schema.py](apps/stream_etl/schemas/job_clean_schema.py) — flat record with normalized fields: `salary_min_vnd`, `salary_bin`, `skills[]`, `province`, `event_ts`, `quality_flags`.
+
+## Fault Tolerance
+
+| Mechanism | Description |
+|-----------|-------------|
+| Checkpointing | Per-query checkpoint dirs under `/tmp/job-market-checkpoints/speed/` |
+| Dead-letter topic | Malformed or invalid records → `jobs_dead_letter` |
+| Watermark | 1-hour late-data tolerance on `event_ts` |
+| Dedup | `dropDuplicates(["job_id"])` within watermark window |
+| Idempotent writes | Deterministic sink keys in Cassandra + Elasticsearch |
+
+## Testing
 
 ```bash
-# Default: crawl all new jobs, 2s delay between each job
-uv run apps/ingestion/producer.py
+# Run all unit tests
+bash scripts/run_tests.sh
 
-# Custom: specific keyword, faster throughput
-uv run apps/ingestion/producer.py --keyword "data engineer" --delay-jobs 1.0
+# Run specific test
+pytest apps/stream_etl/tests/test_salary_parser.py -v
 
-# Limit to 5 pages and 50 events, no looping
-uv run apps/ingestion/producer.py --max-pages 5 --max-events 50 --no-loop
+# Run smoke test (requires running infrastructure)
+bash scripts/smoke_test_pipeline.sh
 ```
 
-#### Producer CLI Options
+## Troubleshooting
 
-| Flag | Default | Description |
-|------|---------|-------------|
-| `--keyword` | `""` | TopCV search keyword (empty = all jobs) |
-| `--location` | `""` | City filter (e.g. `ha-noi`, `ho-chi-minh`) |
-| `--delay-jobs` | `2.0` | Seconds between crawling each job (throughput control) |
-| `--delay-pages` | `5.0` | Seconds between fetching listing pages |
-| `--max-pages` | `0` | Max listing pages per cycle (0 = unlimited) |
-| `--max-events` | `0` | Stop after N events (0 = unlimited) |
-| `--no-loop` | `false` | Don't restart after exhausting all pages |
+See [docs/runbook.md](docs/runbook.md) for detailed troubleshooting.
 
-### 4. Start Spark Structured Streaming
-
-Open a new terminal, and run from the **project root** directory using `uv run`:
-
-```bash
-# Set PySpark to use the Python environment from uv
-$env:PYSPARK_PYTHON="python" # (On Windows PowerShell)
-# export PYSPARK_PYTHON="python" # (On macOS/Linux)
-
-uv run spark-submit \
-  --driver-java-options "-Djava.security.manager=allow" \
-  --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1 \
-  apps/stream/stream_main.py
-```
-
-*Note: The Spark application will automatically connect and create the Cassandra keyspace (`job_market`) and all required tables if they do not exist.*
-
-### 5. Access Dashboards & Data
-
-- **Kibana**: Navigate to [http://localhost:5601](http://localhost:5601) to explore `jobs_realtime`, `job_counts_10m`, and `skill_counts_30m` indices.
-- **Cassandra**: Connect via cqlsh (`docker exec -it speed-cassandra cqlsh`) to query the tables.
-
-## Data Flow Detail
-
-### Crawler → Schema Mapping
-
-The `process.py` module maps raw crawler output to `RAW_EVENT_SCHEMA`:
-
-| Crawler Field | Schema Field | Transform |
-|---------------|-------------|-----------|
-| `source_url` | `source_url` | Direct |
-| (hash of `source_url`) | `job_id` | MD5 hash |
-| `domain` | `source` | Strip `www.` |
-| `title` | `title` | Direct |
-| `company_name` | `company_name` | Direct |
-| `salary` | `salary_text` | Direct |
-| `location` | `location_text` | Direct |
-| `skills` (list) | `skills_text` | Join with `, ` |
-| `description` + `requirements` + `benefits` | `description_text` | Concatenated |
-| `crawled_at` | `event_ts` | Direct (ISO 8601) |
-| (generated) | `ingest_ts` | Current UTC time |
-
-### Spark Pipeline
-
-```
-RAW SOURCE (Kafka) → VALIDATE (parse JSON + schema) → CLEAN (filter, parse timestamps)
-→ NORMALIZE (location mapping, salary parsing, skills array)
-→ MAIN STREAM (realtime job events sink)
-→ GOLD (window aggregates: job counts, skill counts)
-→ SINK (Cassandra tables + Elasticsearch indices)
-```
-
-## Environment Variables
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `KAFKA_BOOTSTRAP_SERVERS` | `localhost:9092` | Kafka broker address |
-| `RAW_TOPIC` | `raw_events` | Main Kafka topic |
-| `CASSANDRA_HOST` | `localhost` | Cassandra host |
-| `CASSANDRA_PORT` | `9042` | Cassandra port |
-| `CASSANDRA_KEYSPACE` | `job_market` | Keyspace to store tables |
-| `ES_URL` | `http://localhost:9200` | Elasticsearch URL |
-| `ES_INDEX_JOBS` | `jobs_realtime` | Index for individual jobs |
-| `CHECKPOINT_DIR` | `/tmp/speed_layer_checkpoints` | Spark checkpoint directory |
-| `TRIGGER_SECONDS` | `10` | Spark micro-batch trigger interval |
-
-## Tear Down
-
-To stop the services, remove containers, and clear Spark checkpoints:
-
-```bash
-cd infra/compose
-docker compose down -v
-cd ../..
-
-# On Windows PowerShell
-Remove-Item -Recurse -Force \tmp\speed_layer_checkpoints -ErrorAction SilentlyContinue
-
-# On macOS/Linux
-rm -rf /tmp/speed_layer_checkpoints
-```
+| Issue | Quick Fix |
+|-------|-----------|
+| Kafka not reachable | `docker ps` — ensure speed-kafka is running |
+| Spark Kafka package missing | Use `--packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1` |
+| Checkpoint conflicts | `bash scripts/clean_checkpoints.sh` |
+| No messages in jobs_clean | Check producer logs, check DLQ topic |

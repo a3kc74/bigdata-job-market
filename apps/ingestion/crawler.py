@@ -295,17 +295,172 @@ def fetch_html(url: str) -> tuple[str, str]:
 
 # ── Single-page parsing ────────────────────────────────────────────────────
 
+# def parse_from_html(url: str, html: str, fetch_method: str) -> tuple[dict, str]:
+#     soup = BeautifulSoup(html, "html.parser")
+
+#     data = {
+#         "source_url": url,
+#         "domain": urlparse(url).netloc,
+#         "crawled_at": datetime.utcnow().isoformat(),
+#         "fetch_method": fetch_method,
+#     }
+
+#     data["title"] = get_text_by_selectors(soup, [
+#         "h1",
+#         ".job-title",
+#         ".title",
+#         ".job-detail__info h1",
+#         ".job-header-info h1",
+#         "[class*='job-title']",
+#         "[class*='title']",
+#     ])
+
+#     data["company_name"] = get_text_by_selectors(soup, [
+#         ".company-name",
+#         ".company-title",
+#         ".employer-name",
+#         ".job-company-name",
+#         "[class*='company-name']",
+#         "[class*='company'] a",
+#     ])
+
+#     data["salary"] = get_text_by_selectors(soup, [
+#         ".salary",
+#         ".job-salary",
+#         ".offer-salary",
+#         "[class*='salary']",
+#         "[class*='wage']",
+#     ])
+
+#     data["location"] = get_text_by_selectors(soup, [
+#         ".location",
+#         ".job-location",
+#         ".address",
+#         "[class*='location']",
+#         "[class*='address']",
+#     ])
+
+#     data["level"] = get_text_by_selectors(soup, [
+#         ".level",
+#         ".job-level",
+#         "[class*='level']",
+#         "[class*='position']",
+#         "[class*='rank']",
+#     ])
+
+#     data["experience"] = get_text_by_selectors(soup, [
+#         ".experience",
+#         ".job-experience",
+#         "[class*='experience']",
+#         "[class*='exp']",
+#     ])
+
+#     data["deadline"] = get_text_by_selectors(soup, [
+#         ".deadline",
+#         ".expired-date",
+#         ".job-deadline",
+#         "[class*='deadline']",
+#         "[class*='expire']",
+#     ])
+
+#     data["job_type"] = get_text_by_selectors(soup, [
+#         ".job-type",
+#         "[class*='job-type']",
+#         "[class*='working-form']",
+#         "[class*='type']",
+#     ])
+
+#     data["quantity"] = get_text_by_selectors(soup, [
+#         ".quantity",
+#         "[class*='quantity']",
+#         "[class*='number']",
+#     ])
+
+#     description_section = None
+#     requirement_section = None
+#     benefit_section = None
+
+#     description_candidates = [
+#         ".job-description",
+#         ".description",
+#         ".job-detail__information-detail",
+#         "[class*='description']",
+#         "[id*='description']",
+#     ]
+#     requirement_candidates = [
+#         ".job-requirement",
+#         ".requirements",
+#         "[class*='requirement']",
+#         "[id*='requirement']",
+#     ]
+#     benefit_candidates = [
+#         ".job-benefit",
+#         ".benefits",
+#         "[class*='benefit']",
+#         "[id*='benefit']",
+#     ]
+
+#     for selector in description_candidates:
+#         description_section = soup.select_one(selector)
+#         if description_section:
+#             break
+
+#     for selector in requirement_candidates:
+#         requirement_section = soup.select_one(selector)
+#         if requirement_section:
+#             break
+
+#     for selector in benefit_candidates:
+#         benefit_section = soup.select_one(selector)
+#         if benefit_section:
+#             break
+
+#     data["description"] = get_all_text_from_section(description_section)
+#     data["requirements"] = get_all_text_from_section(requirement_section)
+#     data["benefits"] = get_all_text_from_section(benefit_section)
+
+#     data["description_items"] = get_list_from_section(description_section)
+#     data["requirement_items"] = get_list_from_section(requirement_section)
+#     data["benefit_items"] = get_list_from_section(benefit_section)
+
+#     skills = []
+#     for node in soup.select(
+#         ".skill, .skills span, .job-tags a, .tag, [class*='skill'], [class*='tag']"
+#     ):
+#         text = clean_text(node.get_text(" ", strip=True))
+#         if text and len(text) < 50:
+#             skills.append(text)
+#     data["skills"] = sorted(set(skills))
+
+#     categories = []
+#     for node in soup.select(".breadcrumb a, [class*='breadcrumb'] a"):
+#         text = clean_text(node.get_text(" ", strip=True))
+#         if text:
+#             categories.append(text)
+#     data["categories"] = categories
+
+#     data["meta_tags"] = extract_meta_tags(soup)
+#     data["json_ld"] = extract_jsonld(soup)
+#     data["sections_by_heading"] = extract_sections_by_headings(soup)
+
+#     raw_text = soup.get_text("\n", strip=True)
+#     raw_text = clean_text(raw_text)
+#     data["page_text"] = raw_text
+
+#     return data, raw_text
+
 def parse_from_html(url: str, html: str, fetch_method: str) -> tuple[dict, str]:
     soup = BeautifulSoup(html, "html.parser")
 
-    data = {
-        "source_url": url,
-        "domain": urlparse(url).netloc,
-        "crawled_at": datetime.utcnow().isoformat(),
-        "fetch_method": fetch_method,
-    }
+    crawled_at = datetime.utcnow().isoformat()
+    ingest_ts = int(datetime.utcnow().timestamp() * 1000)
+    domain = urlparse(url).netloc
+    source = domain
 
-    data["title"] = get_text_by_selectors(soup, [
+    json_ld = extract_jsonld(soup)
+    meta_tags = extract_meta_tags(soup)
+
+    title = get_text_by_selectors(soup, [
         "h1",
         ".job-title",
         ".title",
@@ -315,7 +470,7 @@ def parse_from_html(url: str, html: str, fetch_method: str) -> tuple[dict, str]:
         "[class*='title']",
     ])
 
-    data["company_name"] = get_text_by_selectors(soup, [
+    company_name = get_text_by_selectors(soup, [
         ".company-name",
         ".company-title",
         ".employer-name",
@@ -324,7 +479,7 @@ def parse_from_html(url: str, html: str, fetch_method: str) -> tuple[dict, str]:
         "[class*='company'] a",
     ])
 
-    data["salary"] = get_text_by_selectors(soup, [
+    salary = get_text_by_selectors(soup, [
         ".salary",
         ".job-salary",
         ".offer-salary",
@@ -332,7 +487,7 @@ def parse_from_html(url: str, html: str, fetch_method: str) -> tuple[dict, str]:
         "[class*='wage']",
     ])
 
-    data["location"] = get_text_by_selectors(soup, [
+    location = get_text_by_selectors(soup, [
         ".location",
         ".job-location",
         ".address",
@@ -340,7 +495,7 @@ def parse_from_html(url: str, html: str, fetch_method: str) -> tuple[dict, str]:
         "[class*='address']",
     ])
 
-    data["level"] = get_text_by_selectors(soup, [
+    level = get_text_by_selectors(soup, [
         ".level",
         ".job-level",
         "[class*='level']",
@@ -348,14 +503,14 @@ def parse_from_html(url: str, html: str, fetch_method: str) -> tuple[dict, str]:
         "[class*='rank']",
     ])
 
-    data["experience"] = get_text_by_selectors(soup, [
+    experience = get_text_by_selectors(soup, [
         ".experience",
         ".job-experience",
         "[class*='experience']",
         "[class*='exp']",
     ])
 
-    data["deadline"] = get_text_by_selectors(soup, [
+    deadline = get_text_by_selectors(soup, [
         ".deadline",
         ".expired-date",
         ".job-deadline",
@@ -363,14 +518,14 @@ def parse_from_html(url: str, html: str, fetch_method: str) -> tuple[dict, str]:
         "[class*='expire']",
     ])
 
-    data["job_type"] = get_text_by_selectors(soup, [
+    job_type = get_text_by_selectors(soup, [
         ".job-type",
         "[class*='job-type']",
         "[class*='working-form']",
         "[class*='type']",
     ])
 
-    data["quantity"] = get_text_by_selectors(soup, [
+    quantity = get_text_by_selectors(soup, [
         ".quantity",
         "[class*='quantity']",
         "[class*='number']",
@@ -415,13 +570,17 @@ def parse_from_html(url: str, html: str, fetch_method: str) -> tuple[dict, str]:
         if benefit_section:
             break
 
-    data["description"] = get_all_text_from_section(description_section)
-    data["requirements"] = get_all_text_from_section(requirement_section)
-    data["benefits"] = get_all_text_from_section(benefit_section)
+    description = get_all_text_from_section(description_section)
+    requirements = get_list_from_section(requirement_section)
+    benefits = get_list_from_section(benefit_section)
 
-    data["description_items"] = get_list_from_section(description_section)
-    data["requirement_items"] = get_list_from_section(requirement_section)
-    data["benefit_items"] = get_list_from_section(benefit_section)
+    if not requirements:
+        requirement_text = get_all_text_from_section(requirement_section)
+        requirements = [requirement_text] if requirement_text else []
+
+    if not benefits:
+        benefit_text = get_all_text_from_section(benefit_section)
+        benefits = [benefit_text] if benefit_text else []
 
     skills = []
     for node in soup.select(
@@ -430,25 +589,90 @@ def parse_from_html(url: str, html: str, fetch_method: str) -> tuple[dict, str]:
         text = clean_text(node.get_text(" ", strip=True))
         if text and len(text) < 50:
             skills.append(text)
-    data["skills"] = sorted(set(skills))
+    skills = sorted(set(skills))
 
     categories = []
     for node in soup.select(".breadcrumb a, [class*='breadcrumb'] a"):
         text = clean_text(node.get_text(" ", strip=True))
         if text:
             categories.append(text)
-    data["categories"] = categories
 
-    data["meta_tags"] = extract_meta_tags(soup)
-    data["json_ld"] = extract_jsonld(soup)
-    data["sections_by_heading"] = extract_sections_by_headings(soup)
+    sections_by_heading = extract_sections_by_headings(soup)
 
     raw_text = soup.get_text("\n", strip=True)
     raw_text = clean_text(raw_text)
-    data["page_text"] = raw_text
 
-    return data, raw_text
+    normalized_source_url = url
 
+    job_id = clean_text(f"{source}|{normalized_source_url}")
+    hash_content = clean_text(
+        f"{title}|{company_name}|{location}|{salary}|{requirements}|{job_type}"
+    )
+
+    record = {
+        "source": source,
+        "source_url": url,
+        "normalized_source_url": normalized_source_url,
+        "crawl_version": 1,
+        "ingest_ts": ingest_ts,
+        "event_ts": None,
+        "job_id": job_id,
+        "hash_content": hash_content,
+
+        "payload": {
+            "title": title,
+            "company_name": company_name,
+            "salary": salary,
+            "location": location,
+            "monthOfExperience": experience,
+            "deadline": deadline,
+            "occupationalCategory": level,
+            "education": None,
+            "employmentType": job_type,
+            "openings": quantity,
+            "description": description,
+            "requirements": requirements,
+            "income": None,
+            "benefits": benefits,
+            "schedule": job_type,
+            "skillsNeeded": skills,
+            "skillsShouldHave": skills,
+            "specialty": categories,
+            "meta_tags": meta_tags,
+            "json_ld": json_ld,
+            "sectionsByHeading": sections_by_heading,
+            "pageText": raw_text,
+            "domain": domain,
+            "crawled_at": crawled_at,
+            "fetch_method": fetch_method,
+        },
+
+        "quality_flags": {
+            "has_json_ld": bool(json_ld),
+            "has_page_text": bool(raw_text),
+            "has_structured_company_name_conflict": False,
+
+            "has_valid_posting_date": False,
+            "has_valid_deadline": bool(deadline),
+
+            "has_salary_info": bool(salary),
+            "has_location_info": bool(location),
+            "has_experience_info": bool(experience),
+
+            "has_requirements": bool(requirements),
+            "has_description": bool(description),
+            "has_benefits": bool(benefits),
+
+            "has_skills_info": bool(skills),
+            "has_education_info": False,
+            "has_specialty": bool(categories),
+            "has_schedule": bool(job_type),
+            "has_employment_type": bool(job_type),
+            "has_income": False,
+        }
+    }
+
+    return record, raw_text
 
 def parse_job_posting(url: str) -> tuple[dict, str]:
     url = normalize_url(url)
