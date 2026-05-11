@@ -12,3 +12,7 @@ uv.lock
 .codex
 .pytest_cache
 .state
+
+.postman/
+postman/
+
