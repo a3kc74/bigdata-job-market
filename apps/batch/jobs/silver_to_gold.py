@@ -77,6 +77,15 @@ def normalize_gold_fields(df):
 
     return df
 
+### 2. Clean skills - Remove "Thu gọn" and "Xem thêm" values
+def clean_skills(df):
+    # F.expr - write code in SQL-like mode
+    df = df.withColumn(
+        "skills",
+        F.expr("filter(skills, skill -> trim(lower(skill)) NOT IN ('thu gọn', 'xem thêm'))")
+    )
+    return df
+
 
 ### 3. Select and drop columns
 def select_gold_columns(df):
@@ -115,6 +124,7 @@ def select_gold_columns(df):
 ### FULL TRANSFORMATION PIPELINE
 def transform_silver_to_gold(silver_df):
     df = parse_schedule(silver_df)
+    df = clean_skills(df)
     df = normalize_gold_fields(df)
     df = select_gold_columns(df)
     return df
