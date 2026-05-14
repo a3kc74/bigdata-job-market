@@ -73,7 +73,16 @@ def normalize_gold_fields(df):
     # We will convert string value to null since "Không yêu cầu" means no strict experience required
     df = df.withColumn("monthOfExperience", F.col("monthOfExperience").cast(IntegerType()))
 
-    df = df.withColumn("is_active", F.lit(True))
+    # is_active: False if deadline has passed, True otherwise (null deadline = active)
+    df = df.withColumn(
+        "is_active",
+        F.when(F.col("deadline").isNull(), F.lit(True))
+         .otherwise(F.col("deadline") >= F.current_timestamp())
+    )
+
+    # has_remote: coalesce null -> False (Silver returns null when job_location_type is null,
+    # Elasticsearch does not index null values, making the field invisible in Kibana)
+    df = df.withColumn("has_remote", F.coalesce(F.col("has_remote"), F.lit(False)))
 
     return df
 
