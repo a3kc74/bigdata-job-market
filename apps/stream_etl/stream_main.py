@@ -16,10 +16,7 @@ if PROJECT_ROOT not in sys.path:
 load_dotenv()
 
 from apps.stream_etl.sinks.elasticsearch_sink import write_jobs_realtime
-from apps.stream_etl.sinks.jobs_per_10m_sink import write_jobs_per_10m
 from apps.stream_etl.sinks.kafka_sink import clean_jobs_to_kafka, dead_letter_to_kafka
-from apps.stream_etl.sinks.salary_bins_realtime_sink import write_salary_bins_hourly
-from apps.stream_etl.sinks.top_skills_hourly_sink import write_top_skills_hourly
 from apps.stream_etl.stateful_jobs.jobs_per_10m import build_jobs_per_10m
 from apps.stream_etl.stateful_jobs.salary_bins_realtime import build_salary_bins_hourly
 from apps.stream_etl.stateful_jobs.top_skills_hourly import build_skill_counts_hourly
@@ -120,6 +117,8 @@ def main() -> None:
         )
 
     if ENABLE_JOBS_PER_10M:
+        from apps.stream_etl.sinks.jobs_per_10m_sink import write_jobs_per_10m
+
         jobs_per_10m_df = build_jobs_per_10m(clean_base_df)
         queries.append(
             jobs_per_10m_df.writeStream.foreachBatch(write_jobs_per_10m)
@@ -131,6 +130,8 @@ def main() -> None:
         )
 
     if ENABLE_TOP_SKILLS_HOURLY:
+        from apps.stream_etl.sinks.top_skills_hourly_sink import write_top_skills_hourly
+
         skill_counts_hourly_df = build_skill_counts_hourly(clean_base_df)
         queries.append(
             skill_counts_hourly_df.writeStream.foreachBatch(write_top_skills_hourly)
@@ -142,6 +143,8 @@ def main() -> None:
         )
 
     if ENABLE_SALARY_BINS_HOURLY:
+        from apps.stream_etl.sinks.salary_bins_realtime_sink import write_salary_bins_hourly
+
         salary_bins_hourly_df = build_salary_bins_hourly(clean_base_df)
         queries.append(
             salary_bins_hourly_df.writeStream.foreachBatch(write_salary_bins_hourly)

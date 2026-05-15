@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: spark-checkpoint-cleaner
+  namespace: spark
+spec:
+  restartPolicy: Never
+  containers:
+    - name: cleaner
+      image: busybox
+      command: ["sh", "-c", "rm -rf /mnt/spark-checkpoints/speed-es-only && echo cleaned && sleep 5"]
+      volumeMounts:
+        - name: checkpoints
+          mountPath: /mnt/spark-checkpoints
+  volumes:
+    - name: checkpoints
+      persistentVolumeClaim:
+        claimName: spark-speed-checkpoints-pvc

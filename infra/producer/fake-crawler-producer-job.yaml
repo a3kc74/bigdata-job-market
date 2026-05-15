@@ -1,0 +1,38 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: fake-crawler-producer
+  namespace: spark
+  labels:
+    app: fake-crawler-producer
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      labels:
+        app: fake-crawler-producer
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: fake-crawler-producer
+          image: spark-job-market:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: PYTHONUNBUFFERED
+              value: "1"
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "my-cluster-kafka-bootstrap.kafka.svc.cluster.local:9092"
+            - name: RAW_TOPIC
+              value: "jobs_raw"
+            - name: FAKE_CRAWLER_INPUT
+              value: "data/raw/raw_jobs_batch.jsonl"
+            - name: FAKE_CRAWLER_MAX_RECORDS
+              value: "10"
+            - name: FAKE_CRAWLER_SLEEP_MS
+              value: "500"
+            - name: FAKE_CRAWLER_EVENT_TIME_MODE
+              value: "original"
+          command:
+            - python3
+            - -m
+            - apps.producer.fake_crawler_producer

@@ -1,32 +1,26 @@
 param(
-    [Parameter(ValueFromRemainingArguments = $true)]
-    [string[]] $RemainingArgs
+    [string] $Namespace = "spark",
+    [string] $Manifest = "infra/spark/speed-stream-es-job.yaml",
+    [switch] $FollowLogs
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-$ProjectRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
-$UvBin = if ($env:UV_BIN) { $env:UV_BIN } else { "uv" }
-$UvCacheDir = if ($env:UV_CACHE_DIR_HOME) { $env:UV_CACHE_DIR_HOME } else { Join-Path $HOME ".cache\uv" }
-$env:UV_CACHE_DIR = $UvCacheDir
+Write-Host "[speed-k8s] Applying Spark RBAC..."
+kubectl apply -f infra/spark/rbac.yaml
 
-$SparkPackages = if ($env:SPARK_PACKAGES) {
-    $env:SPARK_PACKAGES
-} else {
-    "org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1"
+Write-Host "[speed-k8s] Applying Kafka topics..."
+kubectl apply -f infra/kafka/jobs-topics.yaml
+
+Write-Host "[speed-k8s] Restarting speed stream submit job..."
+kubectl delete job speed-stream-es-submit -n $Namespace --ignore-not-found
+kubectl apply -f $Manifest
+
+Write-Host "[speed-k8s] Current pods:"
+kubectl get pods -n $Namespace -l app=speed-stream
+
+if ($FollowLogs) {
+    Write-Host "[speed-k8s] Following submit job logs..."
+    kubectl logs -n $Namespace job/speed-stream-es-submit -f
 }
-
-$ArgsList = @(
-    "run",
-    "--project", $ProjectRoot.Path,
-    "spark-submit",
-    "--packages", $SparkPackages,
-    "apps/stream_etl/stream_main.py"
-)
-
-if ($RemainingArgs) {
-    $ArgsList += $RemainingArgs
-}
-
-& $UvBin @ArgsList
