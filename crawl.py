@@ -1,4 +1,3 @@
-import cloudscraper
 from bs4 import BeautifulSoup
 import json
 import hashlib
@@ -10,7 +9,121 @@ from urllib.parse import urlparse, urlunparse
 from datetime import datetime, UTC, timezone, timedelta
 import logging
 import sys
+import os
+from curl_cffi import requests
+from curl_cffi import requests as curl_requests
+from curl_cffi.requests.exceptions import (
+    RequestException,
+    Timeout,
+    ConnectionError
+)
+from tenacity import (
+    retry,
+    stop_after_attempt,
+    wait_exponential,
+    retry_if_exception_type
+)
+class SecureCrawler:
 
+    def __init__(self):
+
+        self.base_url = "https://www.topcv.vn"
+
+        self.chrome_versions = [
+            "chrome116",
+            "chrome120",
+            "chrome124",
+        ]
+
+        self.session = self._create_session()
+
+    def _create_session(self):
+
+        impersonate = random.choice(self.chrome_versions)
+
+        logger.info(f"[SESSION] {impersonate}")
+
+        session = requests.Session(
+            impersonate=impersonate
+        )
+
+        session.headers.update({
+            "User-Agent":
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/124.0.0.0 Safari/537.36",
+
+            "Accept-Language":
+                "vi-VN,vi;q=0.9,en-US;q=0.8",
+
+            "Referer":
+                "https://www.google.com/"
+        })
+
+        return session
+
+    def fetch_page(self, url):
+
+        try:
+
+            time.sleep(random.uniform(1, 3))
+
+            logger.info(f"[GET] {url}")
+
+            res = self.session.get(
+                url,
+                timeout=20
+            )
+
+            logger.info(
+                f"[STATUS] {res.status_code} "
+                f"| LEN={len(res.text)}"
+            )
+
+            if res.status_code >= 400:
+                logger.warning(
+                    f"[HTTP ERROR] {res.status_code}"
+                )
+                return None
+
+            html = res.text
+
+            # check block THẬT thôi
+            lower_html = html.lower()
+
+            real_block = any([
+                "cf-chl" in lower_html,
+                "challenge-platform" in lower_html,
+                "verify you are human" in lower_html,
+                "captcha" in lower_html
+            ])
+
+            if real_block:
+                logger.warning("[REAL BLOCK DETECTED]")
+                return None
+
+            return html
+
+        except RequestException as e:
+
+            logger.error(f"[REQUEST ERROR] {e}")
+
+            return None
+PROCESSED_LINKS_FILE = "processed_links.txt"
+def load_processed_links():
+
+    if not os.path.exists(PROCESSED_LINKS_FILE):
+        return set()
+
+    with open(PROCESSED_LINKS_FILE, "r", encoding="utf-8") as f:
+        return set(line.strip() for line in f if line.strip())
+
+def save_processed_link(link):
+
+    with open(PROCESSED_LINKS_FILE, "a", encoding="utf-8") as f:
+        f.write(link + "\n")
+
+        
 # Cấu hình Logger định dạng chuẩn cho Docker
 logging.basicConfig(
     level=logging.INFO,
@@ -22,32 +135,62 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+def log_failed_page(page, reason, file="failed_pages.log"):
+    with open(file, "a", encoding="utf-8") as f:
+        f.write(f"{page}|{reason}\n")
+
+
+def log_failed_link(url, reason, file="failed_links.log"):
+    with open(file, "a", encoding="utf-8") as f:
+        f.write(f"{url}|{reason}\n")
+
 # ===========================================================
 # 1. CRAWL LINKS
 # ===========================================================
 BASE_URL = "https://www.topcv.vn"
-def get_job_links(scraper, page=1):
+def get_job_links(crawler, page=1):
     url = f"https://www.topcv.vn/tim-viec-lam-cong-nghe-thong-tin-cr257?category_family=r257&page={page}"
-    print(f"[*] Đang quét trang danh sách: {url}")
-    
+    logger.info(f"[*] Đang quét trang danh sách: {url}")
+
     try:
-        res = scraper.get(url, timeout=15)
-        soup = BeautifulSoup(res.text, "html.parser")
+        html = crawler.fetch_page(url)
+        if not html:
+            return []
+        soup = BeautifulSoup(html, "html.parser")
     except Exception as e:
-        print(f"[!] Lỗi khi lấy danh sách trang {page}: {e}")
+        logger.error(f"[!] Lỗi khi lấy danh sách trang {page}: {e}")
+
+        with open("pages_with_error.log", "a", encoding="utf-8") as f:
+            f.write(f"{page}\n")
+
         return []
 
     job_links = set()
     for a in soup.find_all("a", href=True):
         href = a["href"]
-        # Lọc: Chỉ lấy những link trỏ tới chi tiết việc làm
-        if "/viec-lam/" in href:
+        # 1. Cắt bỏ đuôi tracking (?ta_source=...) ngay từ đầu để lấy link sạch
+        clean_href = href.split("?")[0]
+        
+        # 2. KIỂM TRA PHÂN LOẠI LINK
+        is_normal_job = "/viec-lam/" in clean_href
+        
+        # Vũ khí mới: Link brand phải có thêm đuôi .html để loại bỏ trang chủ công ty
+        is_brand_job = "/brand/" in clean_href and clean_href.endswith(".html")
+        
+        # 3. CHỈ LẤY CÁC LINK ĐẠT CHUẨN
+        if is_normal_job or is_brand_job:
             # Bổ sung domain nếu link dạng rút gọn
-            if href.startswith("/"):
-                href = BASE_URL + href
-            # Cắt bỏ đuôi theo dõi tracking (?ta_source=...) để link sạch 100%
-            href = href.split("?")[0] 
-            job_links.add(href)
+            if clean_href.startswith("/"):
+                clean_href = BASE_URL + clean_href
+                
+            job_links.add(clean_href)
+        
+        # QUAN TRỌNG
+    if not job_links:
+        logger.warning(f"[!] Page {page} không lấy được links!")
+
+        log_failed_page(page, "No links extracted")
+
             
     return list(job_links)
 
@@ -58,18 +201,18 @@ SOURCE = "topcv"
 # =========================
 # FETCH
 # =========================
-def get_soup(scraper, url):
+def get_soup(crawler, url):
     """
     Hàm fetch dùng chung phiên (session) và bắt lỗi mạng an toàn.
     """
     try:
-        res = scraper.get(url, timeout=15)
-        if res.status_code != 200:
-            print(f"[!] HTTP {res.status_code} tại URL: {url}")
+        html = crawler.fetch_page(url)
+        if not html:
             return None
-        return BeautifulSoup(res.text, "html.parser")
+        return BeautifulSoup(html, "html.parser")
     except Exception as e:
-        print(f"[!] Lỗi kết nối {url}: {e}")
+        logger.error(f"[!] Retry thất bại URL: {url} | {e}")
+        log_failed_link(url, str(e))
         return None
 # =========================
 # NORMALIZE
@@ -833,13 +976,10 @@ def extract_flat_from_pagetext(page_text):
 # =========================
 # MAIN PARSER
 # =========================
-def parse_job(scraper, url):
+def parse_job(crawler, url):
 
-    soup = get_soup(scraper, url)
-    if not soup:
-        return None
-    with open("debug.html", "w", encoding="utf-8") as f:
-        f.write(soup.prettify())
+    soup = get_soup(crawler, url)
+    
     json_ld = extract_json_ld(soup)
     meta_tags = extract_meta(soup)
 
@@ -896,8 +1036,16 @@ def parse_job(scraper, url):
         except ValueError:
             pass # Bỏ qua nếu regex/text không đúng định dạng ngày
     if not valid_through:
-        valid_through = int(datetime.fromisoformat(json_ld.get("validThrough")).timestamp() * 1000)
-
+        valid_through_raw = json_ld.get("validThrough")
+        if isinstance(valid_through_raw, str):
+            try:
+                valid_through = int(
+                    datetime.fromisoformat(valid_through_raw).timestamp() * 1000
+                )
+            except Exception as e:
+                logger.warning(
+                    f"[!] Parse validThrough lỗi: {valid_through_raw} | {e}"
+                )
     # experience
     exp = json_ld.get("experienceRequirements", {}).get("monthsOfExperience")
 
@@ -1067,6 +1215,7 @@ def save_json(data, file="data1.json"):
 def save_json(data, file="data1.json"):
     with open(file, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
+"""
 def main():
     url = "https://www.topcv.vn/brand/fptis/tuyen-dung/frontend-developer-angular-reactjs-j2125875.html?ta_source=SuggestSimilarJob_LinkDetail&jr_i=job-es-v1%3A%3A1777810062389-63b9e3%3A%3A5a5e162c44b14d76912a6a4a1f2226d6%3A%3A5%3A%3A0.9500"
     scraper = cloudscraper.create_scraper(
@@ -1077,7 +1226,7 @@ def main():
     if rec:
         save_jsonl(rec)
         save_json(rec)
-
+"""
 # =======================================================
 # PHẦN 4: HỆ THỐNG ĐIỀU PHỐI (THE BATCH MANAGER)
 # =======================================================
@@ -1088,9 +1237,20 @@ def save_jsonl(record, file_path="raw_jobs.jsonl"):
 import os
 from datetime import datetime
 
-import os
-from datetime import datetime
+def get_last_checkpoint(checkpoint_file="checkpoint.txt"):
+    """Đọc trang cuối cùng đã cào thành công."""
+    if os.path.exists(checkpoint_file):
+        with open(checkpoint_file, "r") as f:
+            content = f.read().strip()
+            if content.isdigit():
+                return int(content)
+    return 0
 
+def save_checkpoint(page_num, checkpoint_file="checkpoint.txt"):
+    """Lưu lại trang vừa cào xong."""
+    with open(checkpoint_file, "w") as f:
+        f.write(str(page_num))
+        
 def log_missing_fields(record, url, log_file="missing_jobs.log"):
     """
     Hàm kiểm tra lỗi dựa trên quality_flags đã được tạo sẵn trong record.
@@ -1131,54 +1291,110 @@ def log_missing_fields(record, url, log_file="missing_jobs.log"):
     
     return False # Job hoàn hảo
 
-def run_batch_crawler(start_page=1, end_page=3):
-    """
-    Luồng chạy chính của chế độ Batch.
-    """
-    # 1. Khởi tạo 1 Scraper duy nhất cho toàn bộ quá trình
-    scraper = cloudscraper.create_scraper(
-        browser={'browser': 'chrome', 'platform': 'windows', 'desktop': True}
-    )
+def get_total_pages(crawler):
+    try:
+        url = "https://www.topcv.vn/tim-viec-lam-cong-nghe-thong-tin-cr257?category_family=r257"
+        html = crawler.fetch_page(url)
+        if not html:
+            return 1
+        soup = BeautifulSoup(html, "html.parser")
+
+        element = soup.select_one("#job-listing-paginate-text")
+
+        if not element:
+            logger.warning("[!] Không tìm thấy pagination element!")
+            return 1
+
+        text = element.get_text(" ", strip=True)
+
+        match = re.search(r'/\s*(\d+)', text)
+
+        if not match:
+            logger.warning(f"[!] Không parse được total pages từ text: {text}")
+            return 1
+
+        total_pages = int(match.group(1))
+
+        logger.info(f"[OK] Tổng số trang: {total_pages}")
+
+        return total_pages
+
+    except Exception as e:
+        logger.error(f"[ERROR] Lỗi khi lấy total pages: {e}")
+
+        return 1
     
+def run_historical_load(total_pages=None, chunk_size=10):
+    """
+    Chiến dịch cào Batch toàn diện có Checkpoint và Ngủ đông.
+    """
+    logger.info(f"Khởi động chiến dịch Historical Load: {total_pages} trang.")
+    crawler = SecureCrawler()
+    # 1. Khởi tạo phiên Shared Session duy nhất
+    
+    total_pages=get_total_pages(crawler)
+    start_page = get_last_checkpoint() + 1
+    
+    if start_page > total_pages:
+        logger.info("[OK] Dữ liệu đã được cào đủ trang từ trước. Không cần chạy lại!")
+        return
+
+    logger.info(f"Tiếp tục cào từ trang {start_page}...")
+    processed_links = load_processed_links()
+    logger.info(f"[CHECKPOINT] Loaded {len(processed_links)} processed links")
     total_jobs_saved = 0
-    jobs_with_missing_data = 0  
-    # 2. Vòng lặp cào qua các trang danh sách
-    for page in range(start_page, end_page + 1):
-        links = get_job_links(scraper, page)
-        print(f"[-] Tìm thấy {len(links)} links ở trang {page}. Bắt đầu bóc tách...")
+    jobs_with_missing_data = 0 
+
+    # 2. Vòng lặp theo LÔ (Chunk)
+    for chunk_start in range(start_page, total_pages + 1, chunk_size):
+        chunk_end = min(chunk_start + chunk_size - 1, total_pages)
+        logger.info(f"=== BẮT ĐẦU LÔ: Trang {chunk_start} đến {chunk_end} ===")
         
-        # 3. Vòng lặp cào chi tiết từng bài đăng
-        for idx, link in enumerate(links):
-            print(f"   + Cào chi tiết {idx+1}/{len(links)}: {link}")
-            
-            record = parse_job(scraper, link)
-            
-            if record:
+        # 3. Vòng lặp từng TRANG trong Lô
+        for page in range(chunk_start, chunk_end + 1):
+            links = get_job_links(crawler, page)
+            logger.info(f"[-] Trang {page}: Tìm thấy {len(links)} links.")
+            # 4. Vòng lặp từng JOB trong Trang
+            for idx, link in enumerate(links):
+                if link in processed_links:
+                    logger.info(f"[SKIP] Đã crawl: {link}")
+                    continue
+                logger.info(f"   + Cào chi tiết {idx+1}/{len(links)}: {link}")
+                record = parse_job(crawler, link)
+                
+                if record:
                 # ----------------------------------------------------
                 # VŨ KHÍ MỚI: QUÉT LỖI TRƯỚC KHI LƯU
                 # ----------------------------------------------------
-                is_missing = log_missing_fields(record, link)
-                if is_missing:
-                    jobs_with_missing_data += 1
-                    print(f"      [!] Cảnh báo: Job này thiếu data. Đã lưu vào log!")
-                save_jsonl(record, "raw_jobs_batch.jsonl")
-                total_jobs_saved += 1
+                    is_missing = log_missing_fields(record, link)
+                    if is_missing:
+                        jobs_with_missing_data += 1
+                        logger.warning(f"      [!] Cảnh báo: Job này thiếu data. Đã lưu vào log!")
+                    save_jsonl(record, "raw_jobs_batch.jsonl")
+                    save_processed_link(link)
+                    processed_links.add(link)
+                    total_jobs_saved += 1
+                
+                # MICRO-SLEEP: Nghỉ ngẫu nhiên giữa các job
+                time.sleep(random.uniform(1.5, 3.5))
             
-            # NGỦ ĐỂ VƯỢT RÀO: Nghỉ 1-3 giây giữa mỗi link chi tiết
-            time.sleep(random.uniform(1.5, 3.5))
+            # Lưu Checkpoint sau khi xong trọn vẹn 1 trang
+            save_checkpoint(page)
+            logger.info(f"[zZz] Xong trang {page}, nghỉ 5 giây...")
+            time.sleep(random.uniform(5, 12))
             
-        # Nghỉ dài hơn một chút khi chuyển sang trang danh sách tiếp theo
-        print(f"[zZz] Xong trang {page}, nghỉ ngơi 5 giây...")
-        time.sleep(5)
-        
-    # Thay cho các câu print cũ của bạn:
-    logger.info("Batch Crawler hoàn tất!")
-    logger.info(f"Tổng số Job đã lưu: {total_jobs_saved}")
+        # MACRO-SLEEP: Nghỉ dài sau khi xong 1 Lô (RẤT QUAN TRỌNG ĐỂ KHÁNG BAN IP)
+        if chunk_end < total_pages:
+            logger.info(f"[NGỦ ĐÔNG] Đã xong lô đến trang {chunk_end}. Hệ thống nghỉ 60 giây để hạ nhiệt...")
+            time.sleep(random.uniform(60, 120))
+
+    logger.info(f"\n[HOÀN TẤT] Chiến dịch Historical Load thành công! Lấy được {total_jobs_saved} jobs mới.")
     
     if jobs_with_missing_data > 0:
         # Dùng level WARNING để đánh dấu có sự cố (Docker/Kibana sẽ bôi màu vàng/đỏ)
         logger.warning(f"Có {jobs_with_missing_data} Job bị thiếu dữ liệu. Vui lòng check missing_jobs.log!")
 
+
 if __name__ == "__main__":
     #main()
-    run_batch_crawler(7, 8)
+    run_historical_load(total_pages=0, chunk_size=10)

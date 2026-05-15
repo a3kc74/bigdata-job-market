@@ -12,6 +12,8 @@ dependencies = [
   "beautifulsoup4",
   "cloudscraper>=1.2.71",
   "kafka-python>=2.3.1",
+  "tenacity>=9.1.4",
+  "curl-cffi>=0.15.0",
 ]
 
 [tool.uv]
