@@ -1,18 +1,29 @@
-TV1_workspace/
-__pycache__/
+﻿TV1_workspace/
+TV1_docs/
 
+__pycache__/
 .venv/
+.python-version
+uv.lock
 .env
 *.log
+.log
+.agents
+.codex
+.pytest_cache
+.state
+
+.postman/
+postman/
 
 data/mock/
 data/raw/*.jsonl
 data/raw/*.json
 data/raw/*.csv
+
 spark-warehouse/
 metastore_db/
 derby.log
-
 _SUCCESS
 .*.crc
 *.crc
