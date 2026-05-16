@@ -6,14 +6,13 @@ This document describes the Elasticsearch indexes written by the current speed-l
 
 | Index | Writer | Purpose |
 | --- | --- | --- |
-| `jobs_realtime_v1` | `apps/stream_etl/sinks/elasticsearch_sink.py` | Search/filter normalized realtime jobs |
+| `realtime_jobs_v1` | `apps/stream_etl/sinks/elasticsearch_sink.py` | Search/filter normalized realtime jobs |
 | `realtime_job_counts_10m_v1` | `apps/stream_etl/sinks/jobs_per_10m_sink.py` | 10-minute job-count dashboard |
 | `realtime_skill_counts_hourly_v1` | `apps/stream_etl/sinks/top_skills_hourly_sink.py` | Hourly skill count trends |
 | `realtime_top_skills_hourly_v1` | `apps/stream_etl/sinks/top_skills_hourly_sink.py` | Top N skills per hour |
 | `realtime_salary_bins_hourly_v1` | `apps/stream_etl/sinks/salary_bins_realtime_sink.py` | Hourly salary distribution |
-| `stream_dead_letter_v1` | Not currently written | Planned ES mirror for Kafka `jobs_dead_letter` |
 
-## `jobs_realtime_v1`
+## `realtime_jobs_v1`
 
 Recommended mapping:
 

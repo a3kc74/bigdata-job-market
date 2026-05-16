@@ -1,4 +1,4 @@
-"""Elasticsearch sink used by phase 3 for `jobs_realtime_v1`."""
+"""Elasticsearch sink used by phase 3 for realtime job documents."""
 
 from __future__ import annotations
 
@@ -48,7 +48,7 @@ def write_jobs_realtime(batch_df, batch_id: int) -> None:
     """Write a micro-batch of clean jobs to Elasticsearch."""
 
     if batch_df.isEmpty():
-        print(f"[jobs_realtime_v1] empty batch {batch_id}")
+        print(f"[{ES_INDEX_JOBS}] empty batch {batch_id}")
         return
 
     docs = []
@@ -60,6 +60,6 @@ def write_jobs_realtime(batch_df, batch_id: int) -> None:
 
     try:
         _bulk_index(ES_INDEX_JOBS, docs)
-        print(f"[jobs_realtime_v1] indexed {len(docs)} docs in batch {batch_id}")
+        print(f"[{ES_INDEX_JOBS}] indexed {len(docs)} docs in batch {batch_id}")
     except Exception as exc:
-        print(f"[jobs_realtime_v1] Elasticsearch write failed in batch {batch_id}: {exc}")
+        print(f"[{ES_INDEX_JOBS}] Elasticsearch write failed in batch {batch_id}: {exc}")

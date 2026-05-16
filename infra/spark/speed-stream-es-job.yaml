@@ -94,13 +94,23 @@ spec:
             - --conf
             - spark.kubernetes.driverEnv.ES_URL=http://elasticsearch.search.svc.cluster.local:9200
             - --conf
+            - spark.kubernetes.driverEnv.ES_INDEX_JOBS=realtime_jobs_v1
+            - --conf
+            - spark.kubernetes.driverEnv.ES_INDEX_JOB_COUNTS_10M=realtime_job_counts_10m_v1
+            - --conf
+            - spark.kubernetes.driverEnv.ES_INDEX_SKILL_COUNTS_HOURLY=realtime_skill_counts_hourly_v1
+            - --conf
+            - spark.kubernetes.driverEnv.ES_INDEX_TOP_SKILLS_HOURLY=realtime_top_skills_hourly_v1
+            - --conf
+            - spark.kubernetes.driverEnv.ES_INDEX_SALARY_BINS_HOURLY=realtime_salary_bins_hourly_v1
+            - --conf
             - spark.kubernetes.driverEnv.WRITE_ELASTICSEARCH=true
             - --conf
-            - spark.kubernetes.driverEnv.ENABLE_JOBS_PER_10M=false
+            - spark.kubernetes.driverEnv.ENABLE_JOBS_PER_10M=true
             - --conf
-            - spark.kubernetes.driverEnv.ENABLE_TOP_SKILLS_HOURLY=false
+            - spark.kubernetes.driverEnv.ENABLE_TOP_SKILLS_HOURLY=true
             - --conf
-            - spark.kubernetes.driverEnv.ENABLE_SALARY_BINS_HOURLY=false
+            - spark.kubernetes.driverEnv.ENABLE_SALARY_BINS_HOURLY=true
             - --conf
             - spark.kubernetes.driverEnv.STARTING_OFFSETS=earliest
             - --conf
