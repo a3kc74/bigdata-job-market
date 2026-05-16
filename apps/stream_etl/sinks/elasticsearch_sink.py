@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 
 
 ES_URL = os.getenv("ES_URL", "http://localhost:9200")
-ES_INDEX_JOBS = os.getenv("ES_INDEX_JOBS", "jobs_realtime_v1")
+ES_INDEX_JOBS = os.getenv("ES_INDEX_JOBS", "realtime_jobs_v1")
 
 
 def _json_default(value):

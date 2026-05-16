@@ -311,24 +311,25 @@ Message key:
 job_id
 ```
 
-### Cassandra
+### Elasticsearch realtime indexes
+
+Speed layer sử dụng Elasticsearch làm serving layer. Spark Structured Streaming tính các realtime aggregates rồi ghi trực tiếp vào Elasticsearch.
+
+Các index chính:
+
+- `realtime_jobs_v1`: dữ liệu job realtime đã clean
+- `realtime_job_counts_10m_v1`: số lượng job theo cửa sổ 10 phút
+- `realtime_salary_bins_hourly_v1`: phân bố salary theo giờ
+- `realtime_skill_counts_hourly_v1`: số lượng job theo skill theo giờ
+- `realtime_top_skills_hourly_v1`: top skills theo giờ
+
+### Elasticsearch batch indexes
 
 ```text
-jobs_by_day
-jobs_by_skill
-salary_stats_by_skill_month
-company_stats_by_month
-realtime_skill_counts
-realtime_job_counts_10m
-```
-
-### Elasticsearch
-
-```text
+gold-jobs-flat
 jobs_silver_v1
 gold_skill_counts_daily_v1
 gold_company_hiring_by_month_v1
-jobs_realtime_v1
 ```
 
 ---
@@ -460,11 +461,10 @@ Sample record được chấp nhận nếu:
 
 ### Platform
 
-* [ ] Kafka topics created
-* [ ] HDFS partition layout created
-* [ ] Cassandra tables created
-* [ ] Elasticsearch indexes created
-* [ ] batch and streaming sinks aligned
+* [ ] Kafka topics created (jobs_raw, jobs_clean, jobs_dead_letter)
+* [ ] HDFS partition layout created (Raw, Bronze, Silver, Gold layers)
+* [ ] Elasticsearch indexes created (realtime_*, gold-jobs-flat)
+* [ ] Batch and streaming pipelines aligned on Elasticsearch serving layer
 
 ### QA
 

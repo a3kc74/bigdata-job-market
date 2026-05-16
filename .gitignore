@@ -7,11 +7,13 @@ __pycache__/
 uv.lock
 .env
 *.log
-.log
-.agents
-.codex
-.pytest_cache
-.state
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.state/
+.agents/
+.codex/
+processed_links.txt
 
 .postman/
 postman/
@@ -23,7 +25,6 @@ data/raw/*.csv
 
 spark-warehouse/
 metastore_db/
-derby.log
 _SUCCESS
 .*.crc
 *.crc

@@ -122,7 +122,7 @@ def main() -> None:
         jobs_per_10m_df = build_jobs_per_10m(clean_base_df)
         queries.append(
             jobs_per_10m_df.writeStream.foreachBatch(write_jobs_per_10m)
-            .queryName("phase4_jobs_per_10m_to_cassandra_elasticsearch")
+            .queryName("phase4_jobs_per_10m_to_elasticsearch")
             .option("checkpointLocation", f"{CHECKPOINT_DIR}/jobs_per_10m")
             .outputMode("update")
             .trigger(processingTime=f"{TRIGGER_SECONDS} seconds")
@@ -135,7 +135,7 @@ def main() -> None:
         skill_counts_hourly_df = build_skill_counts_hourly(clean_base_df)
         queries.append(
             skill_counts_hourly_df.writeStream.foreachBatch(write_top_skills_hourly)
-            .queryName("phase5_top_skills_hourly_to_cassandra_elasticsearch")
+            .queryName("phase5_top_skills_hourly_to_elasticsearch")
             .option("checkpointLocation", f"{CHECKPOINT_DIR}/top_skills_hourly")
             .outputMode("update")
             .trigger(processingTime=f"{TRIGGER_SECONDS} seconds")
@@ -148,7 +148,7 @@ def main() -> None:
         salary_bins_hourly_df = build_salary_bins_hourly(clean_base_df)
         queries.append(
             salary_bins_hourly_df.writeStream.foreachBatch(write_salary_bins_hourly)
-            .queryName("phase6_salary_bins_hourly_to_cassandra_elasticsearch")
+            .queryName("phase6_salary_bins_hourly_to_elasticsearch")
             .option("checkpointLocation", f"{CHECKPOINT_DIR}/salary_bins_hourly")
             .outputMode("update")
             .trigger(processingTime=f"{TRIGGER_SECONDS} seconds")

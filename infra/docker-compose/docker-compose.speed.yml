@@ -136,27 +136,6 @@ services:
     ports:
       - "5601:5601"
 
-  cassandra:
-    image: cassandra:4.1
-    container_name: speed-cassandra
-    environment:
-      CASSANDRA_CLUSTER_NAME: SpeedCluster
-      CASSANDRA_DC: dc1
-      CASSANDRA_RACK: rack1
-      CASSANDRA_ENDPOINT_SNITCH: GossipingPropertyFileSnitch
-      HEAP_NEWSIZE: 256M
-      MAX_HEAP_SIZE: 1024M
-    ports:
-      - "9042:9042"
-    healthcheck:
-      test: ["CMD-SHELL", "cqlsh -e 'DESCRIBE KEYSPACES' >/dev/null 2>&1"]
-      interval: 20s
-      timeout: 10s
-      retries: 15
-    volumes:
-      - speed_cassandra_data:/var/lib/cassandra
-      - ../../scripts/init_cassandra.cql:/docker-entrypoint-initdb.d/init_cassandra.cql:ro
-
   prometheus:
     image: prom/prometheus:v2.52.0
     container_name: speed-prometheus
@@ -188,6 +167,5 @@ volumes:
   speed_kafka_data:
   speed_spark_checkpoints:
   speed_elasticsearch_data:
-  speed_cassandra_data:
   speed_prometheus_data:
   speed_grafana_data:

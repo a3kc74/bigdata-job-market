@@ -157,16 +157,22 @@ HDFS NameNode URL trong K8s: `hdfs://hdfs-namenode.hdfs.svc:9000`
 - Location → `location_detail`, `has_remote`
 - Dedup: `job_id` giữ `record_version` max
 - Chạy local: `spark-submit bronze_to_silver.py --date 2026-04-30`
-- Trigger K8s: CronJob `batch-etl-bronze-to-silver` (TODO: tạo CronJob)
+### `apps/stream_etl/stream_main.py` — Spark Structured Streaming (Speed Layer)
 
-### `apps/batch/jobs/silver_to_gold.py` ✅
-- Đọc Parquet từ Silver, thực hiện Denormalization
-- Đổi tên `job_id_platform` thành `company_id`
-- Parse `schedule` ra `is_weekend_free` và `schedule_type`
-- Lọc các trường cần thiết theo chuẩn Gold Schema
-- Output Parquet Gold (tương lai đẩy vào Elasticsearch)
+**Kafka → Spark Structured Streaming → Elasticsearch**
 
-### `apps/spark/kafka_to_cassandra_es.py` — Structured Streaming (Speed Layer)
+- Consumes `jobs_raw` topic
+- Parses raw JSON schema
+- Normalizes event time, salary, location, skills
+- Applies watermarking (1 hour) + deduplication by job_id
+- Writes clean jobs to `jobs_clean` (Kafka) and Elasticsearch `realtime_jobs_v1`
+- Computes 3 realtime aggregations:
+  - Jobs per 10-minute window → `realtime_job_counts_10m_v1`
+  - Top 10 skills per hour → `realtime_top_skills_hourly_v1`
+  - Salary bins per hour → `realtime_salary_bins_hourly_v1`
+- All outputs written to Elasticsearch only (ES-only architecture)
+- Checkpoints for crash recovery
+- Trigger: K8s Job `speed-stream-es-job.yaml`
 
 ---
 
@@ -174,10 +180,11 @@ HDFS NameNode URL trong K8s: `hdfs://hdfs-namenode.hdfs.svc:9000`
 
 | Namespace | Services |
 |---|---|
-| `spark` | Driver/Executor Pods, CronJobs |
+| `spark` | Driver/Executor Pods, CronJobs (batch + streaming) |
 | `hdfs` | NameNode (port 9000), DataNode |
-| `kafka` | Broker, Zookeeper |
-| `elastic` | Elasticsearch, Kibana |
+| `kafka` | Kafka broker (KRaft mode), Topics |
+| `search` | Elasticsearch, Kibana |
+| `serving` | FastAPI search endpoint |
 
 **Lưu ý Minikube:** Image bị mất sau khi tắt máy. Rebuild bắt buộc sau mỗi lần restart:
 ```bash

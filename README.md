@@ -16,8 +16,9 @@ This project analyzes IT job postings from Vietnamese job boards using a **Lambd
   - Jobs per 10 minutes (by source, province)
   - Top skills by hour (ranked top 10)
   - Salary bins per 10 minutes (by province)
+- **Elasticsearch indexing**: All aggregations written to Elasticsearch realtime indexes for dashboard/search serving
 - **Checkpointing**: Per-query checkpoint paths for crash recovery
-- **Idempotent sinks**: Deterministic keys for Cassandra and Elasticsearch upserts
+- **Idempotent sinks**: Deterministic document IDs for Elasticsearch upserts
 - **Scripts**: Setup, run, stop, test, smoke test, and cleanup scripts
 - **Unit tests**: Salary parser, skill normalizer, event time fallback, validation
 
@@ -60,11 +61,12 @@ The speed layer is designed as the realtime part of a Lambda Architecture. The e
 │   │   │   ├── jobs_per_10m.py
 │   │   │   ├── top_skills_hourly.py
 │   │   │   └── salary_bins.py
-│   │   ├── sinks/
-│   │   │   ├── kafka_sink.py
-│   │   │   ├── dead_letter_sink.py
-│   │   │   ├── cassandra_sink.py
-│   │   │   └── elasticsearch_sink.py
+   │   │   ├── sinks/
+│   │   │   ├── elasticsearch_sink.py
+│   │   │   ├── jobs_per_10m_sink.py
+│   │   │   ├── top_skills_hourly_sink.py
+│   │   │   ├── salary_bins_realtime_sink.py
+│   │   │   └── kafka_sink.py
 │   │   └── tests/
 │   │       ├── test_salary_parser.py
 │   │       ├── test_skill_normalizer.py
@@ -105,7 +107,6 @@ The speed layer is designed as the realtime part of a Lambda Architecture. The e
 | confluent-kafka | `pip install confluent-kafka` |
 | pytest | `pip install pytest` |
 | python-dotenv | `pip install python-dotenv` |
-| cassandra-driver | Optional, for Cassandra sinks |
 
 ## Quick Start
 
@@ -178,7 +179,8 @@ See [job_clean_schema.py](apps/stream_etl/schemas/job_clean_schema.py) — flat 
 | Dead-letter topic | Malformed or invalid records → `jobs_dead_letter` |
 | Watermark | 1-hour late-data tolerance on `event_ts` |
 | Dedup | `dropDuplicates(["job_id"])` within watermark window |
-| Idempotent writes | Deterministic sink keys in Cassandra + Elasticsearch |
+| Realtime aggregations | Jobs per 10 min, top skills, salary bins via Spark Structured Streaming |
+| Elasticsearch indexes | realtime_jobs_v1, realtime_job_counts_10m_v1, realtime_skill_counts_hourly_v1, realtime_top_skills_hourly_v1, realtime_salary_bins_hourly_v1 |
 
 ## Testing
 
