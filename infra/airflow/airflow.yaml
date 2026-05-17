@@ -1,0 +1,160 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: airflow-init
+  namespace: airflow
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app: airflow-init
+    spec:
+      restartPolicy: Never
+      serviceAccountName: airflow
+      containers:
+        - name: airflow-init
+          image: job-market-airflow:2.9.3
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: AIRFLOW__CORE__EXECUTOR
+              value: LocalExecutor
+            - name: AIRFLOW__CORE__LOAD_EXAMPLES
+              value: "false"
+            - name: AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION
+              value: "false"
+            - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+              value: postgresql+psycopg2://airflow:airflow@airflow-postgres.airflow.svc.cluster.local:5432/airflow
+            - name: AIRFLOW__WEBSERVER__SECRET_KEY
+              value: job-market-airflow-secret-key
+            - name: AIRFLOW_ADMIN_USER
+              value: admin
+            - name: AIRFLOW_ADMIN_PASSWORD
+              value: admin
+          command:
+            - bash
+            - -c
+            - |
+              set -euo pipefail
+
+              echo "[airflow-init] waiting for postgres"
+              until nc -z airflow-postgres.airflow.svc.cluster.local 5432; do
+                sleep 2
+              done
+
+              echo "[airflow-init] migrating metadata database"
+              airflow db migrate
+
+              echo "[airflow-init] creating admin user if needed"
+              airflow users create \
+                --username "${AIRFLOW_ADMIN_USER}" \
+                --password "${AIRFLOW_ADMIN_PASSWORD}" \
+                --firstname Admin \
+                --lastname User \
+                --role Admin \
+                --email admin@example.com || true
+
+              echo "[airflow-init] done"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: airflow-webserver
+  namespace: airflow
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: airflow-webserver
+  template:
+    metadata:
+      labels:
+        app: airflow-webserver
+    spec:
+      serviceAccountName: airflow
+      containers:
+        - name: airflow-webserver
+          image: job-market-airflow:2.9.3
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          env:
+            - name: AIRFLOW__CORE__EXECUTOR
+              value: LocalExecutor
+            - name: AIRFLOW__CORE__LOAD_EXAMPLES
+              value: "false"
+            - name: AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION
+              value: "false"
+            - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+              value: postgresql+psycopg2://airflow:airflow@airflow-postgres.airflow.svc.cluster.local:5432/airflow
+            - name: AIRFLOW__WEBSERVER__SECRET_KEY
+              value: job-market-airflow-secret-key
+          command:
+            - bash
+            - -c
+            - |
+              set -euo pipefail
+
+              echo "[airflow-webserver] waiting for postgres"
+              until nc -z airflow-postgres.airflow.svc.cluster.local 5432; do
+                sleep 2
+              done
+
+              airflow webserver
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: airflow-scheduler
+  namespace: airflow
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: airflow-scheduler
+  template:
+    metadata:
+      labels:
+        app: airflow-scheduler
+    spec:
+      serviceAccountName: airflow
+      containers:
+        - name: airflow-scheduler
+          image: job-market-airflow:2.9.3
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: AIRFLOW__CORE__EXECUTOR
+              value: LocalExecutor
+            - name: AIRFLOW__CORE__LOAD_EXAMPLES
+              value: "false"
+            - name: AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION
+              value: "false"
+            - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+              value: postgresql+psycopg2://airflow:airflow@airflow-postgres.airflow.svc.cluster.local:5432/airflow
+            - name: AIRFLOW__WEBSERVER__SECRET_KEY
+              value: job-market-airflow-secret-key
+          command:
+            - bash
+            - -c
+            - |
+              set -euo pipefail
+
+              echo "[airflow-scheduler] waiting for postgres"
+              until nc -z airflow-postgres.airflow.svc.cluster.local 5432; do
+                sleep 2
+              done
+
+              airflow scheduler
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: airflow-webserver
+  namespace: airflow
+spec:
+  selector:
+    app: airflow-webserver
+  ports:
+    - name: web
+      port: 8080
+      targetPort: 8080
