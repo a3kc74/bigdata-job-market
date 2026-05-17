@@ -1,3 +1,15 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: airflow-logs-pvc
+  namespace: airflow
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -89,6 +101,13 @@ spec:
               value: postgresql+psycopg2://airflow:airflow@airflow-postgres.airflow.svc.cluster.local:5432/airflow
             - name: AIRFLOW__WEBSERVER__SECRET_KEY
               value: job-market-airflow-secret-key
+            - name: AIRFLOW__LOGGING__BASE_LOG_FOLDER
+              value: /opt/airflow/logs
+            - name: AIRFLOW__LOGGING__REMOTE_LOGGING
+              value: "False"
+          volumeMounts:
+            - name: airflow-logs
+              mountPath: /opt/airflow/logs
           command:
             - bash
             - -c
@@ -101,6 +120,10 @@ spec:
               done
 
               airflow webserver
+      volumes:
+        - name: airflow-logs
+          persistentVolumeClaim:
+            claimName: airflow-logs-pvc
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -133,6 +156,13 @@ spec:
               value: postgresql+psycopg2://airflow:airflow@airflow-postgres.airflow.svc.cluster.local:5432/airflow
             - name: AIRFLOW__WEBSERVER__SECRET_KEY
               value: job-market-airflow-secret-key
+            - name: AIRFLOW__LOGGING__BASE_LOG_FOLDER
+              value: /opt/airflow/logs
+            - name: AIRFLOW__LOGGING__REMOTE_LOGGING
+              value: "False"
+          volumeMounts:
+            - name: airflow-logs
+              mountPath: /opt/airflow/logs
           command:
             - bash
             - -c
@@ -145,6 +175,10 @@ spec:
               done
 
               airflow scheduler
+      volumes:
+        - name: airflow-logs
+          persistentVolumeClaim:
+            claimName: airflow-logs-pvc
 ---
 apiVersion: v1
 kind: Service

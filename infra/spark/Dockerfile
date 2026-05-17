@@ -3,11 +3,15 @@ FROM apache/spark:3.5.3-scala2.12-java17-python3-ubuntu
 USER root
 
 RUN pip3 install --no-cache-dir \
-    python-dotenv==1.0.1 \
-    requests>=2.31.0 \
-    pydantic-settings>=2.6.1 \
-    elasticsearch>=8.13.2 \
-    confluent-kafka==2.4.0
+    "beautifulsoup4>=4.12.0" \
+    "cloudscraper>=1.2.71" \
+    "curl-cffi>=0.7.0" \
+    "python-dotenv==1.0.1" \
+    "requests>=2.31.0" \
+    "pydantic-settings>=2.6.1" \
+    "elasticsearch>=8.13.2" \
+    "confluent-kafka==2.4.0" \
+    "tenacity>=8.2.0"
 
 ENV HOME=/tmp
 ENV PATH="/usr/local/bin:/usr/bin:${PATH}"

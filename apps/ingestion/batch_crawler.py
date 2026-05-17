@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from bs4 import BeautifulSoup
 import json
 import hashlib
@@ -6,12 +8,15 @@ import time
 import random
 import unicodedata
 from urllib.parse import urlparse, urlunparse
-from datetime import datetime, UTC, timezone, timedelta
+from datetime import datetime, timezone, timedelta
 import logging
 import sys
 import os
+from typing import Iterable
+from pathlib import Path
 from curl_cffi import requests
 from curl_cffi import requests as curl_requests
+from pyspark.sql import SparkSession
 from curl_cffi.requests.exceptions import (
     RequestException,
     Timeout,
@@ -133,6 +138,72 @@ logging.basicConfig(
     ]
 )
 logger = logging.getLogger(__name__)
+
+
+# =======================================================
+# HDFS UTILITIES
+# =======================================================
+def get_spark() -> SparkSession:
+    """Get or create SparkSession."""
+    return (
+        SparkSession.builder
+        .appName("job-market-batch-crawler")
+        .getOrCreate()
+    )
+
+
+def write_jsonl_to_hdfs(
+    records: Iterable[dict],
+    output_path: str,
+    spark: SparkSession,
+) -> int:
+    """
+    Write crawler records as JSONL directly to HDFS using Hadoop FileSystem.
+
+    output_path example:
+    hdfs://hdfs-namenode.hdfs.svc.cluster.local:9000/raw/jobs/ingest_date=2026-05-17/raw_jobs_20260517T104500.jsonl
+    """
+
+    sc = spark.sparkContext
+    hadoop_conf = sc._jsc.hadoopConfiguration()
+    jvm = sc._jvm
+
+    path = jvm.org.apache.hadoop.fs.Path(output_path)
+    fs = path.getFileSystem(hadoop_conf)
+
+    parent = path.getParent()
+    if parent is not None and not fs.exists(parent):
+        fs.mkdirs(parent)
+
+    if fs.exists(path):
+        fs.delete(path, True)
+
+    output_stream = fs.create(path, True)
+
+    count = 0
+    try:
+        for record in records:
+            line = json.dumps(record, ensure_ascii=False, default=str) + "\n"
+            output_stream.write(bytearray(line, "utf-8"))
+            count += 1
+    finally:
+        output_stream.close()
+
+    return count
+
+
+def build_hdfs_output_path(base_path: str) -> str:
+    """Build output path with ingest_date partition and timestamp."""
+    now = datetime.now(timezone.utc)
+    ingest_date = now.strftime("%Y-%m-%d")
+    run_ts = now.strftime("%Y%m%dT%H%M%SZ")
+
+    return (
+        f"{base_path.rstrip('/')}"
+        f"/ingest_date={ingest_date}"
+        f"/raw_jobs_{run_ts}.jsonl"
+    )
+
 
 def log_failed_page(page, reason, file="failed_pages.log"):
     with open(file, "a", encoding="utf-8") as f:
@@ -1010,7 +1081,7 @@ def parse_job(crawler, url):
     education = extract_education(soup)
     
     # thời gian crawl dữ liệu (ingest_ts)
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
     ingest_ts = int(now.timestamp() * 1000)
     
     # thời gian post job (event_ts)
@@ -1229,13 +1300,6 @@ def main():
 # =======================================================
 # PHẦN 4: HỆ THỐNG ĐIỀU PHỐI (THE BATCH MANAGER)
 # =======================================================
-def save_jsonl(record, file_path="raw_jobs.jsonl"):
-    with open(file_path, "a", encoding="utf-8") as f:
-        f.write(json.dumps(record, ensure_ascii=False) + "\n")
-
-import os
-from datetime import datetime
-
 def get_last_checkpoint(checkpoint_file="checkpoint.txt"):
     """Đọc trang cuối cùng đã cào thành công."""
     if os.path.exists(checkpoint_file):
@@ -1323,78 +1387,127 @@ def get_total_pages(crawler):
 
         return 1
     
-def run_historical_load(total_pages=None, chunk_size=10):
+def crawl_jobs(total_pages: int | None = None, chunk_size: int = 10):
     """
-    Chiến dịch cào Batch toàn diện có Checkpoint và Ngủ đông.
+    Generator that yields job records from TopCV.
+
+    Crawls job links from list pages, parses detail pages, and yields job records.
+    Uses checkpointing to resume from last successful page.
     """
-    logger.info(f"Khởi động chiến dịch Historical Load: {total_pages} trang.")
+    logger.info(f"Starting historical load crawl: {total_pages} pages.")
     crawler = SecureCrawler()
-    # 1. Khởi tạo phiên Shared Session duy nhất
     
     if total_pages is None or total_pages <= 0:
         total_pages = get_total_pages(crawler)
+    
     start_page = get_last_checkpoint() + 1
     
     if start_page > total_pages:
-        logger.info("[OK] Dữ liệu đã được cào đủ trang từ trước. Không cần chạy lại!")
+        logger.info("[OK] Data fully crawled from before. No need to re-run!")
         return
 
-    logger.info(f"Tiếp tục cào từ trang {start_page}...")
+    logger.info(f"Resuming crawl from page {start_page}...")
     processed_links = load_processed_links()
     logger.info(f"[CHECKPOINT] Loaded {len(processed_links)} processed links")
-    total_jobs_saved = 0
-    jobs_with_missing_data = 0 
+    jobs_with_missing_data = 0
 
-    # 2. Vòng lặp theo LÔ (Chunk)
+    # 2. Loop through chunks
     for chunk_start in range(start_page, total_pages + 1, chunk_size):
         chunk_end = min(chunk_start + chunk_size - 1, total_pages)
-        logger.info(f"=== BẮT ĐẦU LÔ: Trang {chunk_start} đến {chunk_end} ===")
+        logger.info(f"=== START CHUNK: Pages {chunk_start} to {chunk_end} ===")
         
-        # 3. Vòng lặp từng TRANG trong Lô
+        # 3. Loop through each page in chunk
         for page in range(chunk_start, chunk_end + 1):
             links = get_job_links(crawler, page)
-            logger.info(f"[-] Trang {page}: Tìm thấy {len(links)} links.")
-            # 4. Vòng lặp từng JOB trong Trang
+            logger.info(f"[-] Page {page}: Found {len(links)} links.")
+            
+            # 4. Loop through each job in page
             for idx, link in enumerate(links):
                 if link in processed_links:
-                    logger.info(f"[SKIP] Đã crawl: {link}")
+                    logger.info(f"[SKIP] Already crawled: {link}")
                     continue
-                logger.info(f"   + Cào chi tiết {idx+1}/{len(links)}: {link}")
+                
+                logger.info(f"   + Crawling detail {idx+1}/{len(links)}: {link}")
                 record = parse_job(crawler, link)
                 
                 if record:
-                # ----------------------------------------------------
-                # VŨ KHÍ MỚI: QUÉT LỖI TRƯỚC KHI LƯU
-                # ----------------------------------------------------
                     is_missing = log_missing_fields(record, link)
                     if is_missing:
                         jobs_with_missing_data += 1
-                        logger.warning(f"      [!] Cảnh báo: Job này thiếu data. Đã lưu vào log!")
-                    save_jsonl(record, "raw_jobs_batch.jsonl")
+                        logger.warning(f"      [!] Warning: Job missing data. Logged!")
+                    
                     save_processed_link(link)
                     processed_links.add(link)
-                    total_jobs_saved += 1
+                    
+                    yield record
                 
-                # MICRO-SLEEP: Nghỉ ngẫu nhiên giữa các job
+                # MICRO-SLEEP: random sleep between jobs
                 time.sleep(random.uniform(1.5, 3.5))
             
-            # Lưu Checkpoint sau khi xong trọn vẹn 1 trang
+            # Save checkpoint after finishing 1 complete page
             save_checkpoint(page)
-            logger.info(f"[zZz] Xong trang {page}, nghỉ 5 giây...")
+            logger.info(f"[zZz] Finished page {page}, sleeping 5 seconds...")
             time.sleep(random.uniform(5, 12))
             
-        # MACRO-SLEEP: Nghỉ dài sau khi xong 1 Lô (RẤT QUAN TRỌNG ĐỂ KHÁNG BAN IP)
+        # MACRO-SLEEP: long sleep after finishing 1 chunk
         if chunk_end < total_pages:
-            logger.info(f"[NGỦ ĐÔNG] Đã xong lô đến trang {chunk_end}. Hệ thống nghỉ 60 giây để hạ nhiệt...")
+            logger.info(f"[DEEP_SLEEP] Finished chunk up to page {chunk_end}. System sleeping 60s to cool down...")
             time.sleep(random.uniform(60, 120))
 
-    logger.info(f"\n[HOÀN TẤT] Chiến dịch Historical Load thành công! Lấy được {total_jobs_saved} jobs mới.")
+    logger.info(f"\n[COMPLETE] Historical load campaign successful! Crawled all pages.")
     
     if jobs_with_missing_data > 0:
-        # Dùng level WARNING để đánh dấu có sự cố (Docker/Kibana sẽ bôi màu vàng/đỏ)
-        logger.warning(f"Có {jobs_with_missing_data} Job bị thiếu dữ liệu. Vui lòng check missing_jobs.log!")
+        logger.warning(f"Found {jobs_with_missing_data} jobs with missing data. Check missing_jobs.log!")
+
+
+def get_optional_int_env(name: str) -> int | None:
+    """Get optional integer environment variable."""
+    value = os.getenv(name)
+    if value is None or value.strip() == "":
+        return None
+    return int(value)
+
+
+def main() -> None:
+    """Main entry point for batch crawler with HDFS output."""
+    hdfs_raw_jobs_path = os.getenv(
+        "HDFS_RAW_JOBS_PATH",
+        "hdfs://hdfs-namenode.hdfs.svc.cluster.local:9000/raw/jobs",
+    )
+
+    crawl_total_pages = get_optional_int_env("CRAWL_TOTAL_PAGES")
+    crawl_chunk_size = int(os.getenv("CRAWL_CHUNK_SIZE", "10"))
+
+    spark = get_spark()
+
+    try:
+        records = list(
+            crawl_jobs(
+                total_pages=crawl_total_pages,
+                chunk_size=crawl_chunk_size,
+            )
+        )
+
+        if not records:
+            raise RuntimeError(
+                "[batch_crawler] no records crawled; source may be blocked or parser failed"
+            )
+
+        output_path = build_hdfs_output_path(hdfs_raw_jobs_path)
+
+        written_count = write_jsonl_to_hdfs(
+            records=records,
+            output_path=output_path,
+            spark=spark,
+        )
+
+        print(
+            f"[batch_crawler] wrote {written_count} raw records "
+            f"to {output_path}"
+        )
+    finally:
+        spark.stop()
 
 
 if __name__ == "__main__":
-    #main()
-    run_historical_load(total_pages=1, chunk_size=1)
+    main()

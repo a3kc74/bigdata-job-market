@@ -59,7 +59,7 @@ cd C:\path\to\bigdata-job-market
 Start Minikube profile job-market:
 
 ```powershell
-minikube start -p job-market --driver=docker --cpus=8 --memory=11000 --disk-size=40g
+minikube start -p job-market --driver=docker --cpus=8 --memory=10000 --disk-size=40g
 kubectl config use-context job-market
 ```
 

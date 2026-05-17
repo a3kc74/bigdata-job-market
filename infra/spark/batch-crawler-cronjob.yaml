@@ -1,0 +1,35 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: batch-etl-crawl-jobs
+  namespace: spark
+spec:
+  schedule: "30 18 * * *"
+  suspend: true
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          serviceAccountName: spark
+          containers:
+            - name: batch-crawler
+              image: spark-job-market:latest
+              imagePullPolicy: IfNotPresent
+              workingDir: /opt/spark/work-dir
+              command:
+                - /opt/spark/bin/spark-submit
+                - --master
+                - local[*]
+                - /opt/spark/work-dir/apps/ingestion/batch_crawler.py
+              env:
+                - name: PYTHONPATH
+                  value: /opt/spark/work-dir
+                - name: HDFS_RAW_JOBS_PATH
+                  value: hdfs://hdfs-namenode.hdfs.svc.cluster.local:9000/raw/jobs
+                - name: CRAWL_OUTPUT_FORMAT
+                  value: jsonl
+                - name: CRAWL_TOTAL_PAGES
+                  value: "1"
+                - name: CRAWL_CHUNK_SIZE
+                  value: "1"

@@ -67,7 +67,7 @@ def run_spark_job_from_cronjob(
 
 with DAG(
     dag_id="job_market_batch_pipeline",
-    description="Batch pipeline: Raw -> Bronze -> Silver -> Gold -> Elasticsearch",
+    description="Batch pipeline: Crawl -> Raw -> Bronze -> Silver -> Gold -> Elasticsearch",
     default_args=DEFAULT_ARGS,
     start_date=pendulum.datetime(2026, 1, 1, tz=TZ),
     schedule="0 2 * * *",
@@ -91,6 +91,12 @@ with DAG(
         echo "[airflow] checking Elasticsearch"
         curl -fsS http://elasticsearch.search.svc.cluster.local:9200/_cluster/health
         """,
+    )
+
+    crawl_jobs = run_spark_job_from_cronjob(
+        task_id="crawl_jobs",
+        cronjob_name="batch-etl-crawl-jobs",
+        timeout_seconds=3600,
     )
 
     raw_to_bronze = run_spark_job_from_cronjob(
@@ -117,5 +123,6 @@ with DAG(
         timeout_seconds=2400,
     )
 
-    [check_hdfs, check_elasticsearch] >> raw_to_bronze
+    [check_hdfs, check_elasticsearch] >> crawl_jobs
+    crawl_jobs >> raw_to_bronze
     raw_to_bronze >> bronze_to_silver >> silver_to_gold >> gold_to_elasticsearch
