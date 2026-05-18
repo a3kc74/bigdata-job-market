@@ -3,7 +3,7 @@
 # This image includes:
 #   - Airflow DAG files
 #   - kubectl, so BashOperator tasks can create/watch Kubernetes Jobs
-#   - Python dependencies from infra/airflow/requirements.txt
+#   - selected Kubernetes manifests used by orchestration DAGs
 #
 # Build:
 #   minikube image build -f infra/airflow/Dockerfile -t job-market-airflow:2.9.3 .
@@ -29,3 +29,8 @@ COPY infra/airflow/requirements.txt /requirements.txt
 RUN pip install --no-cache-dir -r /requirements.txt
 
 COPY infra/airflow/dags /opt/airflow/dags
+
+# Manifests used by Airflow DAGs to create/check Kubernetes resources.
+COPY infra/spark /opt/airflow/infra/spark
+COPY infra/kafka /opt/airflow/infra/kafka
+COPY infra/producer /opt/airflow/infra/producer
