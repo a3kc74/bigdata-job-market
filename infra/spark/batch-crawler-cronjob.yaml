@@ -1,3 +1,16 @@
+# Suspended Kubernetes CronJob template for the batch crawler.
+#
+# Airflow creates one-off Jobs from this CronJob to crawl TopCV job postings
+# and write raw JSONL records directly to HDFS:
+#   /raw/jobs/ingest_date=YYYY-MM-DD/raw_jobs_<timestamp>.jsonl
+#
+# The CronJob is suspended because Airflow is the scheduler. Do not enable the
+# Kubernetes schedule unless you intentionally want it to run without Airflow.
+#
+# Manual test:
+#   kubectl create job batch-etl-crawl-jobs-manual --from=cronjob/batch-etl-crawl-jobs -n spark
+#   kubectl logs -n spark -l job-name=batch-etl-crawl-jobs-manual --tail=200 -f
+---
 apiVersion: batch/v1
 kind: CronJob
 metadata:

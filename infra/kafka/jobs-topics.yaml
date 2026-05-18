@@ -1,3 +1,10 @@
+# Kafka topics used by the job-market speed layer.
+#
+# Topics:
+#   jobs-raw          - raw job events from producers
+#   jobs-clean        - cleaned streaming records
+#   jobs-dead-letter  - invalid records or processing failures
+---
 apiVersion: kafka.strimzi.io/v1
 kind: KafkaTopic
 metadata:

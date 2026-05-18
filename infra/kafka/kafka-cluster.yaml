@@ -1,3 +1,9 @@
+# Strimzi Kafka cluster used by the speed layer.
+#
+# Kafka stores raw crawler events, cleaned streaming events, and dead-letter
+# records. Spark Structured Streaming reads from Kafka and writes realtime
+# indexes to Elasticsearch.
+---
 apiVersion: kafka.strimzi.io/v1
 kind: KafkaNodePool
 metadata:

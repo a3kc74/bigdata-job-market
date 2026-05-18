@@ -1,3 +1,31 @@
+"""Airflow DAG for orchestrating the batch job-market pipeline.
+
+Data flow:
+    TopCV crawler
+        -> HDFS raw JSONL
+        -> Bronze
+        -> Silver
+        -> Gold
+        -> Elasticsearch
+
+Tasks:
+    check_hdfs
+    check_elasticsearch
+    crawl_jobs
+    raw_to_bronze
+    bronze_to_silver
+    silver_to_gold
+    gold_to_elasticsearch
+
+How it works:
+    Airflow creates one-off Kubernetes Jobs from suspended CronJobs in the
+    spark namespace. The CronJobs contain the actual Spark/crawler runtime
+    definitions; Airflow only controls execution order and monitoring.
+
+Demo:
+    Open Airflow UI and trigger DAG `job_market_batch_pipeline`.
+"""
+
 from __future__ import annotations
 
 import pendulum

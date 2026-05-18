@@ -1,3 +1,7 @@
+# Kubernetes Job for producing fake crawler events into Kafka.
+#
+# This is used to smoke test the speed layer without running the real crawler.
+---
 apiVersion: batch/v1
 kind: Job
 metadata:

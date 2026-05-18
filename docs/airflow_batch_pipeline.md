@@ -94,7 +94,7 @@ kubectl get nodes
 Nếu Minikube chưa chạy:
 
 ```bash
-minikube start -p job-market --driver=docker --cpus=8 --memory=11000 --disk-size=40g
+minikube start -p job-market --driver=docker --cpus=8 --memory=10000 --disk-size=40g
 kubectl config use-context job-market
 ```
 

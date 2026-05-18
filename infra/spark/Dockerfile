@@ -1,3 +1,22 @@
+# Spark runtime image for batch ETL, speed-layer streaming, and crawler jobs.
+#
+# This image contains:
+#   - project source code
+#   - Spark/Python runtime
+#   - crawler dependencies such as beautifulsoup4, curl-cffi, tenacity
+#   - Elasticsearch/Kafka integration dependencies
+#
+# Used by:
+#   - batch-etl-crawl-jobs
+#   - batch-etl-raw-to-bronze
+#   - batch-etl-bronze-to-silver
+#   - batch-etl-silver-to-gold
+#   - batch-etl-gold-to-elasticsearch
+#   - speed-stream-es-submit
+#
+# Build:
+#   minikube image build -f infra/spark/Dockerfile -t spark-job-market:latest .
+
 FROM apache/spark:3.5.3-scala2.12-java17-python3-ubuntu
 
 USER root

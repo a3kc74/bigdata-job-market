@@ -1,22 +1,20 @@
-# ============================================================
-# Spark Batch ETL — CronJob on Kubernetes (Minikube)
-# Chạy job_raw_to_bronze.py mỗi ngày lúc 02:00 AM
+# Suspended Kubernetes CronJob template for Raw -> Bronze batch ETL.
 #
-# Apply: kubectl apply -f infra/spark/batch-etl-cronjob.yaml
-# ============================================================
-
+# This job reads raw JSONL files from HDFS under /raw/jobs and writes Bronze
+# Parquet data back to HDFS. Airflow uses this CronJob as a template and creates
+# one-off Jobs from it during the batch DAG run.
+#
+# Manual test:
+#   kubectl create job raw-to-bronze-manual --from=cronjob/batch-etl-raw-to-bronze -n spark
+---
 apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: batch-etl-raw-to-bronze
   namespace: spark
-  labels:
-    app: batch-etl
-    layer: bronze
 spec:
-  # Chạy hàng ngày lúc 02:00 AM (UTC+7 → 19:00 UTC ngày hôm trước)
   schedule: "0 19 * * *"
-  suspend: false
+  suspend: true
   concurrencyPolicy: Forbid        # Không cho chạy song song nếu job trước chưa xong
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3
@@ -31,7 +29,7 @@ spec:
             app: batch-etl
             job: raw-to-bronze
         spec:
-          serviceAccountName: spark   # RBAC đã có trong infra/spark/10-rbac.yaml
+          serviceAccountName: spark   # RBAC được khai báo trong infra/spark/rbac.yaml
           restartPolicy: Never
 
           containers:

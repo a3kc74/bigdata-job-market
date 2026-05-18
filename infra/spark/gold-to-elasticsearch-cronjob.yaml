@@ -1,3 +1,11 @@
+# Suspended Kubernetes CronJob template for Gold -> Elasticsearch indexing.
+#
+# This Spark job reads Gold data from HDFS and writes it to Elasticsearch index
+# `gold-jobs-flat`. The Elasticsearch document id is `job_id`, so reruns update
+# existing jobs instead of blindly duplicating documents.
+#
+# Airflow triggers this job as the final step of the batch DAG.
+---
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -5,7 +13,7 @@ metadata:
   namespace: spark
 spec:
   schedule: "30 20 * * *"
-  suspend: false
+  suspend: true
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 2
   failedJobsHistoryLimit: 2

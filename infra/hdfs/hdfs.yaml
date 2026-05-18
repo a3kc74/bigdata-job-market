@@ -1,3 +1,13 @@
+# HDFS deployment for storing batch pipeline data.
+#
+# HDFS stores:
+#   /raw/jobs
+#   /bronze/jobs
+#   /silver/jobs
+#   /gold/jobs
+#
+# Spark batch jobs read and write these paths during the ETL pipeline.
+---
 apiVersion: v1
 kind: Namespace
 metadata:

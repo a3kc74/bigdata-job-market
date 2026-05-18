@@ -1,3 +1,7 @@
+# Python project metadata and dependency declaration for the job-market pipeline.
+# Dependencies here are used by local development, tests, crawler, API services,
+# Spark jobs, and supporting scripts.
+
 [project]
 name = "bigdata-job-market"
 version = "0.1.0"

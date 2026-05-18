@@ -1,3 +1,8 @@
+# RBAC resources required by Spark jobs running on Kubernetes.
+#
+# Spark driver pods need permission to create and manage executor pods in the
+# spark namespace. Apply this before submitting Spark batch or streaming jobs.
+---
 apiVersion: v1
 kind: ServiceAccount
 metadata:

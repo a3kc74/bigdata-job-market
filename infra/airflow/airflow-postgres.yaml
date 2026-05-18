@@ -1,3 +1,14 @@
+# PostgreSQL metadata database for Airflow.
+#
+# Airflow stores DAG runs, task instances, users, and scheduler state in this
+# database. This deployment is intended for local Minikube/demo use.
+#
+# Apply:
+#   kubectl apply -f infra/airflow/airflow-postgres.yaml
+#
+# Check:
+#   kubectl get pods -n airflow
+---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:

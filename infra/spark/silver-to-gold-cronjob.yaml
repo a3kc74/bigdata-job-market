@@ -1,3 +1,10 @@
+# Suspended Kubernetes CronJob template for Silver -> Gold batch ETL.
+#
+# This Spark job converts Silver data into a search-friendly Gold table with
+# cleaned salary, skill, location, schedule, and UI filter fields.
+#
+# Airflow triggers this job after bronze_to_silver succeeds.
+---
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -5,7 +12,7 @@ metadata:
   namespace: spark
 spec:
   schedule: "0 20 * * *"
-  suspend: false
+  suspend: true
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 2
   failedJobsHistoryLimit: 2

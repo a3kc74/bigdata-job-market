@@ -1,3 +1,13 @@
+# Airflow runtime image for local Minikube deployment.
+#
+# This image includes:
+#   - Airflow DAG files
+#   - kubectl, so BashOperator tasks can create/watch Kubernetes Jobs
+#   - Python dependencies from infra/airflow/requirements.txt
+#
+# Build:
+#   minikube image build -f infra/airflow/Dockerfile -t job-market-airflow:2.9.3 .
+
 FROM apache/airflow:2.9.3-python3.11
 
 USER root

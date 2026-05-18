@@ -1,3 +1,17 @@
+# RBAC for Airflow to orchestrate Spark batch jobs.
+#
+# Airflow runs BashOperator tasks that call kubectl. These tasks need permission
+# to create Jobs from suspended CronJobs in the spark namespace, watch their
+# status, and read pod logs.
+#
+# This file creates:
+#   - ServiceAccount: airflow
+#   - Role in namespace spark
+#   - RoleBinding from airflow namespace to spark namespace
+#
+# Apply:
+#   kubectl apply -f infra/airflow/airflow-rbac.yaml
+---
 apiVersion: v1
 kind: ServiceAccount
 metadata:

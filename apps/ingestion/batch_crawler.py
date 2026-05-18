@@ -1,3 +1,10 @@
+"""Batch crawler for collecting TopCV job postings and writing raw JSONL to HDFS.
+
+This module is triggered by the Airflow batch DAG through the Kubernetes CronJob
+`batch-etl-crawl-jobs`. It crawls job postings, builds raw records, and writes
+them to `/raw/jobs/ingest_date=...` in HDFS for the batch ETL pipeline.
+"""
+
 from __future__ import annotations
 
 from bs4 import BeautifulSoup
