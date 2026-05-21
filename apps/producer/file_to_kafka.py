@@ -3,13 +3,15 @@ import glob
 import json
 import os
 from confluent_kafka import Producer
+from apps.common.logger import get_logger
 
+logger = get_logger("producer")
 
 def delivery_report(err, msg):
     if err is not None:
-        print(f"[KAFKA ERROR] Delivery failed: {err}")
+        logger.error(f"[KAFKA ERROR] Delivery failed: {err}")
     else:
-        print(
+        logger.info(
             f"[KAFKA OK] topic={msg.topic()} "
             f"partition={msg.partition()} offset={msg.offset()}"
         )
@@ -34,12 +36,12 @@ def publish_file(producer, topic, file_path):
             try:
                 record = json.loads(line)
             except json.JSONDecodeError as e:
-                print(f"[SKIP] Invalid JSON {file_path}:{line_no} | {e}")
+                logger.warning(f"[SKIP] Invalid JSON {file_path}:{line_no} | {e}")
                 continue
 
             job_id = record.get("job_id")
             if not job_id:
-                print(f"[SKIP] Missing job_id {file_path}:{line_no}")
+                logger.warning(f"[SKIP] Missing job_id {file_path}:{line_no}")
                 continue
 
             producer.produce(
@@ -86,12 +88,12 @@ def main():
     total_sent = 0
 
     for file_path in iter_jsonl_files(args.input):
-        print(f"[KAFKA] Publishing file: {file_path}")
+        logger.info(f"[KAFKA] Publishing file: {file_path}")
         sent = publish_file(producer, args.topic, file_path)
-        print(f"[KAFKA] Sent {sent} records from {file_path}")
+        logger.info(f"[KAFKA] Sent {sent} records from {file_path}")
         total_sent += sent
 
-    print(f"[KAFKA] Total sent: {total_sent}")
+    logger.info(f"[KAFKA] Total sent: {total_sent}")
 
 
 if __name__ == "__main__":

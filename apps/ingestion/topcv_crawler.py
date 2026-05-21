@@ -13,7 +13,9 @@ import asyncio
 
 from bs4 import BeautifulSoup
 from curl_cffi import requests
+from apps.common.logger import get_logger
 
+logger = get_logger("crawler")
 # ===========================================================
 # 1. CẤU HÌNH GLOBAL & LOGGING
 # ===========================================================
@@ -38,13 +40,7 @@ BATCH_CHECKPOINT_TTL_DAYS = 2
 DEBUG_EXPORT_CARD_LINKS = False
 CARD_LINKS_DEBUG_DIR = "runtime/crawler/debug_card_links"
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s | %(levelname)s | CRAWLER | %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S',
-    handlers=[logging.StreamHandler(sys.stdout)]
-)
-logger = logging.getLogger(__name__)
+logger = get_logger("crawler")
 
 BASE_URL = "https://www.topcv.vn"
 SOURCE = "topcv"
@@ -2113,6 +2109,7 @@ def run_master_crawler(
                                     mark_speed_processed_job(speed_processed_jobs, record.get("job_id"))
                                     save_speed_processed_jobs(speed_processed_jobs)
                             else:
+                                log_failed_link(link, "parse_job_html returned None")
                                 stats["failed_requests"] += 1
                         else:
                             log_failed_link(link, "parse_job_html returned None")
