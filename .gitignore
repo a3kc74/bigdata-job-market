@@ -1,5 +1,3 @@
-jobs_2026-05-08.jsonl
-*.txt
-*.jsonl
-*.jsonl
-raw_jobs_batch.jsonl
+runtime/
+data/raw/jobs/
+processed_links.txt
