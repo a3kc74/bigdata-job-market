@@ -124,7 +124,7 @@ with DAG(
     crawl_jobs = run_spark_job_from_cronjob(
         task_id="crawl_jobs",
         cronjob_name="batch-etl-crawl-jobs",
-        timeout_seconds=3600,
+        timeout_seconds=108000,
     )
 
     raw_to_bronze = run_spark_job_from_cronjob(

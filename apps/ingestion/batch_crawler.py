@@ -120,19 +120,87 @@ class SecureCrawler:
             logger.error(f"[REQUEST ERROR] {e}")
 
             return None
-PROCESSED_LINKS_FILE = "processed_links.txt"
-def load_processed_links():
+CRAWLER_STATE_DIR = Path(os.getenv("CRAWLER_STATE_DIR", "/tmp/batch-crawler-state"))
 
-    if not os.path.exists(PROCESSED_LINKS_FILE):
+PROCESSED_LINKS_FILE = Path(
+    os.getenv(
+        "CRAWLER_PROCESSED_LINKS_FILE",
+        str(CRAWLER_STATE_DIR / "processed_links.txt"),
+    )
+)
+
+FAILED_LINKS_FILE = Path(
+    os.getenv(
+        "CRAWLER_FAILED_LINKS_FILE",
+        str(CRAWLER_STATE_DIR / "failed_links.txt"),
+    )
+)
+
+MISSING_JOBS_LOG = Path(
+    os.getenv(
+        "CRAWLER_MISSING_JOBS_LOG",
+        str(CRAWLER_STATE_DIR / "missing_jobs.log"),
+    )
+)
+
+LAST_COMPLETED_PAGE_FILE = Path(
+    os.getenv(
+        "CRAWLER_LAST_COMPLETED_PAGE_FILE",
+        str(CRAWLER_STATE_DIR / "last_completed_page.txt"),
+    )
+)
+
+
+def ensure_crawler_state_dir() -> None:
+    CRAWLER_STATE_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def load_processed_links() -> set[str]:
+    ensure_crawler_state_dir()
+
+    if not PROCESSED_LINKS_FILE.exists():
         return set()
 
-    with open(PROCESSED_LINKS_FILE, "r", encoding="utf-8") as f:
-        return set(line.strip() for line in f if line.strip())
+    return {
+        line.strip()
+        for line in PROCESSED_LINKS_FILE.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    }
 
-def save_processed_link(link):
 
-    with open(PROCESSED_LINKS_FILE, "a", encoding="utf-8") as f:
-        f.write(link + "\n")
+def append_processed_link(link: str) -> None:
+    ensure_crawler_state_dir()
+
+    with PROCESSED_LINKS_FILE.open("a", encoding="utf-8") as f:
+        f.write(link.strip() + "\n")
+
+
+def append_failed_link(url: str, reason: str) -> None:
+    ensure_crawler_state_dir()
+
+    with FAILED_LINKS_FILE.open("a", encoding="utf-8") as f:
+        f.write(f"{url}\t{reason}\n")
+
+
+def load_last_completed_page() -> int:
+    ensure_crawler_state_dir()
+
+    if not LAST_COMPLETED_PAGE_FILE.exists():
+        return 0
+
+    value = LAST_COMPLETED_PAGE_FILE.read_text(encoding="utf-8").strip()
+    if not value:
+        return 0
+
+    return int(value)
+
+
+def save_last_completed_page(page: int) -> None:
+    ensure_crawler_state_dir()
+
+    tmp_path = LAST_COMPLETED_PAGE_FILE.with_suffix(".tmp")
+    tmp_path.write_text(str(page), encoding="utf-8")
+    tmp_path.replace(LAST_COMPLETED_PAGE_FILE)
 
         
 # Cấu hình Logger định dạng chuẩn cho Docker
@@ -145,6 +213,33 @@ logging.basicConfig(
     ]
 )
 logger = logging.getLogger(__name__)
+
+
+def get_int_env(name: str, default: int) -> int:
+    value = os.getenv(name)
+    if value is None or value.strip() == "":
+        return default
+    return int(value)
+
+
+DETAIL_SLEEP_MIN = get_int_env("CRAWL_DETAIL_SLEEP_MIN_SECONDS", 5)
+DETAIL_SLEEP_MAX = get_int_env("CRAWL_DETAIL_SLEEP_MAX_SECONDS", 10)
+PAGE_SLEEP_MIN = get_int_env("CRAWL_PAGE_SLEEP_MIN_SECONDS", 20)
+PAGE_SLEEP_MAX = get_int_env("CRAWL_PAGE_SLEEP_MAX_SECONDS", 30)
+HTTP_403_COOLDOWN = get_int_env("CRAWL_403_COOLDOWN_SECONDS", 200)
+MAX_DETAIL_RETRIES = get_int_env("CRAWL_MAX_DETAIL_RETRIES", 2)
+
+
+def sleep_between_details() -> None:
+    seconds = random.uniform(DETAIL_SLEEP_MIN, DETAIL_SLEEP_MAX)
+    logger.info("[throttle] sleeping %.1fs between detail requests", seconds)
+    time.sleep(seconds)
+
+
+def sleep_between_pages() -> None:
+    seconds = random.uniform(PAGE_SLEEP_MIN, PAGE_SLEEP_MAX)
+    logger.info("[throttle] sleeping %.1fs between pages", seconds)
+    time.sleep(seconds)
 
 
 # =======================================================
@@ -212,13 +307,17 @@ def build_hdfs_output_path(base_path: str) -> str:
     )
 
 
-def log_failed_page(page, reason, file="failed_pages.log"):
-    with open(file, "a", encoding="utf-8") as f:
+def log_failed_page(page, reason, file=None):
+    target = Path(file) if file else CRAWLER_STATE_DIR / "failed_pages.log"
+    ensure_crawler_state_dir()
+    with target.open("a", encoding="utf-8") as f:
         f.write(f"{page}|{reason}\n")
 
 
-def log_failed_link(url, reason, file="failed_links.log"):
-    with open(file, "a", encoding="utf-8") as f:
+def log_failed_link(url, reason, file=None):
+    target = Path(file) if file else FAILED_LINKS_FILE
+    ensure_crawler_state_dir()
+    with target.open("a", encoding="utf-8") as f:
         f.write(f"{url}|{reason}\n")
 
 # ===========================================================
@@ -313,6 +412,11 @@ def sha256_hash(text):
 # JSON-LD
 # =========================
 def extract_json_ld(soup):
+    """Extract JSON-LD job metadata from a parsed job detail page."""
+    if soup is None:
+        logger.warning("[extract_json_ld] soup is None, skip JSON-LD extraction")
+        return None
+
     scripts = soup.find_all("script", type="application/ld+json")
     for sc in scripts:
         try:
@@ -323,7 +427,7 @@ def extract_json_ld(soup):
                         return d
             elif data.get("@type") == "JobPosting":
                 return data
-        except:
+        except Exception:
             continue
     return {}
 
@@ -1056,6 +1160,9 @@ def extract_flat_from_pagetext(page_text):
 def parse_job(crawler, url):
 
     soup = get_soup(crawler, url)
+    if soup is None:
+        logger.warning("[parse_job] skip job because detail page returned no soup url=%s", url)
+        return None
     
     json_ld = extract_json_ld(soup)
     meta_tags = extract_meta(soup)
@@ -1307,21 +1414,23 @@ def main():
 # =======================================================
 # PHẦN 4: HỆ THỐNG ĐIỀU PHỐI (THE BATCH MANAGER)
 # =======================================================
-def get_last_checkpoint(checkpoint_file="checkpoint.txt"):
+def get_last_checkpoint(checkpoint_file=None):
     """Đọc trang cuối cùng đã cào thành công."""
-    if os.path.exists(checkpoint_file):
-        with open(checkpoint_file, "r") as f:
-            content = f.read().strip()
-            if content.isdigit():
-                return int(content)
+    target = Path(checkpoint_file) if checkpoint_file else LAST_COMPLETED_PAGE_FILE
+    ensure_crawler_state_dir()
+    if target.exists():
+        content = target.read_text(encoding="utf-8").strip()
+        if content.isdigit():
+            return int(content)
     return 0
 
-def save_checkpoint(page_num, checkpoint_file="checkpoint.txt"):
+def save_checkpoint(page_num, checkpoint_file=None):
     """Lưu lại trang vừa cào xong."""
-    with open(checkpoint_file, "w") as f:
-        f.write(str(page_num))
+    target = Path(checkpoint_file) if checkpoint_file else LAST_COMPLETED_PAGE_FILE
+    ensure_crawler_state_dir()
+    target.write_text(str(page_num), encoding="utf-8")
         
-def log_missing_fields(record, url, log_file="missing_jobs.log"):
+def log_missing_fields(record, url, log_file=None):
     """
     Hàm kiểm tra lỗi dựa trên quality_flags đã được tạo sẵn trong record.
     """
@@ -1354,7 +1463,9 @@ def log_missing_fields(record, url, log_file="missing_jobs.log"):
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         log_message = f"[{timestamp}] THIẾU {missing_fields} | URL: {url}\n"
         
-        with open(log_file, "a", encoding="utf-8") as f:
+        target = Path(log_file) if log_file else MISSING_JOBS_LOG
+        ensure_crawler_state_dir()
+        with target.open("a", encoding="utf-8") as f:
             f.write(log_message)
             
         return True # Báo hiệu Job bị thiếu data
@@ -1407,15 +1518,17 @@ def crawl_jobs(total_pages: int | None = None, chunk_size: int = 10):
     if total_pages is None or total_pages <= 0:
         total_pages = get_total_pages(crawler)
     
-    start_page = get_last_checkpoint() + 1
+    processed_links = load_processed_links()
+    logger.info("[CHECKPOINT] Loaded %s processed links", len(processed_links))
+
+    last_completed_page = load_last_completed_page()
+    start_page = max(1, last_completed_page + 1)
+    logger.info("[CHECKPOINT] Resuming from page %s", start_page)
     
     if start_page > total_pages:
         logger.info("[OK] Data fully crawled from before. No need to re-run!")
         return
 
-    logger.info(f"Resuming crawl from page {start_page}...")
-    processed_links = load_processed_links()
-    logger.info(f"[CHECKPOINT] Loaded {len(processed_links)} processed links")
     jobs_with_missing_data = 0
 
     # 2. Loop through chunks
@@ -1431,30 +1544,65 @@ def crawl_jobs(total_pages: int | None = None, chunk_size: int = 10):
             # 4. Loop through each job in page
             for idx, link in enumerate(links):
                 if link in processed_links:
-                    logger.info(f"[SKIP] Already crawled: {link}")
+                    logger.info(f"[CHECKPOINT] Skip already processed link: {link}")
                     continue
                 
                 logger.info(f"   + Crawling detail {idx+1}/{len(links)}: {link}")
-                record = parse_job(crawler, link)
-                
-                if record:
-                    is_missing = log_missing_fields(record, link)
-                    if is_missing:
-                        jobs_with_missing_data += 1
-                        logger.warning(f"      [!] Warning: Job missing data. Logged!")
-                    
-                    save_processed_link(link)
-                    processed_links.add(link)
-                    
-                    yield record
+                record = None
+
+                for attempt in range(1, MAX_DETAIL_RETRIES + 1):
+                    try:
+                        record = parse_job(crawler, link)
+                    except Exception as exc:
+                        logger.warning(
+                            "[crawl_jobs] parse error attempt=%s/%s url=%s error=%s",
+                            attempt,
+                            MAX_DETAIL_RETRIES,
+                            link,
+                            exc,
+                        )
+                        record = None
+
+                    if record:
+                        break
+
+                    logger.warning(
+                        "[crawl_jobs] empty/blocked detail attempt=%s/%s url=%s",
+                        attempt,
+                        MAX_DETAIL_RETRIES,
+                        link,
+                    )
+
+                    if attempt < MAX_DETAIL_RETRIES:
+                        logger.warning(
+                            "[crawl_jobs] cooldown after blocked/empty detail: %ss",
+                            HTTP_403_COOLDOWN,
+                        )
+                        time.sleep(HTTP_403_COOLDOWN)
+
+                if not record:
+                    logger.warning("[crawl_jobs] skip detail after retries url=%s", link)
+                    append_failed_link(link, "parse_failed_or_blocked")
+                    sleep_between_details()
+                    continue
+
+                is_missing = log_missing_fields(record, link)
+                if is_missing:
+                    jobs_with_missing_data += 1
+                    logger.warning("      [!] Warning: Job missing data. Logged!")
+
+                append_processed_link(link)
+                processed_links.add(link)
+
+                yield record
                 
                 # MICRO-SLEEP: random sleep between jobs
-                time.sleep(random.uniform(1.5, 3.5))
+                sleep_between_details()
             
             # Save checkpoint after finishing 1 complete page
-            save_checkpoint(page)
-            logger.info(f"[zZz] Finished page {page}, sleeping 5 seconds...")
-            time.sleep(random.uniform(5, 12))
+            save_last_completed_page(page)
+            logger.info("[CHECKPOINT] Saved last completed page: %s", page)
+            sleep_between_pages()
             
         # MACRO-SLEEP: long sleep after finishing 1 chunk
         if chunk_end < total_pages:
