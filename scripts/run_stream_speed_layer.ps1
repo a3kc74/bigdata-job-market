@@ -84,7 +84,11 @@ function Invoke-DockerSparkSubmit {
     $CassandraHost = if ($env:CASSANDRA_HOST) { $env:CASSANDRA_HOST } else { "cassandra" }
     $CassandraPort = if ($env:CASSANDRA_PORT) { $env:CASSANDRA_PORT } else { "9042" }
     $EsUrl = if ($env:ES_URL) { $env:ES_URL } else { "http://elasticsearch:9200" }
-    $CheckpointDir = if ($env:CHECKPOINT_DIR) { $env:CHECKPOINT_DIR } else { "/checkpoints/speed" }
+    $CheckpointDir = if ($env:CHECKPOINT_DIR -and $env:CHECKPOINT_DIR.StartsWith("/")) {
+        $env:CHECKPOINT_DIR
+    } else {
+        "/checkpoints/speed"
+    }
 
     $dockerEnv = @(
         "export HOME='/tmp/spark-home'",
@@ -111,7 +115,7 @@ function Invoke-DockerSparkSubmit {
     $command = @(
         "cd /opt/spark/workspace",
         "mkdir -p /tmp/spark-home /tmp/spark-pip-cache /tmp/spark-ivy /tmp/spark-python-deps",
-        "python3 -m pip install --target /tmp/spark-python-deps -q python-dotenv cassandra-driver requests",
+        "python3 -m pip install --upgrade --target /tmp/spark-python-deps -q python-dotenv cassandra-driver requests",
         $dockerEnv,
         "/opt/spark/bin/spark-submit --master spark://spark-master:7077 --conf spark.jars.ivy=/tmp/spark-ivy --conf spark.executorEnv.PYTHONPATH=/opt/spark/workspace --packages '$SparkPackages' apps/stream_etl/stream_main.py $quotedSparkArgs"
     ) -join " && "
