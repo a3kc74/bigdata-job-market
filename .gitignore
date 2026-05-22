@@ -5,6 +5,8 @@ __pycache__
 .venv
 .python-version
 
+
+spark_debug.log
 uv.lock
 .env
 .log
@@ -16,4 +18,5 @@ uv.lock
 
 .postman/
 postman/
+
 

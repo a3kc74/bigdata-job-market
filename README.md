@@ -92,6 +92,10 @@ The speed layer is designed as the realtime part of a Lambda Architecture. The e
     └── job_posting.json       # Sample data
 ```
 
+Current speed-layer scripts are available in both Linux/macOS Bash and Windows PowerShell forms:
+`create_kafka_topics`, `init_cassandra`, `run_stream_speed_layer`, `run_fake_crawler`,
+`smoke_test_speed_layer`, `clean_stream_etl_checkpoints`, and `configure_uv_cache`.
+
 ## Prerequisites
 
 | Tool | Required |
@@ -101,46 +105,199 @@ The speed layer is designed as the realtime part of a Lambda Architecture. The e
 | Python 3.10+ | Yes |
 | Java 11+ | For Spark |
 | Apache Spark 3.5.x | For streaming |
+| Hadoop `winutils.exe` | Windows only, required for local Spark mode |
 | PySpark | `pip install pyspark` |
 | confluent-kafka | `pip install confluent-kafka` |
 | pytest | `pip install pytest` |
 | python-dotenv | `pip install python-dotenv` |
 | cassandra-driver | Optional, for Cassandra sinks |
 
-## Quick Start
+## Run Speed Layer
+
+### Linux/macOS Bash
 
 ```bash
-# 1. Setup environment
-cp configs/.env.example .env
+# 1. Start speed-layer infrastructure
+docker compose -f infra/docker-compose/docker-compose.speed.yml up -d
 
-# 2. Setup infrastructure
-bash scripts/setup_all.sh
+# 2. Create required Kafka topics: jobs_raw, jobs_clean, jobs_dead_letter
+bash scripts/create_kafka_topics.sh
 
-# 3. Run the system
-bash scripts/run_all.sh
+# 3. Initialize Cassandra keyspace and realtime tables
+bash scripts/init_cassandra.sh
+
+# 4. Run Spark Structured Streaming
+bash scripts/run_stream_speed_layer.sh
+
+# 5. In another terminal, publish sample crawler records to jobs_raw
+bash scripts/run_fake_crawler.sh
+
+# 6. Verify speed-layer services, Kafka topics, Cassandra tables, and UIs
+bash scripts/smoke_test_speed_layer.sh
 ```
 
-## Run Components Separately
+### Windows PowerShell
+
+```powershell
+# 1. Start speed-layer infrastructure
+docker compose -f infra/docker-compose/docker-compose.speed.yml up -d
+
+# 2. Create required Kafka topics: jobs_raw, jobs_clean, jobs_dead_letter
+.\scripts\create_kafka_topics.ps1
+
+# 3. Initialize Cassandra keyspace and realtime tables
+.\scripts\init_cassandra.ps1
+
+# 4. Run Spark Structured Streaming
+.\scripts\run_stream_speed_layer.ps1
+
+# 5. In another PowerShell window, publish sample crawler records to jobs_raw
+.\scripts\run_fake_crawler.ps1
+
+# 6. Verify speed-layer services, Kafka topics, Cassandra tables, and UIs
+.\scripts\smoke_test_speed_layer.ps1
+```
+
+On Windows, `run_stream_speed_layer.ps1` supports three modes:
+
+```powershell
+# Auto mode: uses local Spark if HADOOP_HOME/bin/winutils.exe exists,
+# otherwise runs Spark inside the Docker spark-master service.
+.\scripts\run_stream_speed_layer.ps1
+
+# Force Docker mode. This avoids Windows HADOOP_HOME / winutils issues.
+.\scripts\run_stream_speed_layer.ps1 -RunMode docker
+
+# Force local Spark mode. Requires Java, PySpark, and HADOOP_HOME/bin/winutils.exe.
+.\scripts\run_stream_speed_layer.ps1 -RunMode local
+```
+
+Docker mode requires the speed-layer Compose services to be running. On a new machine, the first Docker-mode run may need internet access to install Python packages in the Spark container and download Spark's Kafka connector package.
+
+For local Spark mode on Windows, install a Hadoop `winutils.exe` package that matches Spark's Hadoop 3.x runtime, place it under a directory such as `C:\hadoop\bin\winutils.exe`, then set:
+
+```powershell
+$env:HADOOP_HOME = "C:\hadoop"
+$env:Path = "$env:HADOOP_HOME\bin;$env:Path"
+```
+
+`HADOOP_HOME` must be an absolute Windows path with the slash after the drive letter, such as `C:\hadoop`. Do not use `C:hadoop`, `C:HADOOP~1.6`, or a path that points directly to `bin`.
+
+To persist it for future PowerShell sessions:
+
+```powershell
+[Environment]::SetEnvironmentVariable("HADOOP_HOME", "C:\hadoop", "User")
+[Environment]::SetEnvironmentVariable("Path", "C:\hadoop\bin;" + [Environment]::GetEnvironmentVariable("Path", "User"), "User")
+```
+
+Optional checks:
 
 ```bash
-# Run crawler (single URL)
-bash scripts/run_crawler.sh https://www.topcv.vn/viec-lam/example.html
-
-# Run producer (file-based)
-bash scripts/run_producer.sh file TV1_workspace/job_posting.json
-
-# Run producer (live crawl)
-bash scripts/run_producer.sh live --keyword "react native"
-
-# Run Spark streaming
-bash scripts/run_streaming.sh
-
 # Run unit tests
-bash scripts/run_tests.sh
+uv run pytest apps/stream_etl/tests -v
 
-# Run smoke test
-bash scripts/smoke_test_pipeline.sh
+# Consume clean jobs
+docker compose -f infra/docker-compose/docker-compose.speed.yml exec kafka kafka-console-consumer \
+  --bootstrap-server kafka:29092 --topic jobs_clean --from-beginning
+
+# Consume dead-letter records
+docker compose -f infra/docker-compose/docker-compose.speed.yml exec kafka kafka-console-consumer \
+  --bootstrap-server kafka:29092 --topic jobs_dead_letter --from-beginning
+
+# Clean stream_etl checkpoints
+bash scripts/clean_stream_etl_checkpoints.sh
 ```
+
+PowerShell equivalent:
+
+```powershell
+# Run unit tests
+uv run pytest apps/stream_etl/tests -v
+
+# Consume clean jobs
+docker compose -f infra/docker-compose/docker-compose.speed.yml exec kafka kafka-console-consumer `
+  --bootstrap-server kafka:29092 --topic jobs_clean --from-beginning
+
+# Consume dead-letter records
+docker compose -f infra/docker-compose/docker-compose.speed.yml exec kafka kafka-console-consumer `
+  --bootstrap-server kafka:29092 --topic jobs_dead_letter --from-beginning
+
+# Clean stream_etl checkpoints
+.\scripts\clean_stream_etl_checkpoints.ps1
+```
+
+### Clean Stream Checkpoints
+
+Use this when Spark Structured Streaming refuses to restart because checkpoint metadata no longer matches the current query plan. Stop the streaming job first, then run the matching command for your shell.
+
+```bash
+bash scripts/clean_stream_etl_checkpoints.sh
+```
+
+```powershell
+.\scripts\clean_stream_etl_checkpoints.ps1
+```
+
+PowerShell supports explicit checkpoint targets:
+
+```powershell
+# Clean local Windows checkpoints used by -RunMode local
+.\scripts\clean_stream_etl_checkpoints.ps1 -RunMode local
+
+# Clean Docker checkpoints used by -RunMode docker
+.\scripts\clean_stream_etl_checkpoints.ps1 -RunMode docker
+
+# Clean both local and Docker checkpoints
+.\scripts\clean_stream_etl_checkpoints.ps1
+```
+
+Local mode stores checkpoints under `.checkpoints/speed` in this repository unless `CHECKPOINT_DIR` is set. Docker mode stores checkpoints under `/checkpoints/speed` inside the Spark containers. Override Docker `CHECKPOINT_DIR` only for another path under `/checkpoints`.
+
+### Clean Kafka Data
+
+Use this when you want to delete all messages from Kafka and run the speed layer again from an empty Kafka state. Stop the streaming job and producers first, then delete and recreate the three speed-layer topics.
+
+```bash
+docker compose -f infra/docker-compose/docker-compose.speed.yml exec -T kafka kafka-topics \
+  --bootstrap-server kafka:29092 --delete --topic jobs_raw
+docker compose -f infra/docker-compose/docker-compose.speed.yml exec -T kafka kafka-topics \
+  --bootstrap-server kafka:29092 --delete --topic jobs_clean
+docker compose -f infra/docker-compose/docker-compose.speed.yml exec -T kafka kafka-topics \
+  --bootstrap-server kafka:29092 --delete --topic jobs_dead_letter
+
+bash scripts/create_kafka_topics.sh
+```
+
+```powershell
+docker compose -f infra/docker-compose/docker-compose.speed.yml exec -T kafka kafka-topics `
+  --bootstrap-server kafka:29092 --delete --topic jobs_raw
+docker compose -f infra/docker-compose/docker-compose.speed.yml exec -T kafka kafka-topics `
+  --bootstrap-server kafka:29092 --delete --topic jobs_clean
+docker compose -f infra/docker-compose/docker-compose.speed.yml exec -T kafka kafka-topics `
+  --bootstrap-server kafka:29092 --delete --topic jobs_dead_letter
+
+.\scripts\create_kafka_topics.ps1
+```
+
+For a full fresh speed-layer rerun, clean Kafka data and stream checkpoints before starting `run_stream_speed_layer`.
+If topic recreation fails because a topic is still marked for deletion, wait a few seconds and rerun the create-topics command.
+
+## Deployed Ports
+
+| Service | Host Port | URL / Endpoint | Purpose |
+|---------|-----------|----------------|---------|
+| Zookeeper | `2181` | `localhost:2181` | Kafka coordination |
+| Kafka | `9092` | `localhost:9092` | Kafka broker for local producers/consumers |
+| Kafka internal listener | `29092` | `kafka:29092` | Broker endpoint inside Docker network |
+| Kafka UI | `8088` | `http://localhost:8088` | Kafka topics and messages UI |
+| Spark master | `7077` | `spark://localhost:7077` | Spark cluster master endpoint |
+| Spark master UI | `8080` | `http://localhost:8080` | Spark master web UI |
+| Spark worker UI | `8081` | `http://localhost:8081` | Spark worker web UI |
+| Elasticsearch | `9200` | `http://localhost:9200` | Elasticsearch API |
+| Kibana | `5601` | `http://localhost:5601` | Elasticsearch/Kibana UI |
+| Cassandra | `9042` | `localhost:9042` | CQL endpoint |
+| Prometheus | `9090` | `http://localhost:9090` | Metrics and Prometheus UI |
+| Grafana | `3000` | `http://localhost:3000` | Metrics dashboards, default login `admin` / `admin` |
 
 ## Kafka Topics
 
@@ -174,7 +331,7 @@ See [job_clean_schema.py](apps/stream_etl/schemas/job_clean_schema.py) — flat 
 
 | Mechanism | Description |
 |-----------|-------------|
-| Checkpointing | Per-query checkpoint dirs under `/tmp/job-market-checkpoints/speed/` |
+| Checkpointing | Per-query checkpoint dirs under `/checkpoints/speed` in the Spark containers |
 | Dead-letter topic | Malformed or invalid records → `jobs_dead_letter` |
 | Watermark | 1-hour late-data tolerance on `event_ts` |
 | Dedup | `dropDuplicates(["job_id"])` within watermark window |
@@ -201,5 +358,8 @@ See [docs/runbook.md](docs/runbook.md) for detailed troubleshooting.
 |-------|-----------|
 | Kafka not reachable | `docker ps` — ensure speed-kafka is running |
 | Spark Kafka package missing | Use `--packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1` |
-| Checkpoint conflicts | `bash scripts/clean_checkpoints.sh` |
+| Windows `HADOOP_HOME and hadoop.home.dir are unset` | Run `.\scripts\run_stream_speed_layer.ps1 -RunMode docker`, or install `winutils.exe` and set `HADOOP_HOME` for local mode |
+| Kafka `OffsetOutOfRangeException` or `offset was changed` | Kafka data was deleted/recreated while Spark kept old offsets; stop streaming, clean checkpoints, then restart streaming |
+| Checkpoint conflicts | Bash: `bash scripts/clean_stream_etl_checkpoints.sh`; PowerShell: `.\scripts\clean_stream_etl_checkpoints.ps1` |
+| Rerun from empty Kafka topics | Delete and recreate `jobs_raw`, `jobs_clean`, and `jobs_dead_letter` from the Clean Kafka Data section |
 | No messages in jobs_clean | Check producer logs, check DLQ topic |
