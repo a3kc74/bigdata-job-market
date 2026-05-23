@@ -34,42 +34,32 @@ spec:
                 - /opt/spark/bin/spark-submit
                 - --master
                 - local[*]
-                - /opt/spark/work-dir/apps/ingestion/batch_crawler.py
+                - /opt/spark/work-dir/apps/ingestion/run_crawler_to_hdfs.py
+                - --mode
+                - batch
+                - --days
+                - "7"
+                - --max-pages
+                - "0"
+                - --list-pages-per-chunk
+                - "5"
+                - --detail-batch-size
+                - "40"
               env:
                 - name: PYTHONPATH
-                  value: /opt/spark/work-dir
+                  value: "/opt/spark/work-dir"
                 - name: HDFS_RAW_JOBS_PATH
-                  value: hdfs://hdfs-namenode.hdfs.svc.cluster.local:9000/raw/jobs
-                - name: CRAWLER_STATE_DIR
-                  value: /mnt/crawler-checkpoints/topcv
-                - name: CRAWLER_PROCESSED_LINKS_FILE
-                  value: /mnt/crawler-checkpoints/topcv/processed_links.txt
-                - name: CRAWLER_FAILED_LINKS_FILE
-                  value: /mnt/crawler-checkpoints/topcv/failed_links.txt
-                - name: CRAWLER_MISSING_JOBS_LOG
-                  value: /mnt/crawler-checkpoints/topcv/missing_jobs.log
-                - name: CRAWLER_LAST_COMPLETED_PAGE_FILE
-                  value: /mnt/crawler-checkpoints/topcv/last_completed_page.txt
-                - name: CRAWL_OUTPUT_FORMAT
-                  value: jsonl
-                - name: CRAWL_CHUNK_SIZE
-                  value: "10"
-                - name: CRAWL_DETAIL_SLEEP_MIN_SECONDS
-                  value: "5"
-                - name: CRAWL_DETAIL_SLEEP_MAX_SECONDS
-                  value: "10"
-                - name: CRAWL_PAGE_SLEEP_MIN_SECONDS
-                  value: "20"
-                - name: CRAWL_PAGE_SLEEP_MAX_SECONDS
-                  value: "30"
-                - name: CRAWL_403_COOLDOWN_SECONDS
-                  value: "200"
-                - name: CRAWL_MAX_DETAIL_RETRIES
-                  value: "2"
+                  value: "hdfs://hdfs-namenode.hdfs.svc.cluster.local:9000/raw/jobs"
+                - name: CRAWLER_HEADLESS
+                  value: "true"
+                - name: BROWSER_EXECUTABLE_PATH
+                  value: "/usr/bin/google-chrome"
+                - name: CRAWLER_LOCAL_OUTPUT_DIR
+                  value: "/tmp/topcv-crawler-output"
               volumeMounts:
-                - name: crawler-checkpoint
-                  mountPath: /mnt/crawler-checkpoints
+                - name: crawler-runtime
+                  mountPath: /opt/spark/work-dir/runtime
           volumes:
-            - name: crawler-checkpoint
+            - name: crawler-runtime
               persistentVolumeClaim:
                 claimName: batch-crawler-checkpoint-pvc
