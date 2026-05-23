@@ -1,8 +1,78 @@
-# PROJECT ARCHITECTURE — Big Data Job Market (TopCV)
+# Project Architecture — Big Data Job Market
 
-> **Phân tích thị trường việc làm dựa trên dữ liệu từ TopCV**
+## Overview
 
-Lambda Architecture: Historical JSON + Crawler → Batch/Speed Layer → Cassandra / Elasticsearch → FastAPI / Kibana / Grafana
+Hệ thống thu thập và phân tích dữ liệu thị trường lao động từ **TopCV**, áp dụng mô hình **Lambda Architecture** với 5 tầng chức năng.
+
+---
+
+## System Architecture Diagram
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                           DATA SOURCES                                  │
+│                                                                         │
+│          Historical JSON Files          Crawler Producer                │
+│                   │                          │                          │
+└───────────────────┼──────────────────────────┼──────────────────────────┘
+                    │                          │
+        ┌───────────▼──────────┐   ┌───────────▼───────────┐
+        │     BATCH LAYER      │   │     SPEED LAYER       │
+        │                      │   │                       │
+        │    HDFS Raw Zone     │   │         Kafka         │
+        │          ↓           │   │           ↓           │
+        │   Spark Batch ETL    │   │    Spark Structured   │
+        │          ↓           │   │       Streaming       │
+        │   HDFS Bronze Zone   │   │           ↓           │
+        │          ↓           │   │  Realtime Aggregation │
+        │   Spark Batch ETL    │   │                       │
+        │          ↓           │   │                       │
+        │ HDFS Silver/Gold Zone│   │                       │
+        └──────────┬───────────┘   └──────────┬────────────┘
+                   │                          │
+        ┌──────────▼──────────────────────────▼─────────────┐
+        │                  SERVING LAYER                    │
+        │                                                   │
+        │                  Elastic Search                   │
+        │                         ↓                         │
+        │                       Kibana                      │
+        └───────────────────────────────────────────────────┘
+
+┌─────────────────────────────┐
+│       PLATFORM / OPS        │        
+│  Docker / Kubernetes        │
+│  Minikube local deployment  │
+│           ↓                 │
+│      manages all layers     │
+└─────────────────────────────┘
+```
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| **Data Sources** | Python (Requests, BeautifulSoup), Kafka Producer, HDFS Loader |
+| **Batch Layer** | PySpark, HDFS, Parquet |
+| **Speed Layer** | Kafka, Spark Structured Streaming |
+| **Serving Layer** | Elasticsearch, Kibana |
+| **Platform / Ops** | Kubernetes (Minikube), Docker |
+
+---
+
+## Data Model — 4-Layer Medallion Architecture
+
+```
+Raw (JSONL)  →  Bronze (Parquet)  →  Silver (Parquet)  →  Gold (Parquet/Elasticsearch)
+```
+
+| Layer | Format | Location | Description |
+|---|---|---|---|
+| **Raw** | JSONL | `hdfs:///raw/jobs/ingest_date=YYYY-MM-DD/` | Crawler output, passthrough, immutable |
+| **Bronze** | Parquet (Snappy) | `hdfs:///bronze/jobs/ingest_date=YYYY-MM-DD/` | Flatten + cast types + dedup + count metrics |
+| **Silver** | Parquet (Snappy) | `hdfs:///silver/jobs/ingest_date=YYYY-MM-DD/` | Canonicalization (salary, location, experience) |
+| **Gold** | Parquet / Elasticsearch | `hdfs:///gold/` | Denormalized tables for Serving |
 
 ---
 
@@ -10,46 +80,47 @@ Lambda Architecture: Historical JSON + Crawler → Batch/Speed Layer → Cassand
 
 ```
 bigdata-job-market/
-│
 ├── apps/
-│   ├── ingestion/              # TV2 — crawler, historical loader, Kafka producer
-│   ├── batch/                  # TV3 — Spark batch ETL: raw → bronze → silver → gold
-│   ├── stream/                 # TV4 — Spark Structured Streaming, DLQ handler
-│   └── serving/                # TV5 — FastAPI endpoints
-│
-├── data_contracts/             # TV1 — schema definitions, data dictionary
-│   └── data_contract_v1.md     #   Spec đầy đủ cho raw/bronze/silver/gold
-│
+│   ├── batch/
+│   │   └── jobs/
+│   │       ├── raw_to_bronze.py        # Spark ETL: Raw → Bronze
+│   │       ├── bronze_to_silver.py     # Spark ETL: Bronze → Silver (TODO)
+│   │       └── silver_to_gold.py       # Spark ETL: Silver → Gold (TODO)
+│   └── spark/
+│       └── kafka_to_cassandra_es.py    # Structured Streaming job
+├── data/
+│   ├── raw/
+│   │   └── raw_data_format.md          # Raw schema specification
+│   └── bronze/
+│       └── bronze_data_format.md       # Bronze schema specification
+├── docs/
+│   ├── architecture.md                 # This file
+│   ├── hdfs_data_ingestion.md          # How to load raw data into HDFS
+│   ├── raw_to_bronze_runbook.md        # How to run raw_to_bronze job
+│   └── spark_on_minikube.md            # General guide: Spark Jobs on Minikube
 ├── infra/
-│   ├── cassandra/              # K8ssandra manifests
-│   ├── elastic/                # Elasticsearch + Kibana manifests
-│   ├── kafka/                  # Strimzi Kafka manifests
-│   ├── spark/                  # Spark RBAC, Dockerfile
-│   ├── streaming/              # Streaming pipeline docs end-to-end
-│   ├── kubernetes/             # Deployment manifests tổng hợp
-│   └── compose/                # Docker Compose cho local dev
-│
-├── configs/                    # Spark, Kafka, serving configs (YAML)
-├── shared/                     # Shared utils: schemas.py, logger.py, config_loader.py
-├── scripts/                    # Setup, smoke test scripts
-├── tests/                      # Unit & integration tests
-├── docs/                       # Deployment guide, runbook, lineage
-│
-├── PROJECT_ARCHITECTURE.md     # File này
-└── README.md
+│   ├── spark/
+│   │   ├── Dockerfile                  # Spark image with ETL jobs
+│   │   └── 10-rbac.yaml               # Namespace + ServiceAccount + RoleBinding
+│   ├── kubernetes/
+│   │   └── batch-etl-cronjob.yaml     # CronJob: daily raw→bronze
+│   ├── kafka/
+│   ├── cassandra/
+│   └── elastic/
+├── shared/
+│   └── transformations/               # Shared UDFs and helpers (TODO)
+└── tests/                             # Unit tests (TODO)
 ```
 
 ---
 
-## HDFS Layout
+## Deployment Model
 
-```
-/raw/jobs/source=topcv/ingest_date=YYYY-MM-DD/
-/bronze/jobs/source=topcv/ingest_date=YYYY-MM-DD/
-/silver/jobs/posting_date=YYYY-MM-DD/city=<city>/
-/gold/job_facts_daily/date_key=YYYY-MM-DD/
-/gold/skill_counts_daily/date_key=YYYY-MM-DD/
-/gold/company_hiring_by_month/month_key=YYYY-MM/
-```
+All services are containerized with **Docker** and orchestrated by **Kubernetes (Minikube)** for local development. Each layer runs in its own dedicated namespace:
 
-
+| Namespace | Services |
+|---|---|
+| `spark` | Spark Driver Pods, Executor Pods, CronJobs |
+| `hdfs` | HDFS NameNode, DataNode |
+| `kafka` | Kafka Broker, Zookeeper |
+| `elastic` | Elasticsearch, Kibana |

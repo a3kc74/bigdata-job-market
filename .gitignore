@@ -1,16 +1,26 @@
 TV1_workspace/
-TV1_docs/
-__pycache__
+__pycache__/
 
-.venv
+TV1_workspace/
+TV1_docs/
+
+.venv/
 .python-version
 
-
-spark_debug.log
-implementation-notes.md
 uv.lock
 .env
-.log
+*.log
+
+data/mock/
+data/raw/*.jsonl
+data/raw/*.json
+data/raw/*.csv
+spark-warehouse/
+metastore_db/
+derby.log
+
+_SUCCESS
+.*.crc
 
 .agents
 .codex
@@ -21,4 +31,4 @@ uv.lock
 postman/
 runtime/
 
-
+implementation-notes.md

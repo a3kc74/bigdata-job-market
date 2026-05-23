@@ -1,0 +1,82 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: batch-etl-bronze-to-silver
+  namespace: spark
+  labels:
+    app: batch-etl
+    layer: silver
+spec:
+  schedule: "30 19 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        metadata:
+          labels:
+            app: batch-etl
+            job: bronze-to-silver
+        spec:
+          serviceAccountName: spark
+          restartPolicy: Never
+          containers:
+            - name: spark-submit
+              image: spark-job-market:latest
+              imagePullPolicy: IfNotPresent
+              command:
+                - /opt/spark/bin/spark-submit
+                - --master
+                - k8s://https://kubernetes.default.svc:443
+                - --deploy-mode
+                - cluster
+                - --name
+                - bronze-to-silver
+                - --conf
+                - spark.kubernetes.namespace=spark
+                - --conf
+                - spark.kubernetes.authenticate.driver.serviceAccountName=spark
+                - --conf
+                - spark.kubernetes.container.image=spark-job-market:latest
+                - --conf
+                - spark.kubernetes.container.image.pullPolicy=IfNotPresent
+                - --conf
+                - spark.executor.instances=1
+                - --conf
+                - spark.executor.cores=1
+                - --conf
+                - spark.kubernetes.executor.request.cores=250m
+                - --conf
+                - spark.kubernetes.executor.limit.cores=500m
+                - --conf
+                - spark.kubernetes.driver.request.cores=250m
+                - --conf
+                - spark.kubernetes.driver.limit.cores=500m
+                - --conf
+                - spark.executor.memory=768m
+                - --conf
+                - spark.driver.memory=768m
+                - --conf
+                - spark.sql.shuffle.partitions=8
+                - --conf
+                - spark.sql.parquet.enableVectorizedReader=false
+                - --conf
+                - spark.sql.parquet.columnarReaderBatchSize=512
+                - local:///opt/spark/work-dir/jobs/bronze_to_silver.py
+              env:
+                - name: HDFS_NAMENODE_URI
+                  value: "hdfs://hdfs-namenode.hdfs.svc:9000"
+                - name: BRONZE_PATH
+                  value: "hdfs://hdfs-namenode.hdfs.svc:9000/bronze/jobs"
+                - name: SILVER_PATH
+                  value: "hdfs://hdfs-namenode.hdfs.svc:9000/silver/jobs"
+              resources:
+                requests:
+                  cpu: "250m"
+                  memory: "256Mi"
+                limits:
+                  cpu: "500m"
+                  memory: "512Mi"
