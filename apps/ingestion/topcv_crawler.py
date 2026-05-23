@@ -1,3 +1,4 @@
+import asyncio
 import json
 import hashlib
 import re
@@ -9,7 +10,8 @@ from datetime import datetime, UTC, timezone, timedelta
 import logging
 import sys
 import os
-import asyncio
+import contextlib
+import inspect
 
 from bs4 import BeautifulSoup
 from curl_cffi import requests
@@ -45,6 +47,8 @@ logger = get_logger("crawler")
 BASE_URL = "https://www.topcv.vn"
 SOURCE = "topcv"
 
+MAX_LIST_PAGE_REQUEUE = 2
+MAX_DETAIL_REQUEUE = 2
 
 # Biến đếm toàn cục phục vụ chiến lược nghỉ sau mỗi 40 requests của Hoàng
 global_request_count = 0 
@@ -379,7 +383,6 @@ def recover_blocked_request(session, url, context="REQUEST"):
 
     return session, response
 
-# CHỨC NĂNG KIỂM TRA NGƯỠNG NGHỈ TOÀN CỤC CỦA HOÀNG
 def check_and_trigger_global_cooldown():
     global global_request_count
     global_request_count += 1
@@ -387,57 +390,138 @@ def check_and_trigger_global_cooldown():
         cooldown = random.uniform(20, 30) # Nghỉ dài 2.5 - 4.5 phút
         logger.info(f"[GLOBAL COOLDOWN] Đạt ngưỡng {global_request_count} requests. Hệ thống nghỉ xả nhiệt {cooldown:.1f} giây...")
         time.sleep(cooldown)
+
+
+def requeue_list_page_or_fail(page_queue, page_meta, list_url, reason, stats):
+    """
+    Đưa page list lỗi về cuối queue thay vì retry dồn tại chỗ.
+    Sau MAX_LIST_PAGE_REQUEUE lần vẫn lỗi thì mới ghi failed_links.
+    """
+    retry_count = int(page_meta.get("retry_count", 0))
+
+    if retry_count < MAX_LIST_PAGE_REQUEUE:
+        page_meta["retry_count"] = retry_count + 1
+        page_queue.append(page_meta)
+        logger.warning(
+            f"[LIST PAGE RETRY QUEUE] Page {page_meta.get('page')} lỗi, đưa về cuối queue "
+            f"lần {page_meta['retry_count']}/{MAX_LIST_PAGE_REQUEUE}: {reason}"
+        )
+        return True
+
+    logger.error(
+        f"[LIST PAGE] Bỏ page {page_meta.get('page')} sau nhiều lần quay lại: {reason}"
+    )
+    log_failed_link(list_url, reason)
+    stats["failed_requests"] += 1
+    return False
+
+
+def requeue_detail_or_fail(links_queue, job_meta, link, reason, stats):
+    """
+    Đưa detail link lỗi về cuối queue thay vì retry dồn tại chỗ.
+    Sau MAX_DETAIL_REQUEUE lần vẫn lỗi thì mới ghi failed_links.
+    """
+    retry_count = int(job_meta.get("detail_retry_count", 0))
+
+    if retry_count < MAX_DETAIL_REQUEUE:
+        job_meta["detail_retry_count"] = retry_count + 1
+        links_queue.append(job_meta)
+        logger.warning(
+            f"[DETAIL RETRY QUEUE] Link lỗi, đưa về cuối queue "
+            f"lần {job_meta['detail_retry_count']}/{MAX_DETAIL_REQUEUE}: {link} | {reason}"
+        )
+        return True
+
+    logger.error(f"[DETAIL] Bỏ link sau nhiều lần quay lại: {link} | {reason}")
+    log_failed_link(link, reason)
+    stats["failed_requests"] += 1
+    return False
 # ===========================================================
 # 3. GIAI ĐOẠN 1: HARVESTER (LẤY VÉ VIP BẰNG NODRIVER)
 # ===========================================================
 async def get_vip_ticket():
+    browser = None
+
     try:
         import nodriver as uc
+
         logger.info("[HARVESTER] Đang mở Chrome tàng hình (nodriver)...")
-        
         browser = await uc.start(
             headless=False,
-            browser_args=["--disable-blink-features=AutomationControlled"]
+            browser_args=["--disable-blink-features=AutomationControlled"],
         )
-        
+
         logger.info("[HARVESTER] Đang tiến vào TopCV...")
-        page = await browser.get('https://www.topcv.vn')
-        
+        page = await browser.get("https://www.topcv.vn")
+
         logger.info("[HARVESTER] Đang rà soát màng lọc Cloudflare...")
         for _ in range(20):
             title = await page.evaluate("document.title")
             if "Just a moment" not in title and "Cloudflare" not in title:
-                break 
+                break
             await asyncio.sleep(1)
-            
-        await asyncio.sleep(3) 
-        
+
+        await asyncio.sleep(3)
+
         cookies = await browser.cookies.get_all()
         cookie_dict = {c.name: c.value for c in cookies}
         user_agent = await page.evaluate("navigator.userAgent")
-        
-        browser.stop()
-        
-        if len(cookie_dict) > 0:
-            logger.info(f"[HARVESTER] Tuyệt vời! Đã hốt trọn bộ {len(cookie_dict)} Cookies.")
+
+        if cookie_dict:
+            logger.info(f"[HARVESTER] Đã lấy {len(cookie_dict)} cookies.")
             return cookie_dict, user_agent
-        else:
-            logger.error("[HARVESTER] Thất bại! Không kéo được Cookie nào về.")
-            return None, None
-            
+
+        logger.error("[HARVESTER] Không lấy được cookie.")
+        return None, None
+
     except Exception as e:
         logger.error(f"[HARVESTER] Lỗi nghiêm trọng: {e}")
         return None, None
 
+    finally:
+        if browser is not None:
+            # Đóng tab nếu có
+            with contextlib.suppress(Exception):
+                for tab in list(getattr(browser, "tabs", []) or []):
+                    await tab.close()
+
+            # Đóng websocket/CDP connection nếu còn
+            with contextlib.suppress(Exception):
+                conn = getattr(browser, "connection", None)
+                if conn:
+                    await conn.aclose()
+
+            # Gọi stop của nodriver
+            with contextlib.suppress(Exception):
+                browser.stop()
+
+            # Chờ process Chrome chết hẳn nếu nodriver còn giữ _process
+            proc = getattr(browser, "_process", None)
+            if proc is not None:
+                with contextlib.suppress(Exception):
+                    proc.terminate()
+
+                with contextlib.suppress(Exception):
+                    wait_result = proc.wait()
+                    if inspect.isawaitable(wait_result):
+                        await wait_result
+
 # THỨ 3: CƠ CHẾ CIRCUIT BREAKER - LỖI XIN VÉ THÌ NGỦ 1 TIẾNG RỒI THỬ LẠI LẦN CUỐI
-def execute_harvester_with_breaker():
-    cookie_dict, user_agent = asyncio.run(get_vip_ticket())
+async def execute_harvester_with_breaker_async():
+    cookie_dict, user_agent = await get_vip_ticket()
+
     if not cookie_dict:
-        logger.warning("[⚠️ BREAKER] Không lấy được vé VIP. Tiến vào trạng thái giả chết 1 tiếng (3600s)...")
-        time.sleep(3600)
-        logger.info("[⚠️ BREAKER] Hết thời gian cách ly. Tiến hành thử lại lần cuối cùng...")
-        cookie_dict, user_agent = asyncio.run(get_vip_ticket())
+        logger.warning("[⚠️ BREAKER] Không lấy được vé VIP. Ngủ 1 tiếng...")
+        await asyncio.sleep(3600)
+
+        logger.info("[⚠️ BREAKER] Thử lại lần cuối...")
+        cookie_dict, user_agent = await get_vip_ticket()
+
     return cookie_dict, user_agent
+
+
+def execute_harvester_with_breaker():
+    return asyncio.run(execute_harvester_with_breaker_async())
 
 # ===========================================================
 # 4. DATA EXTRACTORS (GIỮ NGUYÊN 100% LOGIC TRÍCH XUẤT CỦA BẠN)
@@ -1901,54 +1985,75 @@ def run_master_crawler(
         # PHA 1: QUÉT LIST PAGE (Theo Lô / Chunk)
         # =====================================================
         if current_page <= end_page and not stop_farming_list_pages:
+            chunk_start = current_page
             chunk_end = min(current_page + list_pages_per_chunk - 1, end_page)
-            logger.info(f"\n=== [PHA 1] QUÉT GOM LINK TỪ TRANG {current_page} ĐẾN {chunk_end} ===")
+            logger.info(f"\n=== [PHA 1] QUÉT GOM LINK TỪ TRANG {chunk_start} ĐẾN {chunk_end} ===")
 
             chunk_farmed = 0
             chunk_new = 0
             chunk_fresh = 0
             chunk_old = 0
 
-            last_scanned_page_in_chunk = current_page - 1
+            last_scanned_page_in_chunk = chunk_start - 1
+            page_queue = [
+                {"page": p_num, "retry_count": 0}
+                for p_num in range(chunk_start, chunk_end + 1)
+            ]
 
-            for p_num in range(current_page, chunk_end + 1):
-                last_scanned_page_in_chunk = p_num
+            while page_queue:
+                page_meta = page_queue.pop(0)
+                p_num = int(page_meta["page"])
+                last_scanned_page_in_chunk = max(last_scanned_page_in_chunk, p_num)
+
                 list_url = f"https://www.topcv.vn/tim-viec-lam-cong-nghe-thong-tin-cr257?sort=up_top&type_keyword=1&page={p_num}&category_family=r257&saturday_status=0"
                 logger.info(f"  -> Đang quét trang danh sách {p_num}...")
 
-                res = None
-                for retry_attempt in range(2):
-                    try:
-                        check_and_trigger_global_cooldown()
-                        res = session.get(list_url, timeout=15)
-                        break
-                    except Exception as net_err:
-                        if retry_attempt == 0:
-                            wait_time = random.uniform(10, 20)
-                            logger.warning(f"Lỗi mạng list trang {p_num}: {net_err}. Thử lại sau {wait_time:.1f}s...")
-                            time.sleep(wait_time)
-                        else:
-                            logger.error(f"Thất bại hoàn toàn khi farm list trang {p_num} sau khi thử lại.")
+                try:
+                    check_and_trigger_global_cooldown()
+                    res = session.get(list_url, timeout=15)
+                except Exception as net_err:
+                    requeue_list_page_or_fail(
+                        page_queue=page_queue,
+                        page_meta=page_meta,
+                        list_url=list_url,
+                        reason=f"list page network error: {net_err}",
+                        stats=stats,
+                    )
+                    continue
 
-                if not res:
+                if res is None:
+                    requeue_list_page_or_fail(
+                        page_queue=page_queue,
+                        page_meta=page_meta,
+                        list_url=list_url,
+                        reason="list page response is None",
+                        stats=stats,
+                    )
                     continue
 
                 if is_blocked_response(res):
-                    session, res = recover_blocked_request(
+                    session, recovered_res = recover_blocked_request(
                         session=session,
                         url=list_url,
                         context=f"LIST PAGE {p_num}",
                     )
 
-                if res is None or is_blocked_response(res):
-                    reason = "list page blocked after recovery"
-                    status = getattr(res, "status_code", None)
-                    if status:
-                        reason = f"HTTP {status} - {reason}"
-                    logger.error(f"[!] Không thể hồi phục list page {p_num}: {reason}")
-                    log_failed_link(list_url, reason)
-                    stats["failed_requests"] += 1
-                    continue
+                    if recovered_res is not None and not is_blocked_response(recovered_res):
+                        res = recovered_res
+                    else:
+                        status = getattr(recovered_res, "status_code", None)
+                        reason = "list page blocked after cookie recovery"
+                        if status:
+                            reason = f"HTTP {status} - {reason}"
+
+                        requeue_list_page_or_fail(
+                            page_queue=page_queue,
+                            page_meta=page_meta,
+                            list_url=list_url,
+                            reason=reason,
+                            stats=stats,
+                        )
+                        continue
 
                 try:
                     soup = BeautifulSoup(res.text, 'html.parser')
@@ -1960,17 +2065,6 @@ def run_master_crawler(
                         threshold_time=threshold_time,
                     )
 
-                    stats["pages_scanned"] += 1
-                    stats["total_farmed_links"] += page_summary["total_job_cards"]
-                    stats["fresh_links_in_window"] += page_summary["fresh_count"]
-                    stats["old_links_skipped_by_time"] += page_summary["old_count"]
-                    stats["no_url_cards"] += page_summary.get("no_url_count", 0)
-                    stats["no_time_cards"] += page_summary.get("no_time_count", 0)
-
-                    chunk_farmed += page_summary["total_job_cards"]
-                    chunk_fresh += page_summary["fresh_count"]
-                    chunk_old += page_summary["old_count"]
-
                     logger.info(
                         f"     Page {p_num}: cards={page_summary['total_job_cards']} | "
                         f"parse_time={page_summary['parseable_time_count']} | "
@@ -1981,11 +2075,29 @@ def run_master_crawler(
                     )
 
                     if page_summary["total_job_cards"] == 0:
-                        with open(f"debug_page_{p_num}.html", "w", encoding="utf-8") as f:
+                        debug_file = f"debug_page_{p_num}.html"
+                        with open(debug_file, "w", encoding="utf-8") as f:
                             f.write(res.text)
-                        logger.warning(f"[EARLY STOP] Page {p_num} không có job card. Dừng quét list page sau.")
-                        stop_farming_list_pages = True
-                        break
+
+                        requeue_list_page_or_fail(
+                            page_queue=page_queue,
+                            page_meta=page_meta,
+                            list_url=list_url,
+                            reason=f"list page has 0 job cards; saved debug html to {debug_file}",
+                            stats=stats,
+                        )
+                        continue
+
+                    stats["pages_scanned"] += 1
+                    stats["total_farmed_links"] += page_summary["total_job_cards"]
+                    stats["fresh_links_in_window"] += page_summary["fresh_count"]
+                    stats["old_links_skipped_by_time"] += page_summary["old_count"]
+                    stats["no_url_cards"] += page_summary.get("no_url_count", 0)
+                    stats["no_time_cards"] += page_summary.get("no_time_count", 0)
+
+                    chunk_farmed += page_summary["total_job_cards"]
+                    chunk_fresh += page_summary["fresh_count"]
+                    chunk_old += page_summary["old_count"]
 
                     for job_meta in fresh_jobs:
                         href = job_meta["url"]
@@ -2023,15 +2135,21 @@ def run_master_crawler(
                     time.sleep(random.uniform(1.5, 3.0))
 
                 except Exception as e:
-                    logger.error(f"Lỗi xử lý DOM trang {p_num}: {e}")
+                    requeue_list_page_or_fail(
+                        page_queue=page_queue,
+                        page_meta=page_meta,
+                        list_url=list_url,
+                        reason=f"list page DOM parse error: {e}",
+                        stats=stats,
+                    )
 
             logger.info(
-                f"[+] HOÀN TẤT PHA 1 (Lô {current_page}-{last_scanned_page_in_chunk}): "
+                f"[+] HOÀN TẤT PHA 1 (Lô {chunk_start}-{last_scanned_page_in_chunk}): "
                 f"cards={chunk_farmed}, fresh={chunk_fresh}, old_skip={chunk_old}, link_mới={chunk_new}."
             )
             logger.info(f"[*] Tổng đạn trong Kho chờ (Queue) hiện tại: {len(links_queue)} links.")
 
-            current_page = last_scanned_page_in_chunk + 1
+            current_page = last_scanned_page_in_chunk + 1 if stop_farming_list_pages else chunk_end + 1
 
         # =====================================================
         # PHA 2: BÓC TÁCH CHI TIẾT (Theo Lô Gối Đầu)
@@ -2049,36 +2167,52 @@ def run_master_crawler(
                     if job_meta.get("updated_text"):
                         logger.info(f"     Listing updated: {job_meta.get('updated_text')}")
 
-                    detail_res = None
-                    for retry_attempt in range(2):
-                        try:
-                            check_and_trigger_global_cooldown()
-                            detail_res = session.get(link, timeout=15)
-                            break
-                        except Exception as net_err:
-                            if retry_attempt == 0:
-                                wait_time = random.uniform(10, 20)
-                                logger.warning(f"Lỗi mạng tại {link}: {net_err}. Thử lại sau {wait_time:.1f}s...")
-                                time.sleep(wait_time)
-                            else:
-                                logger.error(f"Thất bại kết nối link {link} sau khi thử lại.")
+                    try:
+                        check_and_trigger_global_cooldown()
+                        detail_res = session.get(link, timeout=15)
+                    except Exception as net_err:
+                        requeue_detail_or_fail(
+                            links_queue=links_queue,
+                            job_meta=job_meta,
+                            link=link,
+                            reason=f"detail network error: {net_err}",
+                            stats=stats,
+                        )
+                        continue
 
-                    if not detail_res:
-                        log_failed_link(link, "detail request returned None")
-                        stats["failed_requests"] += 1
+                    if detail_res is None:
+                        requeue_detail_or_fail(
+                            links_queue=links_queue,
+                            job_meta=job_meta,
+                            link=link,
+                            reason="detail response is None",
+                            stats=stats,
+                        )
                         continue
 
                     if is_blocked_response(detail_res):
-                        session, detail_res = recover_blocked_request(
+                        session, recovered_res = recover_blocked_request(
                             session=session,
                             url=link,
                             context="DETAIL",
                         )
 
-                    if detail_res is None:
-                        log_failed_link(link, "detail request returned None after recovery")
-                        stats["failed_requests"] += 1
-                        continue
+                        if recovered_res is not None and not is_blocked_response(recovered_res):
+                            detail_res = recovered_res
+                        else:
+                            status = getattr(recovered_res, "status_code", None)
+                            reason = "detail blocked after cookie recovery"
+                            if status:
+                                reason = f"HTTP {status} - {reason}"
+
+                            requeue_detail_or_fail(
+                                links_queue=links_queue,
+                                job_meta=job_meta,
+                                link=link,
+                                reason=reason,
+                                stats=stats,
+                            )
+                            continue
 
                     if detail_res.status_code == 200 and not looks_blocked_or_empty(detail_res.text):
                         record = parse_job_html(detail_res.text, link)
@@ -2109,21 +2243,34 @@ def run_master_crawler(
                                     mark_speed_processed_job(speed_processed_jobs, record.get("job_id"))
                                     save_speed_processed_jobs(speed_processed_jobs)
                             else:
-                                log_failed_link(link, "parse_job_html returned None")
+                                log_failed_link(link, "save_jsonl returned False")
                                 stats["failed_requests"] += 1
                         else:
-                            log_failed_link(link, "parse_job_html returned None")
-                            stats["failed_requests"] += 1
+                            requeue_detail_or_fail(
+                                links_queue=links_queue,
+                                job_meta=job_meta,
+                                link=link,
+                                reason="parse_job_html returned None",
+                                stats=stats,
+                            )
                     else:
                         reason = f"HTTP {detail_res.status_code}"
-                        logger.error(f"  [!] Lỗi {reason} tại {link}.")
-                        log_failed_link(link, reason)
-                        stats["failed_requests"] += 1
+                        requeue_detail_or_fail(
+                            links_queue=links_queue,
+                            job_meta=job_meta,
+                            link=link,
+                            reason=reason,
+                            stats=stats,
+                        )
 
                 except Exception as e:
-                    logger.error(f"  [!] Lỗi hệ thống khi xử lý link {link}: {e}")
-                    log_failed_link(link, str(e))
-                    stats["failed_requests"] += 1
+                    requeue_detail_or_fail(
+                        links_queue=links_queue,
+                        job_meta=job_meta,
+                        link=link,
+                        reason=f"detail system error: {e}",
+                        stats=stats,
+                    )
 
                 time.sleep(random.uniform(1.5, 3.5))
 
