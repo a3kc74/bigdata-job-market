@@ -199,7 +199,9 @@ with DAG(
 
         DRIVER_POD="$(kubectl get pods -n {SPARK_NAMESPACE} \\
           -l spark-role=driver,spark-app-name=speed-stream-es \\
-          -o jsonpath='{{{{.items[0].metadata.name}}}}' 2>/dev/null || true)"
+          --no-headers 2>/dev/null \\
+          | awk 'NR==1 {{print $1}}' \\
+          || true)"
 
         echo "[airflow-speed] streaming driver pod: $DRIVER_POD"
 
