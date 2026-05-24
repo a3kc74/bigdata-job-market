@@ -396,3 +396,17 @@ uv run --project . pytest tests/test_crawler_jsonl_producer.py
 | No records in `jobs_clean` | Check `jobs_dead_letter`, producer logs, and stream logs |
 | Aggregate Cassandra errors | Cassandra service is commented out; disable aggregate toggles or enable Cassandra |
 
+## Salary prediction in speed layer
+
+Speed layer co the load Spark ML PipelineModel da train tu batch de them cac cot
+`salary_display_*`, `salary_predicted_*`, `salary_prediction_applied`, `salary_source` vao
+document realtime. Bat/tat bang:
+
+```env
+ENABLE_SALARY_PREDICTION=true
+SALARY_MODEL_PATH=hdfs://hdfs-namenode.hdfs.svc:9000/models/salary_prediction/latest
+```
+
+Neu model chua ton tai, stream van chay va ghi prediction columns null. Sau khi
+train model moi, restart stream de load model moi. Chi tiet xem
+`docs/salary_prediction_runbook.md`.

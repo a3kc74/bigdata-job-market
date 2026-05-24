@@ -19,6 +19,11 @@ if str(project_root) not in sys.path:
 
 from configs.logger import get_logger
 from configs.settings import settings
+from apps.ml.salary_prediction import (
+    load_salary_prediction_model,
+    score_salary_predictions,
+    with_empty_salary_prediction_columns,
+)
 
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
@@ -229,21 +234,23 @@ def select_gold_columns(df):
         "title", "company_name", "description", "requirements", "benefits", 
 
         # Categorical and filters
-        "company_field", "work_country", "occupationalCategory", "employmentType", "education",
+        "company_field", "work_country", "occupationalCategory", "employmentType", "education", "salary_source",
         "salary_currency", "salary_unit", "skills", "specialty", "location", "location_detail",
 
         # Booleans
-        "has_remote", "experience_required", "salary_is_negotiable", "is_weekend_free",
+        "has_remote", "experience_required", "salary_is_negotiable", "salary_prediction_applied", "is_weekend_free",
 
         # Schedule
         "schedule_type", "schedule",
 
         # Numerical metrics
-        "salary_min_vnd", "salary_max_vnd", "monthOfExperience", "company_scale", "openings",
+        "salary_min_vnd", "salary_max_vnd", "salary_display_min_vnd", "salary_display_max_vnd",
+        "salary_display_avg_vnd", "salary_predicted_min_vnd", "salary_predicted_max_vnd",
+        "salary_predicted_avg_vnd", "monthOfExperience", "company_scale", "openings",
         "benefits_count", "requirements_count", "location_count", "skills_count", "specialty_count",
 
         # Raw display
-        "salary", "company_logo", "company_address", "company_url"
+        "salary", "salary_prediction_model_version", "company_logo", "company_address", "company_url"
     ]
 
     # Ensure we only select columns that exist in the dataframe to avoid errors
@@ -253,11 +260,32 @@ def select_gold_columns(df):
     return df.select(*cols_to_select)
 
 
+def enrich_salary_predictions(df, salary_model=None):
+    """Add model salary fields used by Serving for negotiable salary jobs."""
+
+    if salary_model is None:
+        # Keep schema stable even before the first model is trained; dashboards
+        # can reference salary_display_* without breaking on missing columns.
+        return with_empty_salary_prediction_columns(df)
+
+    # Use the same feature contract as train_salary_model.py:
+    # title, skills, monthOfExperience, location, company_name, has_remote.
+    return score_salary_predictions(
+        df,
+        salary_model,
+        experience_col="monthOfExperience",
+        location_col="location",
+        company_col="company_name",
+        remote_col="has_remote",
+    )
+
+
 ### FULL TRANSFORMATION PIPELINE
-def transform_silver_to_gold(silver_df):
+def transform_silver_to_gold(silver_df, salary_model=None):
     df = parse_schedule(silver_df)
     df = clean_skills(df)
     df = normalize_gold_fields(df)
+    df = enrich_salary_predictions(df, salary_model)
     df = select_gold_columns(df)
     return df
 
@@ -293,7 +321,8 @@ def run(date: str | None = None):
     silver_df = spark.read.parquet(silver_path)
     logger.info(f"Silver records read: {silver_df.count()} rows.")
 
-    gold_df = transform_silver_to_gold(silver_df)
+    salary_model = load_salary_prediction_model(spark, settings.SALARY_MODEL_PATH)
+    gold_df = transform_silver_to_gold(silver_df, salary_model=salary_model)
     logger.info("Silver data transformed to gold data successfully!")
 
     logger.info(f"Writing gold data to {gold_path}...")

@@ -146,6 +146,199 @@ def canonicalize_salary(df):
     )
 
 
+def canonicalize_salary_v2(df):
+    """Normalize salary to VND/month and preserve partial public salary bounds.
+
+    This version fixes cases where display text is "Thoa thuan" but JSON-LD
+    still exposes min/max, plus one-sided public salaries such as
+    "Tren/Lon hon/Tu 40 trieu" and "Den/Toi/Len den 40 trieu".
+    """
+    currency_factor = F.when(
+        F.upper(F.col("salary_currency")) == F.lit("USD"),
+        F.lit(float(settings.USD_TO_VND))
+    ).otherwise(F.lit(1.0))
+
+    period_factor = F.when(
+        F.upper(F.col("salary_unit")) == F.lit("YEAR"),
+        F.lit(1.0 / 12)
+    ).otherwise(F.lit(1.0))
+
+    json_min_vnd = (F.col("salary_min") * currency_factor * period_factor).cast(LongType())
+    json_max_vnd = (F.col("salary_max") * currency_factor * period_factor).cast(LongType())
+
+    _RANGE_TRIEU = r"(?i)(\d+(?:[.,]\d+)?)\s*-\s*(\d+(?:[.,]\d+)?)\s*(?:tri[eệ]u|tr)"
+    _LOWER_BOUND_TRIEU = (
+        r"(?i)(?:tr[eê]n|l[oơ]n\s*h[oơ]n|h[oơ]n|t[uừ]|>=|>)\s*"
+        r"(\d+(?:[.,]\d+)?)\s*(?:tri[eệ]u|tr)"
+    )
+    _UPPER_BOUND_TRIEU = (
+        r"(?i)(?:d[uư][oớ]i|t[oố]i\s*[dđ]a|l[eê]n\s*[dđ][eế]n|"
+        r"[dđ][eế]n|t[oớ]i|up\s*to|<=|<)\s*"
+        r"(\d+(?:[.,]\d+)?)\s*(?:tri[eệ]u|tr)"
+    )
+    _SINGLE_TRIEU = r"(?i)^\s*(\d+(?:[.,]\d+)?)\s*(?:tri[eệ]u|tr)\s*$"
+
+    df = (
+        df
+        .withColumn("_regex_min_raw", F.regexp_replace(F.regexp_extract(F.col("salary"), _RANGE_TRIEU, 1), ",", "."))
+        .withColumn("_regex_max_raw", F.regexp_replace(F.regexp_extract(F.col("salary"), _RANGE_TRIEU, 2), ",", "."))
+        .withColumn("_regex_lower_bound_raw", F.regexp_replace(F.regexp_extract(F.col("salary"), _LOWER_BOUND_TRIEU, 1), ",", "."))
+        .withColumn("_regex_upper_bound_raw", F.regexp_replace(F.regexp_extract(F.col("salary"), _UPPER_BOUND_TRIEU, 1), ",", "."))
+        .withColumn("_regex_single_raw", F.regexp_replace(F.regexp_extract(F.col("salary"), _SINGLE_TRIEU, 1), ",", "."))
+    )
+
+    regex_min = (
+        F.expr("try_cast(nullif(_regex_min_raw, '') as double)") * F.lit(1_000_000.0)
+    ).cast(LongType())
+    regex_max = (
+        F.expr("try_cast(nullif(_regex_max_raw, '') as double)") * F.lit(1_000_000.0)
+    ).cast(LongType())
+    regex_lower_bound = (
+        F.expr("try_cast(nullif(_regex_lower_bound_raw, '') as double)") * F.lit(1_000_000.0)
+    ).cast(LongType())
+    regex_upper_bound = (
+        F.expr("try_cast(nullif(_regex_upper_bound_raw, '') as double)") * F.lit(1_000_000.0)
+    ).cast(LongType())
+    regex_single = (
+        F.expr("try_cast(nullif(_regex_single_raw, '') as double)") * F.lit(1_000_000.0)
+    ).cast(LongType())
+
+    resolved_min_vnd = F.coalesce(
+        json_min_vnd,
+        F.when(regex_min > 0, regex_min),
+        F.when(regex_lower_bound > 0, regex_lower_bound),
+        F.when(regex_single > 0, regex_single),
+    )
+    resolved_max_vnd = F.coalesce(
+        json_max_vnd,
+        F.when(regex_max > 0, regex_max),
+        F.when(regex_upper_bound > 0, regex_upper_bound),
+        F.when(regex_single > 0, regex_single),
+    )
+
+    has_usable_salary = resolved_min_vnd.isNotNull() | resolved_max_vnd.isNotNull()
+    salary_text = F.lower(F.coalesce(F.col("salary"), F.lit("")))
+    looks_negotiable = (
+        salary_text.rlike(r"thá»a\s*thuáº­n|thoáº£\s*thuáº­n|negotiable|cáº¡nh\s*tranh")
+        | (F.trim(salary_text) == "")
+    )
+
+    return (
+        df.withColumns({
+            "salary_min_vnd":         resolved_min_vnd,
+            "salary_max_vnd":         resolved_max_vnd,
+            "salary_is_negotiable":   (~has_usable_salary) & looks_negotiable,
+        })
+        .drop(
+            "_regex_min_raw",
+            "_regex_max_raw",
+            "_regex_lower_bound_raw",
+            "_regex_upper_bound_raw",
+            "_regex_single_raw",
+        )
+    )
+
+
+def canonicalize_salary_v3(df):
+    """Normalize salary to VND/month with a strict public-salary-first rule.
+
+    Why this exists:
+    - Some records display "Thoa thuan" but JSON-LD still has min/max salary.
+      In that case JSON-LD is treated as real public salary, so ML must not
+      overwrite it.
+    - One-sided public salaries such as "Lon hon 40 trieu" still carry useful
+      information. We keep the known bound and leave the other side null.
+    - Only records with no usable min/max are marked negotiable for prediction.
+    """
+
+    currency_factor = F.when(
+        F.upper(F.col("salary_currency")) == F.lit("USD"),
+        F.lit(float(settings.USD_TO_VND)),
+    ).otherwise(F.lit(1.0))
+
+    period_factor = F.when(
+        F.upper(F.col("salary_unit")) == F.lit("YEAR"),
+        F.lit(1.0 / 12),
+    ).otherwise(F.lit(1.0))
+
+    json_min_vnd = (F.col("salary_min") * currency_factor * period_factor).cast(LongType())
+    json_max_vnd = (F.col("salary_max") * currency_factor * period_factor).cast(LongType())
+
+    million_unit = r"(?:tri\S*u|tr)"
+    range_trieu = rf"(?i)(\d+(?:[.,]\d+)?)\s*-\s*(\d+(?:[.,]\d+)?)\s*{million_unit}"
+    lower_bound_trieu = (
+        rf"(?i)(?:trên|tren|lớn\s*hơn|lon\s*hon|hơn|hon|từ|tu|>=|>)\s*"
+        rf"(\d+(?:[.,]\d+)?)\s*{million_unit}"
+    )
+    upper_bound_trieu = (
+        rf"(?i)(?:dưới|duoi|tối\s*đa|toi\s*da|lên\s*đến|len\s*den|"
+        rf"đến|den|tới|toi|up\s*to|<=|<)\s*"
+        rf"(\d+(?:[.,]\d+)?)\s*{million_unit}"
+    )
+    single_trieu = rf"(?i)^\s*(\d+(?:[.,]\d+)?)\s*{million_unit}\s*$"
+
+    df = (
+        df.withColumn("_regex_min_raw", F.regexp_replace(F.regexp_extract(F.col("salary"), range_trieu, 1), ",", "."))
+        .withColumn("_regex_max_raw", F.regexp_replace(F.regexp_extract(F.col("salary"), range_trieu, 2), ",", "."))
+        .withColumn(
+            "_regex_lower_bound_raw",
+            F.regexp_replace(F.regexp_extract(F.col("salary"), lower_bound_trieu, 1), ",", "."),
+        )
+        .withColumn(
+            "_regex_upper_bound_raw",
+            F.regexp_replace(F.regexp_extract(F.col("salary"), upper_bound_trieu, 1), ",", "."),
+        )
+        .withColumn("_regex_single_raw", F.regexp_replace(F.regexp_extract(F.col("salary"), single_trieu, 1), ",", "."))
+    )
+
+    regex_min = (F.expr("try_cast(nullif(_regex_min_raw, '') as double)") * F.lit(1_000_000.0)).cast(LongType())
+    regex_max = (F.expr("try_cast(nullif(_regex_max_raw, '') as double)") * F.lit(1_000_000.0)).cast(LongType())
+    regex_lower_bound = (
+        F.expr("try_cast(nullif(_regex_lower_bound_raw, '') as double)") * F.lit(1_000_000.0)
+    ).cast(LongType())
+    regex_upper_bound = (
+        F.expr("try_cast(nullif(_regex_upper_bound_raw, '') as double)") * F.lit(1_000_000.0)
+    ).cast(LongType())
+    regex_single = (F.expr("try_cast(nullif(_regex_single_raw, '') as double)") * F.lit(1_000_000.0)).cast(LongType())
+
+    resolved_min_vnd = F.coalesce(
+        json_min_vnd,
+        F.when(regex_min > 0, regex_min),
+        F.when(regex_lower_bound > 0, regex_lower_bound),
+        F.when(regex_single > 0, regex_single),
+    )
+    resolved_max_vnd = F.coalesce(
+        json_max_vnd,
+        F.when(regex_max > 0, regex_max),
+        F.when(regex_upper_bound > 0, regex_upper_bound),
+        F.when(regex_single > 0, regex_single),
+    )
+
+    has_usable_salary = resolved_min_vnd.isNotNull() | resolved_max_vnd.isNotNull()
+    salary_text = F.lower(F.coalesce(F.col("salary"), F.lit("")))
+    looks_negotiable = (
+        salary_text.rlike(r"th\S*a\s*thu\S*n|tho\S*a\s*thu\S*n|negotiable|canh\s*tranh|c\S*nh\s*tranh")
+        | (F.trim(salary_text) == "")
+    )
+
+    return (
+        df.withColumns(
+            {
+                "salary_min_vnd": resolved_min_vnd,
+                "salary_max_vnd": resolved_max_vnd,
+                "salary_is_negotiable": (~has_usable_salary) & looks_negotiable,
+            }
+        )
+        .drop(
+            "_regex_min_raw",
+            "_regex_max_raw",
+            "_regex_lower_bound_raw",
+            "_regex_upper_bound_raw",
+            "_regex_single_raw",
+        )
+    )
+
+
 ### 4. Location canonical -> location_count, location_detail, has_remote
 def process_location(df):
     """
@@ -186,7 +379,7 @@ def transform_bronze_to_silver(bronze_df):
     df = bronze_df.withColumnRenamed("event_ts", "date_posted")
     df = parse_json_ld(df)
     df = resolve_experience(df)
-    df = canonicalize_salary(df)
+    df = canonicalize_salary_v3(df)
     df = process_location(df)
     return df
 
