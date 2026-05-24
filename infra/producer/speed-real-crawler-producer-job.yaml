@@ -1,0 +1,96 @@
+﻿apiVersion: batch/v1
+kind: Job
+metadata:
+  name: speed-real-crawler-producer
+  namespace: spark
+  labels:
+    app: speed-real-crawler-producer
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app: speed-real-crawler-producer
+    spec:
+      restartPolicy: Never
+      serviceAccountName: spark
+      containers:
+        - name: speed-crawler-producer
+          image: spark-job-market:latest
+          imagePullPolicy: IfNotPresent
+          workingDir: /opt/spark/work-dir
+          env:
+            - name: PYTHONPATH
+              value: "/opt/spark/work-dir"
+
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "my-cluster-kafka-bootstrap.kafka.svc.cluster.local:9092"
+            - name: RAW_TOPIC
+              value: "jobs_raw"
+
+            - name: CRAWLER_HEADLESS
+              value: "true"
+            - name: BROWSER_EXECUTABLE_PATH
+              value: "/usr/bin/google-chrome"
+            - name: CRAWLER_LOCAL_OUTPUT_DIR
+              value: "/tmp/topcv-crawler-output"
+            - name: CRAWLER_LOG_DIR
+              value: "runtime/logs"
+
+            - name: SPEED_CRAWL_MAX_PAGES
+              value: "15"
+            - name: SPEED_UPDATED_WITHIN_MINUTES
+              value: "30"
+            - name: SPEED_LIST_PAGES_PER_CHUNK
+              value: "5"
+            - name: SPEED_DETAIL_BATCH_SIZE
+              value: "40"
+
+            - name: CRAWLER_JSONL_INPUT
+              value: "/tmp/topcv-crawler-output/source=topcv/ingest_date=*/jobs_speed_*.jsonl"
+            - name: CRAWLER_JSONL_EVENT_TIME_MODE
+              value: "now"
+            - name: CRAWLER_JSONL_LATEST_ONLY
+              value: "true"
+            - name: CRAWLER_JSONL_CHECKPOINT_FILE
+              value: "runtime/producer/crawler_jsonl_offsets.json"
+            - name: CRAWLER_JSONL_LOG_EVERY
+              value: "10"
+
+          command:
+            - /bin/bash
+            - -lc
+          args:
+            - |
+              set -euo pipefail
+
+              mkdir -p /tmp/topcv-crawler-output runtime/producer runtime/crawler runtime/logs
+
+              echo "[speed-real] Running TopCV speed crawler..."
+              python3 -m apps.ingestion.run_crawler \
+                --mode speed \
+                --max-pages "${SPEED_CRAWL_MAX_PAGES}" \
+                --updated-within-minutes "${SPEED_UPDATED_WITHIN_MINUTES}" \
+                --list-pages-per-chunk "${SPEED_LIST_PAGES_PER_CHUNK}" \
+                --detail-batch-size "${SPEED_DETAIL_BATCH_SIZE}"
+
+              echo "[speed-real] Publishing crawler JSONL output to Kafka..."
+              python3 -m apps.producer.crawler_jsonl_producer \
+                --input "${CRAWLER_JSONL_INPUT}" \
+                --latest-only \
+                --event-time-mode "${CRAWLER_JSONL_EVENT_TIME_MODE}" \
+                --bootstrap-servers "${KAFKA_BOOTSTRAP_SERVERS}" \
+                --topic "${RAW_TOPIC}" \
+                --checkpoint-file "${CRAWLER_JSONL_CHECKPOINT_FILE}" \
+                --log-every "${CRAWLER_JSONL_LOG_EVERY}"
+
+              echo "[speed-real] Done."
+
+          volumeMounts:
+            - name: speed-runtime
+              mountPath: /opt/spark/work-dir/runtime
+
+      volumes:
+        - name: speed-runtime
+          persistentVolumeClaim:
+            claimName: spark-speed-checkpoints-pvc

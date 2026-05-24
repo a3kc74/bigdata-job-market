@@ -1,5 +1,7 @@
 import argparse
+import os
 from datetime import datetime, timedelta
+from pathlib import Path
 
 from apps.ingestion import topcv_crawler as crawler
 
@@ -9,11 +11,11 @@ def build_output_path(mode: str) -> str:
     ingest_date = now.strftime("%Y-%m-%d")
     ts = now.strftime("%Y%m%d_%H%M%S")
 
-    return (
-        f"data/raw/jobs/source=topcv/"
-        f"ingest_date={ingest_date}/"
-        f"jobs_{mode}_{ts}.jsonl"
-    )
+    local_output_base = Path(os.getenv("CRAWLER_LOCAL_OUTPUT_DIR", "/tmp/topcv-crawler-output"))
+    output_dir = local_output_base / "source=topcv" / f"ingest_date={ingest_date}"
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    return str(output_dir / f"jobs_{mode}_{ts}.jsonl")
 
 
 def run_speed(args):

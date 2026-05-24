@@ -1,3 +1,8 @@
+# Deployment for the job-search FastAPI service.
+#
+# The API reads from Elasticsearch and exposes search/detail endpoints for the
+# serving layer.
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:

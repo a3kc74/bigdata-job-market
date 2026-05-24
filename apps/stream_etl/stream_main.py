@@ -16,10 +16,7 @@ if PROJECT_ROOT not in sys.path:
 load_dotenv()
 
 from apps.stream_etl.sinks.elasticsearch_sink import write_jobs_realtime
-from apps.stream_etl.sinks.jobs_per_10m_sink import write_jobs_per_10m
 from apps.stream_etl.sinks.kafka_sink import clean_jobs_to_kafka, dead_letter_to_kafka
-from apps.stream_etl.sinks.salary_bins_realtime_sink import write_salary_bins_hourly
-from apps.stream_etl.sinks.top_skills_hourly_sink import write_top_skills_hourly
 from apps.stream_etl.stateful_jobs.jobs_per_10m import build_jobs_per_10m
 from apps.stream_etl.stateful_jobs.salary_bins_realtime import build_salary_bins_hourly
 from apps.stream_etl.stateful_jobs.top_skills_hourly import build_skill_counts_hourly
@@ -37,7 +34,6 @@ DEAD_LETTER_TOPIC = os.getenv("DEAD_LETTER_TOPIC", "jobs_dead_letter")
 CHECKPOINT_DIR = os.getenv("CHECKPOINT_DIR", "/checkpoints/speed")
 TRIGGER_SECONDS = os.getenv("TRIGGER_SECONDS", "10")
 STARTING_OFFSETS = os.getenv("STARTING_OFFSETS", "earliest")
-FAIL_ON_DATA_LOSS = os.getenv("FAIL_ON_DATA_LOSS", "false").lower() in {"1", "true", "yes"}
 WRITE_ELASTICSEARCH = os.getenv("WRITE_ELASTICSEARCH", "true").lower() in {"1", "true", "yes"}
 WRITE_CONSOLE_DEBUG = os.getenv("WRITE_CONSOLE_DEBUG", "false").lower() in {"1", "true", "yes"}
 ENABLE_JOBS_PER_10M = os.getenv("ENABLE_JOBS_PER_10M", "true").lower() in {"1", "true", "yes"}
@@ -69,7 +65,6 @@ def main() -> None:
         f"bootstrap={BOOTSTRAP} raw_topic={RAW_TOPIC} clean_topic={CLEAN_TOPIC} "
         f"dead_letter_topic={DEAD_LETTER_TOPIC} checkpoint_dir={CHECKPOINT_DIR} "
         f"starting_offsets={STARTING_OFFSETS} trigger_seconds={TRIGGER_SECONDS} "
-        f"fail_on_data_loss={FAIL_ON_DATA_LOSS} "
         f"write_elasticsearch={WRITE_ELASTICSEARCH} write_console_debug={WRITE_CONSOLE_DEBUG} "
         f"enable_jobs_per_10m={ENABLE_JOBS_PER_10M} "
         f"enable_top_skills_hourly={ENABLE_TOP_SKILLS_HOURLY} "
@@ -82,7 +77,6 @@ def main() -> None:
         .option("kafka.bootstrap.servers", BOOTSTRAP)
         .option("subscribe", RAW_TOPIC)
         .option("startingOffsets", STARTING_OFFSETS)
-        .option("failOnDataLoss", str(FAIL_ON_DATA_LOSS).lower())
         .load()
     )
 
@@ -123,10 +117,12 @@ def main() -> None:
         )
 
     if ENABLE_JOBS_PER_10M:
+        from apps.stream_etl.sinks.jobs_per_10m_sink import write_jobs_per_10m
+
         jobs_per_10m_df = build_jobs_per_10m(clean_base_df)
         queries.append(
             jobs_per_10m_df.writeStream.foreachBatch(write_jobs_per_10m)
-            # .queryName("phase4_jobs_per_10m_to_cassandra_elasticsearch")
+            .queryName("phase4_jobs_per_10m_to_elasticsearch")
             .option("checkpointLocation", f"{CHECKPOINT_DIR}/jobs_per_10m")
             .outputMode("update")
             .trigger(processingTime=f"{TRIGGER_SECONDS} seconds")
@@ -134,10 +130,12 @@ def main() -> None:
         )
 
     if ENABLE_TOP_SKILLS_HOURLY:
+        from apps.stream_etl.sinks.top_skills_hourly_sink import write_top_skills_hourly
+
         skill_counts_hourly_df = build_skill_counts_hourly(clean_base_df)
         queries.append(
             skill_counts_hourly_df.writeStream.foreachBatch(write_top_skills_hourly)
-            # .queryName("phase5_top_skills_hourly_to_cassandra_elasticsearch")
+            .queryName("phase5_top_skills_hourly_to_elasticsearch")
             .option("checkpointLocation", f"{CHECKPOINT_DIR}/top_skills_hourly")
             .outputMode("update")
             .trigger(processingTime=f"{TRIGGER_SECONDS} seconds")
@@ -145,10 +143,12 @@ def main() -> None:
         )
 
     if ENABLE_SALARY_BINS_HOURLY:
+        from apps.stream_etl.sinks.salary_bins_realtime_sink import write_salary_bins_hourly
+
         salary_bins_hourly_df = build_salary_bins_hourly(clean_base_df)
         queries.append(
             salary_bins_hourly_df.writeStream.foreachBatch(write_salary_bins_hourly)
-            # .queryName("phase6_salary_bins_hourly_to_cassandra_elasticsearch")
+            .queryName("phase6_salary_bins_hourly_to_elasticsearch")
             .option("checkpointLocation", f"{CHECKPOINT_DIR}/salary_bins_hourly")
             .outputMode("update")
             .trigger(processingTime=f"{TRIGGER_SECONDS} seconds")

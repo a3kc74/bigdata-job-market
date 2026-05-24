@@ -82,34 +82,56 @@ Raw (JSONL)  →  Bronze (Parquet)  →  Silver (Parquet)  →  Gold (Parquet/El
 bigdata-job-market/
 ├── apps/
 │   ├── batch/
-│   │   └── jobs/
+│   │   └── spark/
 │   │       ├── raw_to_bronze.py        # Spark ETL: Raw → Bronze
-│   │       ├── bronze_to_silver.py     # Spark ETL: Bronze → Silver (TODO)
-│   │       └── silver_to_gold.py       # Spark ETL: Silver → Gold (TODO)
-│   └── spark/
-│       └── kafka_to_cassandra_es.py    # Structured Streaming job
+│   │       ├── bronze_to_silver.py     # Spark ETL: Bronze → Silver
+│   │       ├── silver_to_gold.py       # Spark ETL: Silver → Gold
+│   │       └── gold_to_elasticsearch.py # Load Gold layer to Elasticsearch
+│   ├── stream_etl/
+│   │   ├── stream_main.py              # Spark Structured Streaming main
+│   │   ├── sinks/
+│   │   │   ├── elasticsearch_sink.py   # Write realtime jobs to ES
+│   │   │   ├── jobs_per_10m_sink.py    # Write job counts to ES
+│   │   │   ├── top_skills_hourly_sink.py # Write top skills to ES
+│   │   │   └── salary_bins_realtime_sink.py # Write salary aggregates to ES
+│   │   └── stateful_jobs/
+│   ├── producer/                       # Kafka producers
+│   └── ingestion/                      # Real crawler
 ├── data/
 │   ├── raw/
-│   │   └── raw_data_format.md          # Raw schema specification
-│   └── bronze/
-│       └── bronze_data_format.md       # Bronze schema specification
+│   │   └── raw_data_format.md
+│   ├── bronze/
+│   │   └── bronze_data_format.md
+│   ├── silver/
+│   └── gold/
 ├── docs/
-│   ├── architecture.md                 # This file
-│   ├── hdfs_data_ingestion.md          # How to load raw data into HDFS
-│   ├── raw_to_bronze_runbook.md        # How to run raw_to_bronze job
-│   └── spark_on_minikube.md            # General guide: Spark Jobs on Minikube
 ├── infra/
 │   ├── spark/
-│   │   ├── Dockerfile                  # Spark image with ETL jobs
-│   │   └── 10-rbac.yaml               # Namespace + ServiceAccount + RoleBinding
-│   ├── kubernetes/
-│   │   └── batch-etl-cronjob.yaml     # CronJob: daily raw→bronze
+│   │   ├── Dockerfile                  # Spark image with batch + streaming
+│   │   ├── 10-rbac.yaml
+│   │   ├── raw-to-bronze-cronjob.yaml
+│   │   ├── bronze-to-silver-cronjob.yaml
+│   │   ├── silver-to-gold-cronjob.yaml
+│   │   ├── gold-to-elasticsearch-cronjob.yaml
+│   │   └── speed-stream-es-job.yaml    # Streaming ES-only job
+│   ├── hdfs/
+│   │   └── hdfs.yaml                   # HDFS 3-node cluster
 │   ├── kafka/
-│   ├── cassandra/
-│   └── elastic/
+│   │   ├── kafka-cluster.yaml          # Kafka KRaft mode
+│   │   └── topics.yaml                 # Kafka topics
+│   ├── search/
+│   │   ├── elasticsearch.yaml
+│   │   └── kibana.yaml
+│   ├── serving/
+│   │   └── api.yaml                    # FastAPI search endpoint
+│   ├── namespaces/
+│   │   └── all.yaml                    # hdfs, spark, search, serving, kafka
+│   └── docker-compose/
+│       └── docker-compose.speed.yml    # Local Docker Compose (dev)
 ├── shared/
-│   └── transformations/               # Shared UDFs and helpers (TODO)
-└── tests/                             # Unit tests (TODO)
+│   └── transformations/
+├── tests/
+└── scripts/
 ```
 
 ---

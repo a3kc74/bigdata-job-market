@@ -1,17 +1,17 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: hdfs
+# Kubernetes namespaces used by the job-market data platform.
+#
+# Namespaces separate infrastructure concerns:
+#   hdfs     - HDFS storage
+#   spark    - Spark jobs and batch/streaming workloads
+#   search   - Elasticsearch and Kibana
+#   kafka    - Kafka and Strimzi resources
+#   serving  - API service
+#   airflow  - Airflow orchestration
 ---
 apiVersion: v1
 kind: Namespace
 metadata:
   name: spark
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: database
 ---
 apiVersion: v1
 kind: Namespace
@@ -27,3 +27,8 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: kafka
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: airflow

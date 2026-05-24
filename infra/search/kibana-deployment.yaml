@@ -1,3 +1,7 @@
+# Kibana deployment for inspecting Elasticsearch indexes in the local cluster.
+#
+# Use Kibana for manual exploration of batch and realtime indexes during demo.
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:

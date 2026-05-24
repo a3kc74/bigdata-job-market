@@ -1,0 +1,49 @@
+# Kafka topics used by the job-market speed layer.
+#
+# Topics:
+#   jobs-raw          - raw job events from producers
+#   jobs-clean        - cleaned streaming records
+#   jobs-dead-letter  - invalid records or processing failures
+---
+apiVersion: kafka.strimzi.io/v1
+kind: KafkaTopic
+metadata:
+  name: jobs-raw
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: my-cluster
+spec:
+  topicName: jobs_raw
+  partitions: 3
+  replicas: 1
+  config:
+    retention.ms: 604800000
+---
+apiVersion: kafka.strimzi.io/v1
+kind: KafkaTopic
+metadata:
+  name: jobs-clean
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: my-cluster
+spec:
+  topicName: jobs_clean
+  partitions: 3
+  replicas: 1
+  config:
+    retention.ms: 604800000
+---
+apiVersion: kafka.strimzi.io/v1
+kind: KafkaTopic
+metadata:
+  name: jobs-dead-letter
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: my-cluster
+spec:
+  topicName: jobs_dead_letter
+  partitions: 3
+  replicas: 1
+  config:
+    retention.ms: 604800000
+

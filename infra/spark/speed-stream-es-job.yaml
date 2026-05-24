@@ -1,0 +1,166 @@
+# Kubernetes Job that submits the Spark Structured Streaming speed layer.
+#
+# Data flow:
+#   Kafka jobs_raw
+#     -> Spark Structured Streaming
+#     -> Elasticsearch realtime indexes
+#
+# Realtime indexes:
+#   realtime_jobs_v1
+#   realtime_job_counts_10m_v1
+#   realtime_salary_bins_hourly_v1
+#   realtime_skill_counts_hourly_v1
+#   realtime_top_skills_hourly_v1
+#
+# This is a long-running streaming job. Delete and recreate the Job when changing
+# immutable Kubernetes Job fields.
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: speed-stream-es-submit
+  namespace: spark
+  labels:
+    app: speed-stream
+    sink: elasticsearch
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      labels:
+        app: speed-stream
+        sink: elasticsearch
+    spec:
+      serviceAccountName: spark
+      restartPolicy: Never
+      containers:
+        - name: spark-submit
+          image: spark-job-market:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: HOME
+              value: /tmp
+
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "my-cluster-kafka-bootstrap.kafka.svc.cluster.local:9092"
+
+            - name: ES_URL
+              value: "http://elasticsearch.search.svc.cluster.local:9200"
+
+            - name: WRITE_ELASTICSEARCH
+              value: "true"
+
+            - name: ENABLE_JOBS_PER_10M
+              value: "false"
+
+            - name: ENABLE_TOP_SKILLS_HOURLY
+              value: "false"
+
+            - name: ENABLE_SALARY_BINS_HOURLY
+              value: "false"
+
+            - name: STARTING_OFFSETS
+              value: "earliest"
+
+            - name: CHECKPOINT_DIR
+              value: "/mnt/spark-checkpoints/speed-es-only"
+
+            - name: TRIGGER_SECONDS
+              value: "10"
+
+          command:
+            - /opt/spark/bin/spark-submit
+            - --master
+            - k8s://https://kubernetes.default.svc:443
+            - --deploy-mode
+            - cluster
+            - --name
+            - speed-stream-es
+            - --packages
+            - org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1
+            - --conf
+            - spark.jars.ivy=/tmp/.ivy2
+            - --conf
+            - spark.kubernetes.namespace=spark
+            - --conf
+            - spark.kubernetes.authenticate.driver.serviceAccountName=spark
+            - --conf
+            - spark.kubernetes.container.image=spark-job-market:latest
+            - --conf
+            - spark.kubernetes.container.image.pullPolicy=IfNotPresent
+            - --conf
+            - spark.executor.instances=1
+            - --conf
+            - spark.executor.cores=1
+            - --conf
+            - spark.kubernetes.executor.request.cores=250m
+            - --conf
+            - spark.kubernetes.executor.limit.cores=500m
+            - --conf
+            - spark.kubernetes.driver.request.cores=250m
+            - --conf
+            - spark.kubernetes.driver.limit.cores=500m
+            - --conf
+            - spark.executor.memory=768m
+            - --conf
+            - spark.driver.memory=768m
+            - --conf
+            - spark.sql.shuffle.partitions=8
+            - --conf
+            - spark.kubernetes.driverEnv.KAFKA_BOOTSTRAP_SERVERS=my-cluster-kafka-bootstrap.kafka.svc.cluster.local:9092
+            - --conf
+            - spark.kubernetes.driverEnv.ES_URL=http://elasticsearch.search.svc.cluster.local:9200
+            - --conf
+            - spark.kubernetes.driverEnv.ES_INDEX_JOBS=realtime_jobs_v1
+            - --conf
+            - spark.kubernetes.driverEnv.ES_INDEX_JOB_COUNTS_10M=realtime_job_counts_10m_v1
+            - --conf
+            - spark.kubernetes.driverEnv.ES_INDEX_SKILL_COUNTS_HOURLY=realtime_skill_counts_hourly_v1
+            - --conf
+            - spark.kubernetes.driverEnv.ES_INDEX_TOP_SKILLS_HOURLY=realtime_top_skills_hourly_v1
+            - --conf
+            - spark.kubernetes.driverEnv.ES_INDEX_SALARY_BINS_HOURLY=realtime_salary_bins_hourly_v1
+            - --conf
+            - spark.kubernetes.driverEnv.WRITE_ELASTICSEARCH=true
+            - --conf
+            - spark.kubernetes.driverEnv.ENABLE_JOBS_PER_10M=true
+            - --conf
+            - spark.kubernetes.driverEnv.ENABLE_TOP_SKILLS_HOURLY=true
+            - --conf
+            - spark.kubernetes.driverEnv.ENABLE_SALARY_BINS_HOURLY=true
+            - --conf
+            - spark.kubernetes.driverEnv.STARTING_OFFSETS=earliest
+            - --conf
+            - spark.kubernetes.driverEnv.CHECKPOINT_DIR=/mnt/spark-checkpoints/speed-es-only
+            - --conf
+            - spark.kubernetes.driverEnv.TRIGGER_SECONDS=10
+            - --conf
+            - spark.executorEnv.KAFKA_BOOTSTRAP_SERVERS=my-cluster-kafka-bootstrap.kafka.svc.cluster.local:9092
+            - --conf
+            - spark.executorEnv.ES_URL=http://elasticsearch.search.svc.cluster.local:9200
+            - --conf
+            - spark.kubernetes.driver.volumes.persistentVolumeClaim.spark-speed-checkpoints.options.claimName=spark-speed-checkpoints-pvc
+            - --conf
+            - spark.kubernetes.driver.volumes.persistentVolumeClaim.spark-speed-checkpoints.mount.path=/mnt/spark-checkpoints
+            - --conf
+            - spark.kubernetes.executor.volumes.persistentVolumeClaim.spark-speed-checkpoints.options.claimName=spark-speed-checkpoints-pvc
+            - --conf
+            - spark.kubernetes.executor.volumes.persistentVolumeClaim.spark-speed-checkpoints.mount.path=/mnt/spark-checkpoints
+            - local:///opt/spark/work-dir/apps/stream_etl/stream_main.py
+
+          volumeMounts:
+            - name: spark-speed-checkpoints
+              mountPath: /mnt/spark-checkpoints
+
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1"
+              memory: "1Gi"
+
+      volumes:
+        - name: spark-speed-checkpoints
+          persistentVolumeClaim:
+            claimName: spark-speed-checkpoints-pvc

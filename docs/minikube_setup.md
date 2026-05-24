@@ -1,13 +1,13 @@
 # Hướng dẫn Cài đặt và Sử dụng Minikube cho Dự án Big Data Job Market
 
-Dự án này sử dụng Kubernetes (thông qua **Minikube**) làm môi trường triển khai (Deployment Environment) cho các tiến trình Spark Batch ETL, Kafka, Cassandra và Elasticsearch. Dưới đây là hướng dẫn từ số không để bạn thiết lập thành công.
+Dự án này sử dụng Kubernetes (thông qua **Minikube**) làm môi trường triển khai (Deployment Environment) cho các tiến trình Spark Batch ETL, Kafka và Elasticsearch. Dưới đây là hướng dẫn từ số không để bạn thiết lập thành công.
 
 ---
 
 ## 1. Yêu cầu hệ thống
 
 - Hệ điều hành: Windows 10/11 (chạy qua WSL2) hoặc Linux (Ubuntu).
-- RAM: Tối thiểu 8GB (khuyến nghị 12GB+ vì chạy cả Spark, Kafka, Cassandra).
+- RAM: Tối thiểu 8GB (khuyến nghị 12GB+ vì chạy cả Spark, Kafka, HDFS).
 - CPU: Tối thiểu 4 cores.
 - Đã cài đặt Docker Desktop (trên Windows) hoặc Docker Engine (trên Linux).
 

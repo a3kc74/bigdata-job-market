@@ -1,3 +1,8 @@
+# Kubernetes Service for the job-search FastAPI deployment.
+#
+# Local access:
+#   kubectl port-forward svc/job-search-api 8001:8000 -n serving
+---
 apiVersion: v1
 kind: Service
 metadata:

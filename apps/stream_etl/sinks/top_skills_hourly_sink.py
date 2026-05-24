@@ -1,4 +1,4 @@
-"""Cassandra and Elasticsearch sinks for hourly skill counts and top skills."""
+"""Elasticsearch sink for hourly skill counts and top skills."""
 
 from __future__ import annotations
 
@@ -8,14 +8,10 @@ import urllib.request
 from datetime import date, datetime
 from typing import Any
 
-from cassandra.cluster import Cluster
 from pyspark.sql import functions as F
 from pyspark.sql.window import Window
 
 
-CASSANDRA_HOST = os.getenv("CASSANDRA_HOST", "localhost")
-CASSANDRA_PORT = int(os.getenv("CASSANDRA_PORT", "9042"))
-CASSANDRA_KEYSPACE = os.getenv("CASSANDRA_KEYSPACE", "job_market_speed")
 ES_URL = os.getenv("ES_URL", "http://localhost:9200")
 ES_INDEX_SKILL_COUNTS_HOURLY = os.getenv(
     "ES_INDEX_SKILL_COUNTS_HOURLY",
@@ -34,46 +30,6 @@ def _json_default(value: Any) -> str:
     return str(value)
 
 
-def _connect_cassandra():
-    cluster = Cluster([CASSANDRA_HOST], port=CASSANDRA_PORT)
-    session = cluster.connect()
-    session.execute(
-        f"""
-        CREATE KEYSPACE IF NOT EXISTS {CASSANDRA_KEYSPACE}
-        WITH replication = {{'class': 'SimpleStrategy', 'replication_factor': 1}}
-        """
-    )
-    session.set_keyspace(CASSANDRA_KEYSPACE)
-    session.execute(
-        """
-        CREATE TABLE IF NOT EXISTS realtime_skill_counts_hourly (
-            bucket_date date,
-            window_start timestamp,
-            window_end timestamp,
-            skill text,
-            job_count bigint,
-            updated_at timestamp,
-            PRIMARY KEY ((bucket_date, window_start), skill)
-        )
-        """
-    )
-    session.execute(
-        """
-        CREATE TABLE IF NOT EXISTS realtime_top_skills_hourly (
-            bucket_date date,
-            window_start timestamp,
-            window_end timestamp,
-            rank int,
-            skill text,
-            job_count bigint,
-            updated_at timestamp,
-            PRIMARY KEY ((bucket_date, window_start), rank)
-        ) WITH CLUSTERING ORDER BY (rank ASC)
-        """
-    )
-    return cluster, session
-
-
 def _bulk_index(index_name: str, rows: list[dict], id_fields: list[str]) -> None:
     if not rows:
         return
@@ -85,7 +41,7 @@ def _bulk_index(index_name: str, rows: list[dict], id_fields: list[str]) -> None
         lines.append(json.dumps(row, ensure_ascii=False, default=_json_default))
 
     request = urllib.request.Request(
-        f"{ES_URL}/_bulk",
+        f"{ES_URL.rstrip('/')}/_bulk",
         data=("\n".join(lines) + "\n").encode("utf-8"),
         headers={"Content-Type": "application/x-ndjson"},
         method="POST",
@@ -97,72 +53,15 @@ def _bulk_index(index_name: str, rows: list[dict], id_fields: list[str]) -> None
             raise RuntimeError(f"Elasticsearch bulk index reported errors for {index_name}")
 
 
-def _write_cassandra(skill_rows: list[dict], top_rows: list[dict]) -> None:
-    if not skill_rows and not top_rows:
+def write_top_skills_hourly(batch_df, batch_id: int) -> None:
+    """Write hourly skill counts plus ranked top skills for each window."""
+
+    if batch_df.isEmpty():
+        print(f"[top_skills_hourly] empty batch {batch_id}")
         return
 
-    cluster, session = _connect_cassandra()
-    try:
-        skill_statement = session.prepare(
-            """
-            INSERT INTO realtime_skill_counts_hourly (
-                bucket_date,
-                window_start,
-                window_end,
-                skill,
-                job_count,
-                updated_at
-            )
-            VALUES (?, ?, ?, ?, ?, ?)
-            """
-        )
-        top_statement = session.prepare(
-            """
-            INSERT INTO realtime_top_skills_hourly (
-                bucket_date,
-                window_start,
-                window_end,
-                rank,
-                skill,
-                job_count,
-                updated_at
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-            """
-        )
+    skill_rows = [row.asDict(recursive=True) for row in batch_df.collect()]
 
-        for row in skill_rows:
-            session.execute(
-                skill_statement,
-                (
-                    row["bucket_date"],
-                    row["window_start"],
-                    row["window_end"],
-                    row["skill"],
-                    int(row["job_count"]),
-                    row["updated_at"],
-                ),
-            )
-
-        for row in top_rows:
-            session.execute(
-                top_statement,
-                (
-                    row["bucket_date"],
-                    row["window_start"],
-                    row["window_end"],
-                    int(row["rank"]),
-                    row["skill"],
-                    int(row["job_count"]),
-                    row["updated_at"],
-                ),
-            )
-    finally:
-        session.shutdown()
-        cluster.shutdown()
-
-
-def _rank_top_skills(batch_df) -> list[dict]:
     rank_window = Window.partitionBy("window_start").orderBy(
         F.desc("job_count"),
         F.asc("skill"),
@@ -180,42 +79,19 @@ def _rank_top_skills(batch_df) -> list[dict]:
             "updated_at",
         )
     )
-    return [row.asDict(recursive=True) for row in ranked_df.collect()]
+    top_rows = [row.asDict(recursive=True) for row in ranked_df.collect()]
 
-
-def write_top_skills_hourly(batch_df, batch_id: int) -> None:
-    """Write hourly skill counts plus ranked top skills for each window."""
-
-    if batch_df.isEmpty():
-        print(f"[top_skills_hourly] empty batch {batch_id}")
-        return
-
-    skill_rows = [row.asDict(recursive=True) for row in batch_df.collect()]
-    top_rows = _rank_top_skills(batch_df)
-
-    try:
-        _write_cassandra(skill_rows, top_rows)
-        print(
-            f"[top_skills_hourly] wrote {len(skill_rows)} count rows and "
-            f"{len(top_rows)} top rows to Cassandra in batch {batch_id}"
-        )
-    except Exception as exc:
-        print(f"[top_skills_hourly] Cassandra write failed in batch {batch_id}: {exc}")
-
-    try:
-        _bulk_index(
-            ES_INDEX_SKILL_COUNTS_HOURLY,
-            skill_rows,
-            ["window_start", "skill"],
-        )
-        _bulk_index(
-            ES_INDEX_TOP_SKILLS_HOURLY,
-            top_rows,
-            ["window_start", "rank"],
-        )
-        print(
-            f"[top_skills_hourly] indexed {len(skill_rows)} count rows and "
-            f"{len(top_rows)} top rows to Elasticsearch in batch {batch_id}"
-        )
-    except Exception as exc:
-        print(f"[top_skills_hourly] Elasticsearch write failed in batch {batch_id}: {exc}")
+    _bulk_index(
+        ES_INDEX_SKILL_COUNTS_HOURLY,
+        skill_rows,
+        ["window_start", "skill"],
+    )
+    _bulk_index(
+        ES_INDEX_TOP_SKILLS_HOURLY,
+        top_rows,
+        ["window_start", "rank"],
+    )
+    print(
+        f"[top_skills_hourly] indexed {len(skill_rows)} count rows and "
+        f"{len(top_rows)} top rows to Elasticsearch in batch {batch_id}"
+    )

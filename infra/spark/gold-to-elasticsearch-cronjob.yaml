@@ -1,42 +1,40 @@
-# Suspended Kubernetes CronJob template for Raw -> Bronze batch ETL.
+# Suspended Kubernetes CronJob template for Gold -> Elasticsearch indexing.
 #
-# This job reads raw JSONL files from HDFS under /raw/jobs and writes Bronze
-# Parquet data back to HDFS. Airflow uses this CronJob as a template and creates
-# one-off Jobs from it during the batch DAG run.
+# This Spark job reads Gold data from HDFS and writes it to Elasticsearch index
+# `gold-jobs-flat`. The Elasticsearch document id is `job_id`, so reruns update
+# existing jobs instead of blindly duplicating documents.
 #
-# Manual test:
-#   kubectl create job raw-to-bronze-manual --from=cronjob/batch-etl-raw-to-bronze -n spark
+# Airflow triggers this job as the final step of the batch DAG.
 ---
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: batch-etl-raw-to-bronze
+  name: batch-etl-gold-to-elasticsearch
   namespace: spark
 spec:
-  schedule: "0 19 * * *"
+  schedule: "30 20 * * *"
   suspend: true
-  concurrencyPolicy: Forbid        # Không cho chạy song song nếu job trước chưa xong
-  successfulJobsHistoryLimit: 3
-  failedJobsHistoryLimit: 3
-
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 2
   jobTemplate:
     spec:
-      # Retry tối đa 2 lần nếu thất bại
-      backoffLimit: 2
+      backoffLimit: 1
       template:
         metadata:
           labels:
             app: batch-etl
-            job: raw-to-bronze
+            job: gold-to-elasticsearch
         spec:
-          serviceAccountName: spark   # RBAC được khai báo trong infra/spark/rbac.yaml
+          serviceAccountName: spark
           restartPolicy: Never
-
           containers:
             - name: spark-submit
               image: spark-job-market:latest
               imagePullPolicy: IfNotPresent
-
+              env:
+                - name: HOME
+                  value: /tmp
               command:
                 - /opt/spark/bin/spark-submit
                 - --master
@@ -44,7 +42,11 @@ spec:
                 - --deploy-mode
                 - cluster
                 - --name
-                - raw-to-bronze
+                - gold-to-elasticsearch
+                - --packages
+                - org.elasticsearch:elasticsearch-spark-30_2.12:8.13.4
+                - --conf
+                - spark.jars.ivy=/tmp/.ivy2
                 - --conf
                 - spark.kubernetes.namespace=spark
                 - --conf
@@ -71,17 +73,7 @@ spec:
                 - spark.driver.memory=768m
                 - --conf
                 - spark.sql.shuffle.partitions=8
-                - local:///opt/spark/work-dir/jobs/raw_to_bronze.py
-
-              env:
-                # HDFS namenode connection
-                - name: HDFS_NAMENODE_URI
-                  value: "hdfs://hdfs-namenode.hdfs.svc:9000"
-                - name: RAW_BASE_PATH
-                  value: "hdfs://hdfs-namenode.hdfs.svc:9000/raw/jobs"
-                - name: BRONZE_BASE_PATH
-                  value: "hdfs://hdfs-namenode.hdfs.svc:9000/bronze/jobs"
-
+                - local:///opt/spark/work-dir/jobs/gold_to_elasticsearch.py
               resources:
                 requests:
                   cpu: "500m"

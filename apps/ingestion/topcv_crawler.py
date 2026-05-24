@@ -5,7 +5,9 @@ import time
 import random
 import unicodedata
 from urllib.parse import urlparse, urlunparse
-from datetime import datetime, UTC, timezone, timedelta
+from datetime import datetime, timezone, timedelta
+
+UTC = timezone.utc
 import logging
 import sys
 import os
@@ -395,9 +397,18 @@ async def get_vip_ticket():
         import nodriver as uc
         logger.info("[HARVESTER] Đang mở Chrome tàng hình (nodriver)...")
         
+        headless = os.getenv("CRAWLER_HEADLESS", "true").lower() in {"1", "true", "yes"}
+        browser_executable_path = os.getenv("BROWSER_EXECUTABLE_PATH", "/usr/bin/google-chrome")
+
         browser = await uc.start(
-            headless=False,
-            browser_args=["--disable-blink-features=AutomationControlled"]
+            headless=headless,
+            browser_executable_path=browser_executable_path,
+            browser_args=[
+                "--disable-blink-features=AutomationControlled",
+                "--no-sandbox",
+                "--disable-dev-shm-usage",
+                "--disable-gpu",
+            ],
         )
         
         logger.info("[HARVESTER] Đang tiến vào TopCV...")

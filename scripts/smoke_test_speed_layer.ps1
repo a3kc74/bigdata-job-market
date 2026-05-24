@@ -42,17 +42,6 @@ function Require-Topic {
     Assert-LastExitCode "Kafka topic is missing or unavailable: $Topic"
 }
 
-function Require-CassandraTable {
-    param(
-        [Parameter(Mandatory = $true)]
-        [string] $Table
-    )
-
-    docker compose -f $ComposeFile exec -T cassandra cqlsh `
-        -e "DESCRIBE TABLE job_market_speed.$Table;" *> $null
-    Assert-LastExitCode "Cassandra table is missing or unavailable: job_market_speed.$Table"
-}
-
 $services = @(
     "kafka",
     "kafka-ui",
@@ -60,7 +49,6 @@ $services = @(
     "spark-worker",
     "elasticsearch",
     "kibana",
-    "cassandra",
     "prometheus",
     "grafana"
 )
@@ -74,21 +62,9 @@ foreach ($topic in $topics) {
     Require-Topic $topic
 }
 
-$tables = @(
-    "realtime_job_counts_10m",
-    "realtime_skill_counts_hourly",
-    "realtime_top_skills_hourly",
-    "realtime_salary_bins_hourly",
-    "jobs_realtime_by_id",
-    "stream_dead_letter_by_day"
-)
-
-foreach ($table in $tables) {
-    Require-CassandraTable $table
-}
-
 Invoke-WebRequest -Uri "http://localhost:9200" -UseBasicParsing | Out-Null
+Invoke-WebRequest -Uri "http://localhost:9200/_cat/indices/realtime*?v" -UseBasicParsing | Out-Null
 Invoke-WebRequest -Uri "http://localhost:8088" -UseBasicParsing | Out-Null
 Invoke-WebRequest -Uri "http://localhost:9090/-/ready" -UseBasicParsing | Out-Null
 
-Write-Host "Speed Layer phase 1 smoke test passed."
+Write-Host "Speed Layer smoke test passed."

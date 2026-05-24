@@ -1,0 +1,65 @@
+# Suspended Kubernetes CronJob template for the batch crawler.
+#
+# Airflow creates one-off Jobs from this CronJob to crawl TopCV job postings
+# and write raw JSONL records directly to HDFS:
+#   /raw/jobs/ingest_date=YYYY-MM-DD/raw_jobs_<timestamp>.jsonl
+#
+# The CronJob is suspended because Airflow is the scheduler. Do not enable the
+# Kubernetes schedule unless you intentionally want it to run without Airflow.
+#
+# Manual test:
+#   kubectl create job batch-etl-crawl-jobs-manual --from=cronjob/batch-etl-crawl-jobs -n spark
+#   kubectl logs -n spark -l job-name=batch-etl-crawl-jobs-manual --tail=200 -f
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: batch-etl-crawl-jobs
+  namespace: spark
+spec:
+  schedule: "30 18 * * *"
+  suspend: true
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: spark
+          restartPolicy: Never
+          containers:
+            - name: batch-crawler
+              image: spark-job-market:latest
+              imagePullPolicy: IfNotPresent
+              workingDir: /opt/spark/work-dir
+              command:
+                - /opt/spark/bin/spark-submit
+                - --master
+                - local[*]
+                - /opt/spark/work-dir/apps/ingestion/run_crawler_to_hdfs.py
+                - --mode
+                - batch
+                - --days
+                - "7"
+                - --max-pages
+                - "0"
+                - --list-pages-per-chunk
+                - "5"
+                - --detail-batch-size
+                - "40"
+              env:
+                - name: PYTHONPATH
+                  value: "/opt/spark/work-dir"
+                - name: HDFS_RAW_JOBS_PATH
+                  value: "hdfs://hdfs-namenode.hdfs.svc.cluster.local:9000/raw/jobs"
+                - name: CRAWLER_HEADLESS
+                  value: "true"
+                - name: BROWSER_EXECUTABLE_PATH
+                  value: "/usr/bin/google-chrome"
+                - name: CRAWLER_LOCAL_OUTPUT_DIR
+                  value: "/tmp/topcv-crawler-output"
+              volumeMounts:
+                - name: crawler-runtime
+                  mountPath: /opt/spark/work-dir/runtime
+          volumes:
+            - name: crawler-runtime
+              persistentVolumeClaim:
+                claimName: batch-crawler-checkpoint-pvc

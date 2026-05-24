@@ -1,0 +1,74 @@
+# RBAC for Airflow to orchestrate Spark batch and speed-layer jobs.
+#
+# Airflow runs BashOperator tasks that call kubectl. These tasks need permission
+# to create Jobs from suspended CronJobs, submit Spark streaming jobs, inspect
+# pods/log, and check Strimzi Kafka topics.
+#
+# Apply:
+#   kubectl apply -f infra/airflow/airflow-rbac.yaml
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: airflow
+  namespace: airflow
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: airflow-spark-job-runner
+  namespace: spark
+rules:
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["get", "list", "watch", "create", "delete", "patch", "update"]
+  - apiGroups: ["batch"]
+    resources: ["cronjobs"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["pods", "pods/log"]
+    verbs: ["get", "list", "watch", "create", "delete"]
+  - apiGroups: [""]
+    resources: ["persistentvolumeclaims"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: airflow-spark-job-runner
+  namespace: spark
+subjects:
+  - kind: ServiceAccount
+    name: airflow
+    namespace: airflow
+roleRef:
+  kind: Role
+  name: airflow-spark-job-runner
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: airflow-kafka-reader
+  namespace: kafka
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["kafka.strimzi.io"]
+    resources: ["kafkatopics", "kafkas", "kafkanodepools"]
+    verbs: ["get", "list", "watch", "create", "patch", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: airflow-kafka-reader
+  namespace: kafka
+subjects:
+  - kind: ServiceAccount
+    name: airflow
+    namespace: airflow
+roleRef:
+  kind: Role
+  name: airflow-kafka-reader
+  apiGroup: rbac.authorization.k8s.io

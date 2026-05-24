@@ -1,13 +1,18 @@
+# Suspended Kubernetes CronJob template for Bronze -> Silver batch ETL.
+#
+# This Spark job reads Bronze Parquet data from HDFS, normalizes fields,
+# deduplicates job snapshots, and writes Silver data back to HDFS.
+#
+# Airflow triggers this job after raw_to_bronze succeeds.
+---
 apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: batch-etl-bronze-to-silver
   namespace: spark
-  labels:
-    app: batch-etl
-    layer: silver
 spec:
   schedule: "30 19 * * *"
+  suspend: true
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3
