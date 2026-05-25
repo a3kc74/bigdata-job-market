@@ -30,8 +30,16 @@ spec:
 
             - name: CRAWLER_HEADLESS
               value: "true"
+            - name: DISPLAY
+              value: ":99"
+            - name: HARVESTER_BREAKER_SLEEP_SECONDS
+              value: "60"
             - name: BROWSER_EXECUTABLE_PATH
               value: "/usr/bin/google-chrome"
+            - name: HOME
+              value: "/tmp"
+            - name: XDG_RUNTIME_DIR
+              value: "/tmp/xdg-runtime"
             - name: CRAWLER_LOCAL_OUTPUT_DIR
               value: "/tmp/topcv-crawler-output"
             - name: CRAWLER_LOG_DIR
@@ -65,6 +73,11 @@ spec:
               set -euo pipefail
 
               mkdir -p /tmp/topcv-crawler-output runtime/producer runtime/crawler runtime/logs
+              mkdir -p /tmp/xdg-runtime /tmp/topcv_chrome_profile
+              chmod 700 /tmp/xdg-runtime
+
+              Xvfb :99 -screen 0 1366x768x24 >/tmp/xvfb.log 2>&1 &
+              sleep 2
 
               echo "[speed-real] Running TopCV speed crawler..."
               python3 -m apps.ingestion.run_crawler \

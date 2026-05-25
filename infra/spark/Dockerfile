@@ -10,6 +10,7 @@
 #   - batch-etl-crawl-jobs
 #   - batch-etl-raw-to-bronze
 #   - batch-etl-bronze-to-silver
+#   - batch-etl-train-salary-model
 #   - batch-etl-silver-to-gold
 #   - batch-etl-gold-to-elasticsearch
 #   - speed-stream-es-submit
@@ -25,6 +26,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
     ca-certificates \
     gnupg \
+    xvfb \
     fonts-liberation \
     libasound2 \
     libatk-bridge2.0-0 \
@@ -55,6 +57,7 @@ RUN pip3 install --no-cache-dir \
     "python-dotenv==1.0.1" \
     "requests>=2.31.0" \
     "pydantic-settings>=2.6.1" \
+    "numpy>=1.26.0,<3.0.0" \
     "elasticsearch>=8.13.2" \
     "confluent-kafka==2.4.0" \
     "tenacity>=8.2.0"
@@ -66,6 +69,7 @@ ENV PYSPARK_DRIVER_PYTHON=python3
 
 
 COPY apps/common/              /opt/spark/work-dir/apps/common/
+COPY apps/ml/                  /opt/spark/work-dir/apps/ml/
 COPY apps/stream_etl/          /opt/spark/work-dir/apps/stream_etl/
 COPY apps/ingestion/           /opt/spark/work-dir/apps/ingestion/
 COPY apps/producer/            /opt/spark/work-dir/apps/producer/

@@ -7,6 +7,7 @@ import sys
 
 from dotenv import load_dotenv
 from pyspark.sql import SparkSession
+from pyspark.sql import functions as F
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(os.path.dirname(CURRENT_DIR))
@@ -20,6 +21,11 @@ from apps.stream_etl.sinks.kafka_sink import clean_jobs_to_kafka, dead_letter_to
 from apps.stream_etl.stateful_jobs.jobs_per_10m import build_jobs_per_10m
 from apps.stream_etl.stateful_jobs.salary_bins_realtime import build_salary_bins_hourly
 from apps.stream_etl.stateful_jobs.top_skills_hourly import build_skill_counts_hourly
+from apps.ml.salary_prediction import (
+    load_salary_prediction_model,
+    score_salary_predictions,
+    with_empty_salary_prediction_columns,
+)
 from apps.stream_etl.transform import (
     build_clean_jobs,
     build_dead_letter,
@@ -47,6 +53,15 @@ ENABLE_SALARY_BINS_HOURLY = os.getenv("ENABLE_SALARY_BINS_HOURLY", "true").lower
     "true",
     "yes",
 }
+ENABLE_SALARY_PREDICTION = os.getenv("ENABLE_SALARY_PREDICTION", "true").lower() in {
+    "1",
+    "true",
+    "yes",
+}
+SALARY_MODEL_PATH = os.getenv(
+    "SALARY_MODEL_PATH",
+    "hdfs://hdfs-namenode.hdfs.svc:9000/models/salary_prediction/latest",
+)
 
 
 def build_spark() -> SparkSession:
@@ -68,7 +83,9 @@ def main() -> None:
         f"write_elasticsearch={WRITE_ELASTICSEARCH} write_console_debug={WRITE_CONSOLE_DEBUG} "
         f"enable_jobs_per_10m={ENABLE_JOBS_PER_10M} "
         f"enable_top_skills_hourly={ENABLE_TOP_SKILLS_HOURLY} "
-        f"enable_salary_bins_hourly={ENABLE_SALARY_BINS_HOURLY}",
+        f"enable_salary_bins_hourly={ENABLE_SALARY_BINS_HOURLY} "
+        f"enable_salary_prediction={ENABLE_SALARY_PREDICTION} "
+        f"salary_model_path={SALARY_MODEL_PATH}",
         flush=True,
     )
 
@@ -82,7 +99,26 @@ def main() -> None:
 
     validated_df = validate_raw_jobs(parse_raw_kafka(raw_kafka_df))
     clean_base_df = build_clean_jobs(validated_df)
-    clean_df = clean_base_df.withWatermark("event_time", "60 minutes").dropDuplicates(["job_id", "hash_content"])
+
+    salary_model = load_salary_prediction_model(spark, SALARY_MODEL_PATH) if ENABLE_SALARY_PREDICTION else None
+    if salary_model is not None:
+        # Score the streaming DataFrame with the model trained in batch. The
+        # model is loaded once on startup; micro-batches only run transform().
+        clean_scored_base_df = score_salary_predictions(
+            clean_base_df,
+            salary_model,
+            experience_col="experience_months",
+            location_col="location_raw",
+            company_col="company_name",
+            remote_col="has_remote",
+            needs_prediction_col=(
+                clean_base_df["salary_min_vnd"].isNull() & clean_base_df["salary_max_vnd"].isNull()
+            ),
+        )
+    else:
+        clean_scored_base_df = with_empty_salary_prediction_columns(clean_base_df)
+
+    clean_df = clean_scored_base_df.withWatermark("event_time", "60 minutes").dropDuplicates(["job_id", "hash_content"])
     dead_letter_df = build_dead_letter(validated_df)
 
     queries = [

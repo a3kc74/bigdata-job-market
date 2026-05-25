@@ -396,3 +396,53 @@ uv run --project . pytest tests/test_crawler_jsonl_producer.py
 | No records in `jobs_clean` | Check `jobs_dead_letter`, producer logs, and stream logs |
 | Aggregate Cassandra errors | Cassandra service is commented out; disable aggregate toggles or enable Cassandra |
 
+## Salary prediction in speed layer
+
+Speed layer co the load Spark ML PipelineModel da train tu batch de them cac cot
+`salary_display_*`, `salary_predicted_*`, `salary_prediction_applied`, `salary_source` vao
+document realtime. Bat/tat bang:
+
+```env
+ENABLE_SALARY_PREDICTION=true
+SALARY_MODEL_PATH=hdfs://hdfs-namenode.hdfs.svc:9000/models/salary_prediction/latest
+```
+
+Neu model chua ton tai, stream van chay va ghi prediction columns null. Sau khi
+train model moi, restart stream de load model moi. Chi tiet xem
+`docs/salary_prediction_runbook.md`.
+
+## Rebuild image khi sửa crawler/speed
+
+Khi sửa code crawler, Chrome/nodriver, Xvfb hoặc manifest speed, nên build lại image bằng `--no-cache` để tránh Kubernetes/Minikube dùng layer cũ.
+
+```powershell
+& minikube -p job-market docker-env --shell powershell | Invoke-Expression
+
+docker build --no-cache -f infra\spark\Dockerfile -t spark-job-market:latest .
+
+Kiểm tra image đã chứa code mới:
+
+docker run --rm spark-job-market:latest `
+  sh -c "grep -n 'no_sandbox\|chrome_profile_dir\|HARVESTER_BREAKER_SLEEP_SECONDS' /opt/spark/work-dir/apps/ingestion/topcv_crawler.py"
+
+Sau khi build lại image, cần update manifest cho Airflow:
+
+kubectl create configmap airflow-speed-dag `
+  -n airflow `
+  --from-file=job_market_speed_layer_bootstrap.py=infra\airflow\dags\job_market_speed_layer_bootstrap.py `
+  --from-file=speed-real-crawler-producer-job.yaml=infra\producer\speed-real-crawler-producer-job.yaml `
+  --dry-run=client -o yaml | kubectl apply -f -
+
+kubectl rollout restart deployment -n airflow airflow-scheduler
+kubectl rollout restart deployment -n airflow airflow-webserver
+
+Speed crawler trong Minikube chạy Chrome headed qua Xvfb:
+
+CRAWLER_HEADLESS=false
+DISPLAY=:99
+Xvfb :99 -screen 0 1366x768x24
+
+Chrome profile runtime dùng /tmp/topcv_chrome_profile, còn cookie cache vẫn lưu trong PVC tại:
+
+runtime/crawler/cookie_cache.json
+```

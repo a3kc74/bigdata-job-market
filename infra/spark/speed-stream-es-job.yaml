@@ -59,6 +59,12 @@ spec:
             - name: ENABLE_SALARY_BINS_HOURLY
               value: "false"
 
+            - name: ENABLE_SALARY_PREDICTION
+              value: "true"
+
+            - name: SALARY_MODEL_PATH
+              value: "hdfs://hdfs-namenode.hdfs.svc:9000/models/salary_prediction/latest"
+
             - name: STARTING_OFFSETS
               value: "earliest"
 
@@ -128,6 +134,10 @@ spec:
             - spark.kubernetes.driverEnv.ENABLE_TOP_SKILLS_HOURLY=true
             - --conf
             - spark.kubernetes.driverEnv.ENABLE_SALARY_BINS_HOURLY=true
+            - --conf
+            - spark.kubernetes.driverEnv.ENABLE_SALARY_PREDICTION=true
+            - --conf
+            - spark.kubernetes.driverEnv.SALARY_MODEL_PATH=hdfs://hdfs-namenode.hdfs.svc:9000/models/salary_prediction/latest
             - --conf
             - spark.kubernetes.driverEnv.STARTING_OFFSETS=earliest
             - --conf

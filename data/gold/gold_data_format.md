@@ -99,3 +99,24 @@
 - Đổi tên `job_id_platform` thành `company_id`.
 - Chuyển `monthOfExperience` thành Integer (thay "Thỏa thuận" thành `0` hoặc `null`).
 - Lưu trữ ở HDFS Parquet tầng Gold.
+## Salary Prediction Fields (Spark ML)
+
+Thêm bởi `apps/batch/jobs/silver_to_gold.py` sau khi load model từ
+`SALARY_MODEL_PATH`. Model hiện tại là Spark ML `GBTRegressor`.
+
+| Field | Type | Purpose |
+| :--- | :--- | :--- |
+| `salary_prediction_applied` | Boolean | `true` nếu job không có min/max thật và đã được điền bằng Spark ML prediction. |
+| `salary_display_min_vnd` | Long | Lương min dùng cho serving: lương thật nếu có, hoặc dự đoán nếu job thiếu lương thật. |
+| `salary_display_avg_vnd` | Long | Lương trung bình dùng cho sort/chart; ưu tiên lương thật, chỉ dùng dự đoán khi không có min/max. |
+| `salary_display_max_vnd` | Long | Lương max dùng cho serving: lương thật nếu có, hoặc dự đoán nếu job thiếu lương thật. |
+| `salary_source` | String | Nguồn lương dùng cho Kibana/API: `parsed_range`, `parsed_min_only`, `parsed_max_only`, `predicted`, hoặc `unknown`. |
+| `salary_predicted_min_vnd` | Long | Cận dưới lương dự đoán bằng Spark ML, chỉ có khi `salary_prediction_applied=true`. |
+| `salary_predicted_avg_vnd` | Long | Lương trung bình dự đoán bằng Spark ML, chỉ có khi cần prediction. |
+| `salary_predicted_max_vnd` | Long | Cận trên lương dự đoán bằng Spark ML, chỉ có khi `salary_prediction_applied=true`. |
+| `salary_prediction_model_version` | String | Version model Spark ML đã score salary prediction. |
+
+Lưu ý nghiệp vụ: nếu job ghi “Thỏa thuận” nhưng JSON-LD vẫn có min/max, hoặc
+salary text là “Lớn hơn 40 triệu”/“Lên đến 40 triệu”, hệ thống vẫn coi phần
+min/max đã parse được là lương thật. Model chỉ dự đoán khi cả `salary_min_vnd`
+và `salary_max_vnd` đều rỗng.

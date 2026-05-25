@@ -84,6 +84,8 @@ function Invoke-DockerSparkSubmit {
     $CassandraHost = if ($env:CASSANDRA_HOST) { $env:CASSANDRA_HOST } else { "cassandra" }
     $CassandraPort = if ($env:CASSANDRA_PORT) { $env:CASSANDRA_PORT } else { "9042" }
     $EsUrl = if ($env:ES_URL) { $env:ES_URL } else { "http://elasticsearch:9200" }
+    $EnableSalaryPrediction = if ($env:ENABLE_SALARY_PREDICTION) { $env:ENABLE_SALARY_PREDICTION } else { "true" }
+    $SalaryModelPath = if ($env:SALARY_MODEL_PATH) { $env:SALARY_MODEL_PATH } else { "hdfs://hdfs-namenode.hdfs.svc:9000/models/salary_prediction/latest" }
     $CheckpointDir = if ($env:CHECKPOINT_DIR -and $env:CHECKPOINT_DIR.StartsWith("/")) {
         $env:CHECKPOINT_DIR
     } else {
@@ -97,6 +99,8 @@ function Invoke-DockerSparkSubmit {
         "export CASSANDRA_HOST='$CassandraHost'",
         "export CASSANDRA_PORT='$CassandraPort'",
         "export ES_URL='$EsUrl'",
+        "export ENABLE_SALARY_PREDICTION='$EnableSalaryPrediction'",
+        "export SALARY_MODEL_PATH='$SalaryModelPath'",
         "export CHECKPOINT_DIR='$CheckpointDir'",
         "export PYTHONPATH='/tmp/spark-python-deps:/opt/spark/workspace'"
     ) -join "; "

@@ -413,3 +413,22 @@ Kiểm tra index:
 ```bash
 curl.exe "http://localhost:9200/_cat/indices/gold-jobs-flat?v"
 ```
+## Salary Prediction step
+
+Pipeline batch hien co them task `train_salary_model` nam sau
+`bronze_to_silver` va truoc `silver_to_gold`.
+
+```text
+bronze_to_silver -> train_salary_model -> silver_to_gold
+```
+
+Task nay dung Spark ML de train model tu cac job co luong cong khai trong
+Silver, luu model tai `SALARY_MODEL_PATH`, sau do `silver_to_gold` load model
+de dien cac cot `salary_display_*` va `salary_predicted_*` cho job luong thoa
+thuan. Apply them CronJob truoc khi trigger DAG:
+
+```powershell
+kubectl apply -f infra\spark\salary-model-train-cronjob.yaml
+```
+
+Chi tiet cach chay batch/speed xem `docs/salary_prediction_runbook.md`.
