@@ -1913,6 +1913,13 @@ def get_total_pages(session, fallback_pages=1):
 
     if res is None or is_blocked_response(res):
         status = getattr(res, "status_code", None)
+
+        if fallback_pages is None:
+            raise RuntimeError(
+                "[TOTAL PAGES] Không lấy được total pages cho full batch. "
+                "Dừng để tránh crawl thiếu."
+            )
+
         logger.error(
             f"[TOTAL PAGES] Không lấy được tổng số trang sau khi recover "
             f"(status={status}). Fallback về {fallback_pages} trang."
@@ -2048,7 +2055,7 @@ def run_master_crawler(
     }
 
     if max_pages is None or max_pages <= 0:
-        total_pages_fallback = 1
+        total_pages_fallback = None
     else:
         total_pages_fallback = max_pages
 
