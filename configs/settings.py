@@ -8,6 +8,10 @@ class Settings(BaseSettings):
     BRONZE_PATH: str = "hdfs://hdfs-namenode.hdfs.svc:9000/bronze/jobs"
     SILVER_PATH: str = "hdfs://hdfs-namenode.hdfs.svc:9000/silver/jobs"
     GOLD_PATH: str = "hdfs://hdfs-namenode.hdfs.svc:9000/gold/jobs/job_market_index"
+    # Spark ML salary model trained from public salary jobs. Batch and speed
+    # both read this path so salary prediction stays consistent across layers.
+    SALARY_MODEL_PATH: str = "hdfs://hdfs-namenode.hdfs.svc:9000/models/salary_prediction/latest"
+    SALARY_MODEL_METRICS_PATH: str = "hdfs://hdfs-namenode.hdfs.svc:9000/models/salary_prediction/metrics/latest"
 
 
     model_config = SettingsConfigDict(

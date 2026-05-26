@@ -30,8 +30,16 @@ spec:
 
             - name: CRAWLER_HEADLESS
               value: "true"
+            - name: DISPLAY
+              value: ":99"
+            - name: HARVESTER_BREAKER_SLEEP_SECONDS
+              value: "60"
             - name: BROWSER_EXECUTABLE_PATH
               value: "/usr/bin/google-chrome"
+            - name: HOME
+              value: "/tmp"
+            - name: XDG_RUNTIME_DIR
+              value: "/tmp/xdg-runtime"
             - name: CRAWLER_LOCAL_OUTPUT_DIR
               value: "/tmp/topcv-crawler-output"
             - name: CRAWLER_LOG_DIR
@@ -69,6 +77,15 @@ spec:
               set -euo pipefail
 
               mkdir -p /tmp/topcv-crawler-output runtime/producer runtime/crawler runtime/logs
+              mkdir -p /tmp/xdg-runtime /tmp/topcv_chrome_profile
+              chmod 700 /tmp/xdg-runtime
+
+              export DISPLAY=:99
+              export XDG_RUNTIME_DIR=/tmp/xdg-runtime
+
+              Xvfb :99 -screen 0 1366x768x24 >/tmp/xvfb.log 2>&1 &
+              XVFB_PID="$!"
+              sleep 2
 
               cleanup() {
                 if [ -n "${PRODUCER_PID:-}" ] && kill -0 "$PRODUCER_PID" 2>/dev/null; then
@@ -82,7 +99,14 @@ spec:
                   kill "$CRAWLER_PID" 2>/dev/null || true
                   wait "$CRAWLER_PID" 2>/dev/null || true
                 fi
+
+                if [ -n "${XVFB_PID:-}" ] && kill -0 "$XVFB_PID" 2>/dev/null; then
+                  echo "[speed-real] stopping Xvfb pid=$XVFB_PID"
+                  kill "$XVFB_PID" 2>/dev/null || true
+                  wait "$XVFB_PID" 2>/dev/null || true
+                fi
               }
+
               trap cleanup EXIT INT TERM
 
               echo "[speed-real] Starting checkpointed JSONL producer in watch mode..."

@@ -4,6 +4,7 @@ import re
 import time
 import random
 import unicodedata
+import shutil
 from urllib.parse import urlparse, urlunparse
 from datetime import datetime, timezone, timedelta
 
@@ -400,15 +401,22 @@ async def get_vip_ticket():
         headless = os.getenv("CRAWLER_HEADLESS", "true").lower() in {"1", "true", "yes"}
         browser_executable_path = os.getenv("BROWSER_EXECUTABLE_PATH", "/usr/bin/google-chrome")
 
+        chrome_profile_dir = "/tmp/topcv_chrome_profile"
+        shutil.rmtree(chrome_profile_dir, ignore_errors=True)
+        os.makedirs(chrome_profile_dir, exist_ok=True)
+
         browser = await uc.start(
             headless=headless,
             browser_executable_path=browser_executable_path,
             no_sandbox=True,
+            user_data_dir=chrome_profile_dir,
             browser_args=[
-                "--disable-blink-features=AutomationControlled",
                 "--no-sandbox",
+                "--disable-setuid-sandbox",
                 "--disable-dev-shm-usage",
                 "--disable-gpu",
+                "--window-size=1366,768",
+                "--disable-blink-features=AutomationControlled",
             ],
         )
         
@@ -416,13 +424,13 @@ async def get_vip_ticket():
         page = await browser.get('https://www.topcv.vn')
         
         logger.info("[HARVESTER] Đang rà soát màng lọc Cloudflare...")
-        for _ in range(20):
+        for _ in range(90):
             title = await page.evaluate("document.title")
             if "Just a moment" not in title and "Cloudflare" not in title:
                 break 
             await asyncio.sleep(1)
             
-        await asyncio.sleep(3) 
+        await asyncio.sleep(10) 
         
         cookies = await browser.cookies.get_all()
         cookie_dict = {c.name: c.value for c in cookies}
@@ -445,8 +453,9 @@ async def get_vip_ticket():
 def execute_harvester_with_breaker():
     cookie_dict, user_agent = asyncio.run(get_vip_ticket())
     if not cookie_dict:
-        logger.warning("[⚠️ BREAKER] Không lấy được vé VIP. Tiến vào trạng thái giả chết 1 tiếng (3600s)...")
-        time.sleep(3600)
+        sleep_seconds = int(os.getenv("HARVESTER_BREAKER_SLEEP_SECONDS", "60"))
+        logger.warning(f"[⚠️ BREAKER] Không lấy được vé VIP. Nghỉ {sleep_seconds}s rồi thử lại...")
+        time.sleep(sleep_seconds)
         logger.info("[⚠️ BREAKER] Hết thời gian cách ly. Tiến hành thử lại lần cuối cùng...")
         cookie_dict, user_agent = asyncio.run(get_vip_ticket())
     return cookie_dict, user_agent

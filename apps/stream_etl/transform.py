@@ -60,6 +60,12 @@ def build_clean_jobs(validated_df: DataFrame) -> DataFrame:
     sal_min = salary_min_million(salary_raw)
     sal_max = salary_max_million(salary_raw)
     sal_avg = F.when(sal_min.isNotNull() & sal_max.isNotNull(), (sal_min + sal_max) / F.lit(2.0))
+    salary_text = F.lower(salary_raw)
+    looks_negotiable = salary_text.rlike(
+        r"th\S*a\s*thu\S*n|tho\S*a\s*thu\S*n|negotiable|canh\s*tranh|c\S*nh\s*tranh"
+    )
+    salary_is_negotiable = sal_min.isNull() & sal_max.isNull() & looks_negotiable
+    location_text = F.lower(F.concat_ws(" ", F.coalesce(F.col("payload.location"), F.array().cast("array<string>"))))
 
     with_skills_source = valid_df.withColumn(
         "_skills_needed",
@@ -77,7 +83,15 @@ def build_clean_jobs(validated_df: DataFrame) -> DataFrame:
         .withColumn("salary_min_million", sal_min)
         .withColumn("salary_max_million", sal_max)
         .withColumn("salary_avg_million", sal_avg)
+        # Add VND salary columns so the speed layer can reuse the same Spark ML
+        # prediction output schema as the batch Gold layer.
+        .withColumn("salary_min_vnd", (F.col("salary_min_million") * F.lit(1_000_000)).cast("long"))
+        .withColumn("salary_max_vnd", (F.col("salary_max_million") * F.lit(1_000_000)).cast("long"))
+        .withColumn("salary_is_negotiable", salary_is_negotiable)
         .withColumn("salary_bin", salary_bin(F.col("salary_avg_million"), F.col("salary_raw")))
+        # Remote is part of the salary model feature set. In streaming we do
+        # not parse json_ld, so infer it from location text when available.
+        .withColumn("has_remote", location_text.rlike("remote|wfh|work\\s*from\\s*home|táº¡i\\s*nhÃ |lÃ m\\s*viá»‡c\\s*táº¡i\\s*nhÃ "))
         .withColumn("skills", normalize_skills(F.col("_skills_needed"), F.col("_skills_should_have")))
         .select(
             F.trim(F.col("job_id")).alias("job_id"),
@@ -99,8 +113,12 @@ def build_clean_jobs(validated_df: DataFrame) -> DataFrame:
             "salary_min_million",
             "salary_max_million",
             "salary_avg_million",
+            "salary_min_vnd",
+            "salary_max_vnd",
+            "salary_is_negotiable",
             "salary_bin",
             F.when(F.lower(F.col("salary_raw")).contains("usd"), F.lit("USD")).otherwise(F.lit("VND")).alias("currency"),
+            "has_remote",
             "skills",
             F.col("payload.description").alias("description"),
             F.col("payload.requirements").alias("requirements"),

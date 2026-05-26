@@ -30,6 +30,9 @@ data/mock/
 data/raw/*.jsonl
 data/raw/*.json
 data/raw/*.csv
+data/raw/**/*.jsonl
+data/raw/**/*.json
+data/raw/**/*.csv
 
 spark-warehouse/
 metastore_db/

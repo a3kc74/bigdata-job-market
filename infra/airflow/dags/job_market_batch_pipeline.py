@@ -5,6 +5,7 @@ Data flow:
         -> HDFS raw JSONL
         -> Bronze
         -> Silver
+        -> Salary ML model
         -> Gold
         -> Elasticsearch
 
@@ -14,6 +15,7 @@ Tasks:
     crawl_jobs
     raw_to_bronze
     bronze_to_silver
+    train_salary_model
     silver_to_gold
     gold_to_elasticsearch
 
@@ -61,6 +63,7 @@ def run_spark_job_from_cronjob(
     and lets Airflow only orchestrate the execution order.
     """
     driver_log_block = ""
+    cleanup_spark_pods_block = ""
 
     if spark_app_name:
         driver_log_block = f"""
@@ -86,6 +89,13 @@ def run_spark_job_from_cronjob(
         done
         """
 
+        cleanup_spark_pods_block = f"""
+        echo "[airflow] deleting old Spark pods for app: {spark_app_name}"
+        kubectl delete pod -n {SPARK_NAMESPACE} \
+          -l spark-app-name={spark_app_name} \
+          --ignore-not-found=true || true
+        """
+
     return BashOperator(
         task_id=task_id,
         bash_command=f"""
@@ -96,7 +106,7 @@ def run_spark_job_from_cronjob(
         echo "[airflow] deleting old job if exists: $JOB_NAME"
         kubectl delete job "$JOB_NAME" -n {SPARK_NAMESPACE} --ignore-not-found=true
 
-        {"echo \"[airflow] deleting old Spark pods for app: " + spark_app_name + "\"; kubectl delete pod -n " + SPARK_NAMESPACE + " -l spark-app-name=" + spark_app_name + " --ignore-not-found=true || true" if spark_app_name else ""}
+        {cleanup_spark_pods_block}
 
         echo "[airflow] creating job $JOB_NAME from cronjob/{cronjob_name}"
         kubectl create job "$JOB_NAME" \\
@@ -226,6 +236,13 @@ with DAG(
         spark_app_name="silver-to-gold",
     )
 
+    train_salary_model = run_spark_job_from_cronjob(
+        task_id="train_salary_model",
+        cronjob_name="batch-etl-train-salary-model",
+        timeout_seconds=2400,
+        spark_app_name="train-salary-model",
+    )
+
     gold_to_elasticsearch = run_spark_job_from_cronjob(
         task_id="gold_to_elasticsearch",
         cronjob_name="batch-etl-gold-to-elasticsearch",
@@ -235,4 +252,4 @@ with DAG(
 
     [check_hdfs, check_elasticsearch] >> crawl_jobs
     crawl_jobs >> raw_to_bronze
-    raw_to_bronze >> bronze_to_silver >> silver_to_gold >> gold_to_elasticsearch
+    raw_to_bronze >> bronze_to_silver >> train_salary_model >> silver_to_gold >> gold_to_elasticsearch
