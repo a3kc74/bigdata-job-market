@@ -11,7 +11,12 @@ $UvBin = if ($env:UV_BIN) { $env:UV_BIN } else { "uv" }
 $UvCacheDir = if ($env:UV_CACHE_DIR_HOME) { $env:UV_CACHE_DIR_HOME } else { Join-Path $HOME ".cache\uv" }
 $env:UV_CACHE_DIR = $UvCacheDir
 
-$InputPath = if ($env:CRAWLER_JSONL_INPUT) { $env:CRAWLER_JSONL_INPUT } else { "data/raw/jobs/source=topcv/ingest_date=*/jobs_speed_*.jsonl" }
+$CrawlerOutputDir = if ($env:CRAWLER_LOCAL_OUTPUT_DIR) { $env:CRAWLER_LOCAL_OUTPUT_DIR } else { "/tmp/topcv-crawler-output" }
+$InputPath = if ($env:CRAWLER_JSONL_INPUT) {
+    $env:CRAWLER_JSONL_INPUT
+} else {
+    Join-Path $CrawlerOutputDir "source=topcv\ingest_date=*\jobs_speed_*.jsonl"
+}
 $Topic = if ($env:RAW_TOPIC) { $env:RAW_TOPIC } else { "jobs_raw" }
 $BootstrapServers = if ($env:KAFKA_BOOTSTRAP_SERVERS) { $env:KAFKA_BOOTSTRAP_SERVERS } else { "localhost:9092" }
 $SleepMs = if ($env:CRAWLER_JSONL_SLEEP_MS) { $env:CRAWLER_JSONL_SLEEP_MS } else { "0" }

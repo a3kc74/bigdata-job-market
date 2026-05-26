@@ -21,7 +21,9 @@ from typing import Any, Iterable
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_INPUT = "data/raw/jobs/source=topcv/ingest_date=*/jobs_speed_*.jsonl"
+DEFAULT_CRAWLER_LOCAL_OUTPUT_DIR = "/tmp/topcv-crawler-output"
+DEFAULT_INPUT_SUFFIX = "source=topcv/ingest_date=*/jobs_speed_*.jsonl"
+DEFAULT_INPUT = f"{DEFAULT_CRAWLER_LOCAL_OUTPUT_DIR}/{DEFAULT_INPUT_SUFFIX}"
 DEFAULT_TOPIC = "jobs_raw"
 DEFAULT_BOOTSTRAP = "localhost:9092"
 DEFAULT_CHECKPOINT_FILE = "runtime/producer/crawler_jsonl_offsets.json"
@@ -643,10 +645,14 @@ def follow_files(args: argparse.Namespace) -> ProduceStats:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Publish crawler JSONL records into Kafka jobs_raw.")
+    default_input = os.getenv(
+        "CRAWLER_JSONL_INPUT",
+        f"{os.getenv('CRAWLER_LOCAL_OUTPUT_DIR', DEFAULT_CRAWLER_LOCAL_OUTPUT_DIR)}/{DEFAULT_INPUT_SUFFIX}",
+    )
     parser.add_argument(
         "--input",
         nargs="+",
-        default=os.getenv("CRAWLER_JSONL_INPUT", DEFAULT_INPUT).split(os.pathsep),
+        default=default_input.split(os.pathsep),
         help=f"JSONL input path or glob (default: {DEFAULT_INPUT})",
     )
     parser.add_argument(

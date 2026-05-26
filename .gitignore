@@ -18,6 +18,8 @@ uv.lock
 .agents
 .codex
 .state
+.checkpoints
+.uv-cache
 
 processed_links.txt
 

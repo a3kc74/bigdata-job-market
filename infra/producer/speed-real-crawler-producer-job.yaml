@@ -56,6 +56,10 @@ spec:
               value: "runtime/producer/crawler_jsonl_offsets.json"
             - name: CRAWLER_JSONL_LOG_EVERY
               value: "10"
+            - name: CRAWLER_JSONL_POLL_SECONDS
+              value: "2"
+            - name: PRODUCER_DRAIN_SECONDS
+              value: "10"
 
           command:
             - /bin/bash
@@ -66,23 +70,60 @@ spec:
 
               mkdir -p /tmp/topcv-crawler-output runtime/producer runtime/crawler runtime/logs
 
-              echo "[speed-real] Running TopCV speed crawler..."
+              cleanup() {
+                if [ -n "${PRODUCER_PID:-}" ] && kill -0 "$PRODUCER_PID" 2>/dev/null; then
+                  echo "[speed-real] stopping JSONL producer pid=$PRODUCER_PID"
+                  kill "$PRODUCER_PID" 2>/dev/null || true
+                  wait "$PRODUCER_PID" 2>/dev/null || true
+                fi
+
+                if [ -n "${CRAWLER_PID:-}" ] && kill -0 "$CRAWLER_PID" 2>/dev/null; then
+                  echo "[speed-real] stopping crawler pid=$CRAWLER_PID"
+                  kill "$CRAWLER_PID" 2>/dev/null || true
+                  wait "$CRAWLER_PID" 2>/dev/null || true
+                fi
+              }
+              trap cleanup EXIT INT TERM
+
+              echo "[speed-real] Starting checkpointed JSONL producer in watch mode..."
+              python3 -m apps.producer.crawler_jsonl_producer \
+                --input "${CRAWLER_JSONL_INPUT}" \
+                --latest-only \
+                --watch \
+                --poll-seconds "${CRAWLER_JSONL_POLL_SECONDS}" \
+                --event-time-mode "${CRAWLER_JSONL_EVENT_TIME_MODE}" \
+                --bootstrap-servers "${KAFKA_BOOTSTRAP_SERVERS}" \
+                --topic "${RAW_TOPIC}" \
+                --checkpoint-file "${CRAWLER_JSONL_CHECKPOINT_FILE}" \
+                --log-every "${CRAWLER_JSONL_LOG_EVERY}" &
+              PRODUCER_PID="$!"
+
+              echo "[speed-real] Running TopCV speed crawler in background..."
               python3 -m apps.ingestion.run_crawler \
                 --mode speed \
                 --max-pages "${SPEED_CRAWL_MAX_PAGES}" \
                 --updated-within-minutes "${SPEED_UPDATED_WITHIN_MINUTES}" \
                 --list-pages-per-chunk "${SPEED_LIST_PAGES_PER_CHUNK}" \
-                --detail-batch-size "${SPEED_DETAIL_BATCH_SIZE}"
+                --detail-batch-size "${SPEED_DETAIL_BATCH_SIZE}" &
+              CRAWLER_PID="$!"
 
-              echo "[speed-real] Publishing crawler JSONL output to Kafka..."
-              python3 -m apps.producer.crawler_jsonl_producer \
-                --input "${CRAWLER_JSONL_INPUT}" \
-                --latest-only \
-                --event-time-mode "${CRAWLER_JSONL_EVENT_TIME_MODE}" \
-                --bootstrap-servers "${KAFKA_BOOTSTRAP_SERVERS}" \
-                --topic "${RAW_TOPIC}" \
-                --checkpoint-file "${CRAWLER_JSONL_CHECKPOINT_FILE}" \
-                --log-every "${CRAWLER_JSONL_LOG_EVERY}"
+              set +e
+              wait "$CRAWLER_PID"
+              CRAWLER_EXIT="$?"
+              set -e
+
+              if [ "$CRAWLER_EXIT" -ne 0 ]; then
+                echo "[speed-real] crawler failed with exit code $CRAWLER_EXIT"
+                exit "$CRAWLER_EXIT"
+              fi
+
+              echo "[speed-real] crawler finished; letting producer drain for ${PRODUCER_DRAIN_SECONDS}s"
+              sleep "${PRODUCER_DRAIN_SECONDS}"
+
+              echo "[speed-real] stopping JSONL producer after drain"
+              kill "$PRODUCER_PID" 2>/dev/null || true
+              wait "$PRODUCER_PID" 2>/dev/null || true
+              PRODUCER_PID=""
 
               echo "[speed-real] Done."
 

@@ -4,6 +4,27 @@ from pyspark.sql import Column
 from pyspark.sql import functions as F
 
 
+UI_SKILL_LABELS = (
+    "an bot",
+    "an bớt",
+    "an it",
+    "ẩn bớt",
+    "less",
+    "more",
+    "read more",
+    "see less",
+    "see more",
+    "show less",
+    "show more",
+    "thu gon",
+    "thu gọn",
+    "xem it hon",
+    "xem them",
+    "xem ít hơn",
+    "xem thêm",
+)
+
+
 def epoch_ms_to_timestamp(column: Column) -> Column:
     return F.to_timestamp(F.from_unixtime((column.cast("double") / F.lit(1000.0))))
 
@@ -29,7 +50,16 @@ def normalize_skills(skills_needed: Column, skills_should_have: Column) -> Colum
             F.coalesce(skills_should_have, F.array()),
         )
     )
-    normalized = F.transform(merged, lambda skill: F.initcap(F.trim(skill)))
+    cleaned = F.transform(merged, lambda skill: F.lower(F.trim(skill)))
+    filtered = F.filter(
+        cleaned,
+        lambda skill: (
+            skill.isNotNull()
+            & (skill != "")
+            & (~F.array_contains(F.array(*[F.lit(label) for label in UI_SKILL_LABELS]), skill))
+        ),
+    )
+    normalized = F.transform(filtered, lambda skill: F.initcap(skill))
     return F.array_sort(
         F.array_distinct(F.filter(normalized, lambda skill: skill.isNotNull() & (skill != "")))
     )

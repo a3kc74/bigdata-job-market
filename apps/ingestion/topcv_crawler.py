@@ -403,6 +403,7 @@ async def get_vip_ticket():
         browser = await uc.start(
             headless=headless,
             browser_executable_path=browser_executable_path,
+            no_sandbox=True,
             browser_args=[
                 "--disable-blink-features=AutomationControlled",
                 "--no-sandbox",

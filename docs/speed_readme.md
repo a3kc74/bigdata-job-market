@@ -160,7 +160,7 @@ Default speed behavior:
 
 - starts from page 1
 - filters jobs updated within `CRAWLER_UPDATED_WITHIN_MINUTES`
-- writes JSONL to `data/raw/jobs/source=topcv/ingest_date=...`
+- writes JSONL to `${CRAWLER_LOCAL_OUTPUT_DIR:-/tmp/topcv-crawler-output}/source=topcv/ingest_date=...`
 - uses `runtime/crawler/speed_processed_jobs_29d.json` to avoid recently
   processed `job_id`s
 
@@ -192,7 +192,7 @@ bash scripts/run_crawler_jsonl_producer.sh
 
 Default behavior:
 
-- follows `data/raw/jobs/source=topcv/ingest_date=*/jobs_speed_*.jsonl`
+- follows `${CRAWLER_LOCAL_OUTPUT_DIR:-/tmp/topcv-crawler-output}/source=topcv/ingest_date=*/jobs_speed_*.jsonl`
 - selects the newest matching file
 - stores sent byte offsets in `runtime/producer/crawler_jsonl_offsets.json`
 - sends only newly appended JSONL lines
@@ -216,7 +216,7 @@ Follow a specific file:
 
 ```powershell
 .\scripts\run_crawler_jsonl_producer.ps1 `
-  --input "data/raw/jobs/source=topcv/ingest_date=2026-05-23/jobs_speed_20260523_113346.jsonl"
+  --input "/tmp/topcv-crawler-output/source=topcv/ingest_date=2026-05-23/jobs_speed_20260523_113346.jsonl"
 ```
 
 Producer delivery is at-least-once around crashes: it flushes Kafka before
@@ -268,6 +268,7 @@ Crawler:
 
 ```env
 CRAWLER_MODE=speed
+CRAWLER_LOCAL_OUTPUT_DIR=/tmp/topcv-crawler-output
 CRAWLER_MAX_PAGES=15
 CRAWLER_UPDATED_WITHIN_MINUTES=30
 CRAWLER_DETAIL_BATCH_SIZE=40
@@ -281,7 +282,7 @@ JSONL producer:
 ```env
 KAFKA_BOOTSTRAP_SERVERS=localhost:9092
 RAW_TOPIC=jobs_raw
-CRAWLER_JSONL_INPUT=data/raw/jobs/source=topcv/ingest_date=*/jobs_speed_*.jsonl
+CRAWLER_JSONL_INPUT=/tmp/topcv-crawler-output/source=topcv/ingest_date=*/jobs_speed_*.jsonl
 CRAWLER_JSONL_CHECKPOINT_FILE=runtime/producer/crawler_jsonl_offsets.json
 CRAWLER_JSONL_WATCH=true
 CRAWLER_JSONL_POLL_SECONDS=2
