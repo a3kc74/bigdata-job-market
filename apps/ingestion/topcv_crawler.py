@@ -7,7 +7,9 @@ import random
 import unicodedata
 import shutil
 from urllib.parse import urlparse, urlunparse
-from datetime import datetime, UTC, timezone, timedelta
+from datetime import datetime, timezone, timedelta
+
+UTC = timezone.utc
 import logging
 import sys
 import os
