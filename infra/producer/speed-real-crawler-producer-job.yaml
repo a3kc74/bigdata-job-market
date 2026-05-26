@@ -29,7 +29,7 @@ spec:
               value: "jobs_raw"
 
             - name: CRAWLER_HEADLESS
-              value: "true"
+              value: "false"
             - name: DISPLAY
               value: ":99"
             - name: HARVESTER_BREAKER_SLEEP_SECONDS

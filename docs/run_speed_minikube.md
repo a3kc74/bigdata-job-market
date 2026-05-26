@@ -239,3 +239,13 @@ If a previous streaming driver is still running, the DAG deletes old
 
 If Kafka topics were recreated manually, always reset Spark checkpoints too;
 otherwise Spark may hold old Kafka offsets.
+
+## airflow image rebuild
+
+```powershell
+minikube image build -f infra\airflow\Dockerfile -t job-market-airflow:2.9.3 .
+kubectl rollout restart deployment/airflow-scheduler -n airflow
+kubectl rollout restart deployment/airflow-webserver -n airflow
+kubectl rollout status deployment/airflow-scheduler -n airflow
+kubectl rollout status deployment/airflow-webserver -n airflow
+```
