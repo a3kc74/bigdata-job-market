@@ -8,4 +8,11 @@ uv.lock
 .env
 .log
 
+runtime/
+data/raw/jobs/
+__pycache__/
+*.pyc
+.venv/
+project.log
+debug_page_*.html
 
