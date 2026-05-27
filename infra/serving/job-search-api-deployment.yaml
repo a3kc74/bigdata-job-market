@@ -1,0 +1,38 @@
+# Deployment for the job-search FastAPI service.
+#
+# The API reads from Elasticsearch and exposes search/detail endpoints for the
+# serving layer.
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: job-search-api
+  namespace: serving
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: job-search-api
+  template:
+    metadata:
+      labels:
+        app: job-search-api
+    spec:
+      containers:
+        - name: job-search-api
+          image: job-search-api:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          env:
+            - name: ELASTICSEARCH_URL
+              value: "http://elasticsearch.search.svc:9200"
+            - name: JOBS_INDEX
+              value: "gold-jobs-flat"
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"

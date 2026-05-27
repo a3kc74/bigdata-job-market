@@ -1,0 +1,77 @@
+# Suspended Kubernetes CronJob template for Silver -> Gold batch ETL.
+#
+# This Spark job converts Silver data into a search-friendly Gold table with
+# cleaned salary, skill, location, schedule, and UI filter fields.
+#
+# Airflow triggers this job after bronze_to_silver succeeds.
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: batch-etl-silver-to-gold
+  namespace: spark
+spec:
+  schedule: "0 20 * * *"
+  suspend: true
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        metadata:
+          labels:
+            app: batch-etl
+            job: silver-to-gold
+        spec:
+          serviceAccountName: spark
+          restartPolicy: Never
+          containers:
+            - name: spark-submit
+              image: spark-job-market:latest
+              imagePullPolicy: IfNotPresent
+              command:
+                - /opt/spark/bin/spark-submit
+                - --master
+                - k8s://https://kubernetes.default.svc:443
+                - --deploy-mode
+                - cluster
+                - --name
+                - silver-to-gold
+                - --conf
+                - spark.kubernetes.namespace=spark
+                - --conf
+                - spark.kubernetes.authenticate.driver.serviceAccountName=spark
+                - --conf
+                - spark.kubernetes.container.image=spark-job-market:latest
+                - --conf
+                - spark.kubernetes.container.image.pullPolicy=IfNotPresent
+                - --conf
+                - spark.executor.instances=1
+                - --conf
+                - spark.executor.cores=1
+                - --conf
+                - spark.kubernetes.executor.request.cores=250m
+                - --conf
+                - spark.kubernetes.executor.limit.cores=500m
+                - --conf
+                - spark.kubernetes.driver.request.cores=250m
+                - --conf
+                - spark.kubernetes.driver.limit.cores=500m
+                - --conf
+                - spark.executor.memory=768m
+                - --conf
+                - spark.driver.memory=768m
+                - --conf
+                - spark.sql.shuffle.partitions=8
+                - --conf
+                - spark.sql.parquet.enableVectorizedReader=false
+                - local:///opt/spark/work-dir/jobs/silver_to_gold.py
+              resources:
+                requests:
+                  cpu: "500m"
+                  memory: "512Mi"
+                limits:
+                  cpu: "1"
+                  memory: "1Gi"

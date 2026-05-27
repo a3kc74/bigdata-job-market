@@ -1,0 +1,91 @@
+# Suspended Kubernetes CronJob template for Raw -> Bronze batch ETL.
+#
+# This job reads raw JSONL files from HDFS under /raw/jobs and writes Bronze
+# Parquet data back to HDFS. Airflow uses this CronJob as a template and creates
+# one-off Jobs from it during the batch DAG run.
+#
+# Manual test:
+#   kubectl create job raw-to-bronze-manual --from=cronjob/batch-etl-raw-to-bronze -n spark
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: batch-etl-raw-to-bronze
+  namespace: spark
+spec:
+  schedule: "0 19 * * *"
+  suspend: true
+  concurrencyPolicy: Forbid        # Không cho chạy song song nếu job trước chưa xong
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+
+  jobTemplate:
+    spec:
+      # Retry tối đa 2 lần nếu thất bại
+      backoffLimit: 2
+      template:
+        metadata:
+          labels:
+            app: batch-etl
+            job: raw-to-bronze
+        spec:
+          serviceAccountName: spark   # RBAC được khai báo trong infra/spark/rbac.yaml
+          restartPolicy: Never
+
+          containers:
+            - name: spark-submit
+              image: spark-job-market:latest
+              imagePullPolicy: IfNotPresent
+
+              command:
+                - /opt/spark/bin/spark-submit
+                - --master
+                - k8s://https://kubernetes.default.svc:443
+                - --deploy-mode
+                - cluster
+                - --name
+                - raw-to-bronze
+                - --conf
+                - spark.kubernetes.namespace=spark
+                - --conf
+                - spark.kubernetes.authenticate.driver.serviceAccountName=spark
+                - --conf
+                - spark.kubernetes.container.image=spark-job-market:latest
+                - --conf
+                - spark.kubernetes.container.image.pullPolicy=IfNotPresent
+                - --conf
+                - spark.executor.instances=1
+                - --conf
+                - spark.executor.cores=1
+                - --conf
+                - spark.kubernetes.executor.request.cores=250m
+                - --conf
+                - spark.kubernetes.executor.limit.cores=500m
+                - --conf
+                - spark.kubernetes.driver.request.cores=250m
+                - --conf
+                - spark.kubernetes.driver.limit.cores=500m
+                - --conf
+                - spark.executor.memory=768m
+                - --conf
+                - spark.driver.memory=768m
+                - --conf
+                - spark.sql.shuffle.partitions=8
+                - local:///opt/spark/work-dir/jobs/raw_to_bronze.py
+
+              env:
+                # HDFS namenode connection
+                - name: HDFS_NAMENODE_URI
+                  value: "hdfs://hdfs-namenode.hdfs.svc:9000"
+                - name: RAW_BASE_PATH
+                  value: "hdfs://hdfs-namenode.hdfs.svc:9000/raw/jobs"
+                - name: BRONZE_BASE_PATH
+                  value: "hdfs://hdfs-namenode.hdfs.svc:9000/bronze/jobs"
+
+              resources:
+                requests:
+                  cpu: "500m"
+                  memory: "512Mi"
+                limits:
+                  cpu: "1"
+                  memory: "1Gi"

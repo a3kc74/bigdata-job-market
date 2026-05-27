@@ -1,0 +1,16 @@
+# PersistentVolumeClaim for the batch crawler checkpoint/state.
+#
+# The crawler uses this PVC to persist processed links, failed links, missing job
+# logs, and the last completed page. This allows Airflow/Kubernetes retries to
+# resume a long full crawl instead of starting from page 1 again.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: batch-crawler-checkpoint-pvc
+  namespace: spark
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi

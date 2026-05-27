@@ -1,0 +1,79 @@
+# Suspended Kubernetes CronJob template for training the salary prediction model.
+#
+# This job learns f(title, skills, experience, location, company, remote)
+# from Silver rows that have public salary. silver_to_gold.py and the speed
+# stream then load the saved PipelineModel to predict negotiable salaries.
+#
+# Airflow triggers this job after bronze_to_silver and before silver_to_gold.
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: batch-etl-train-salary-model
+  namespace: spark
+spec:
+  schedule: "45 19 * * *"
+  suspend: true
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        metadata:
+          labels:
+            app: batch-etl
+            job: train-salary-model
+        spec:
+          serviceAccountName: spark
+          restartPolicy: Never
+          containers:
+            - name: spark-submit
+              image: spark-job-market:latest
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: HOME
+                  value: /tmp
+              command:
+                - /opt/spark/bin/spark-submit
+                - --master
+                - k8s://https://kubernetes.default.svc:443
+                - --deploy-mode
+                - cluster
+                - --name
+                - train-salary-model
+                - --conf
+                - spark.kubernetes.namespace=spark
+                - --conf
+                - spark.kubernetes.authenticate.driver.serviceAccountName=spark
+                - --conf
+                - spark.kubernetes.container.image=spark-job-market:latest
+                - --conf
+                - spark.kubernetes.container.image.pullPolicy=IfNotPresent
+                - --conf
+                - spark.executor.instances=1
+                - --conf
+                - spark.executor.cores=1
+                - --conf
+                - spark.kubernetes.executor.request.cores=250m
+                - --conf
+                - spark.kubernetes.executor.limit.cores=500m
+                - --conf
+                - spark.kubernetes.driver.request.cores=250m
+                - --conf
+                - spark.kubernetes.driver.limit.cores=500m
+                - --conf
+                - spark.executor.memory=1g
+                - --conf
+                - spark.driver.memory=1g
+                - --conf
+                - spark.sql.shuffle.partitions=8
+                - local:///opt/spark/work-dir/jobs/train_salary_model.py
+              resources:
+                requests:
+                  cpu: "500m"
+                  memory: "768Mi"
+                limits:
+                  cpu: "1"
+                  memory: "1536Mi"

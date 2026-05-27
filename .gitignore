@@ -1,12 +1,14 @@
 TV1_workspace/
-__pycache__
+TV1_docs/
 
-.venv
+__pycache__/
+*.pyc
+.venv/
 .python-version
 
 uv.lock
 .env
-.log
+*.log
 
 runtime/
 data/raw/jobs/
@@ -15,4 +17,36 @@ __pycache__/
 .venv/
 project.log
 debug_page_*.html
+.pytest_cache/
+.ruff_cache/
+.state/
+.agents/
+.codex/
+.agents
+.codex
+.state
+.checkpoints
+.uv-cache
 
+processed_links.txt
+
+.postman/
+postman/
+
+data/mock/
+data/raw/*.jsonl
+data/raw/*.json
+data/raw/*.csv
+data/raw/**/*.jsonl
+data/raw/**/*.json
+data/raw/**/*.csv
+
+spark-warehouse/
+metastore_db/
+derby.log
+_SUCCESS
+.*.crc
+
+runtime/
+
+implementation-notes.md

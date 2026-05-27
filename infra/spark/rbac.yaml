@@ -1,0 +1,37 @@
+# RBAC resources required by Spark jobs running on Kubernetes.
+#
+# Spark driver pods need permission to create and manage executor pods in the
+# spark namespace. Apply this before submitting Spark batch or streaming jobs.
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: spark
+  namespace: spark
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: spark-role
+  namespace: spark
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "pods/log", "services", "configmaps", "persistentvolumeclaims"]
+    verbs: ["create", "get", "list", "watch", "delete", "deletecollection", "update", "patch"]
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["create", "get", "list", "watch", "delete", "deletecollection"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: spark-rolebinding
+  namespace: spark
+subjects:
+  - kind: ServiceAccount
+    name: spark
+    namespace: spark
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: spark-role

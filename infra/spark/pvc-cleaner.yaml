@@ -1,0 +1,28 @@
+# Temporary Pod used to clean Spark Structured Streaming checkpoints.
+#
+# Use this only for demo/debug when the speed layer must reread Kafka data from
+# the beginning. It removes checkpoint data from the Spark checkpoint PVC.
+#
+# Typical usage:
+#   kubectl apply -f infra/spark/pvc-cleaner.yaml
+#   kubectl logs -n spark spark-checkpoint-cleaner
+#   kubectl delete pod -n spark spark-checkpoint-cleaner
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: spark-checkpoint-cleaner
+  namespace: spark
+spec:
+  restartPolicy: Never
+  containers:
+    - name: cleaner
+      image: busybox
+      command: ["sh", "-c", "rm -rf /mnt/spark-checkpoints/speed-es-only && echo cleaned && sleep 5"]
+      volumeMounts:
+        - name: checkpoints
+          mountPath: /mnt/spark-checkpoints
+  volumes:
+    - name: checkpoints
+      persistentVolumeClaim:
+        claimName: spark-speed-checkpoints-pvc

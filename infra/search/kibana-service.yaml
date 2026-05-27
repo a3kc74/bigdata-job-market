@@ -1,0 +1,18 @@
+# Kubernetes Service for Kibana UI.
+#
+# Local access:
+#   kubectl port-forward svc/kibana 5601:5601 -n search
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana
+  namespace: search
+spec:
+  type: ClusterIP
+  selector:
+    app: kibana
+  ports:
+    - name: http
+      port: 5601
+      targetPort: 5601

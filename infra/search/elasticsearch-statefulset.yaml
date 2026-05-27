@@ -1,0 +1,79 @@
+# Elasticsearch StatefulSet for batch and realtime search indexes.
+#
+# Batch pipeline writes Gold data to:
+#   gold-jobs-flat
+#
+# Speed layer writes realtime data to:
+#   realtime_jobs_v1
+#   realtime_job_counts_10m_v1
+#   realtime_salary_bins_hourly_v1
+#   realtime_skill_counts_hourly_v1
+#   realtime_top_skills_hourly_v1
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: elasticsearch
+  namespace: search
+spec:
+  serviceName: elasticsearch
+  replicas: 1
+  selector:
+    matchLabels:
+      app: elasticsearch
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+    spec:
+      securityContext:
+        fsGroup: 1000
+      containers:
+        - name: elasticsearch
+          image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9200
+              name: http
+            - containerPort: 9300
+              name: transport
+          env:
+            - name: discovery.type
+              value: single-node
+            - name: cluster.name
+              value: job-market-es
+            - name: node.name
+              value: elasticsearch-0
+            - name: xpack.security.enabled
+              value: "false"
+            - name: xpack.security.enrollment.enabled
+              value: "false"
+            - name: ES_JAVA_OPTS
+              value: "-Xms512m -Xmx512m"
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "768Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+          volumeMounts:
+            - name: elasticsearch-data
+              mountPath: /usr/share/elasticsearch/data
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 9200
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+  volumeClaimTemplates:
+    - metadata:
+        name: elasticsearch-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: standard
+        resources:
+          requests:
+            storage: 2Gi

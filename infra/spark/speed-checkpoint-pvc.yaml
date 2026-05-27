@@ -1,0 +1,20 @@
+# PersistentVolumeClaim for Spark Structured Streaming checkpoints.
+#
+# Spark uses this PVC to store Kafka offsets and streaming query state. Keeping
+# checkpoints allows the speed layer to resume safely after restart. Deleting the
+# checkpoint makes Spark reread according to STARTING_OFFSETS.
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: spark-speed-checkpoints-pvc
+  namespace: spark
+  labels:
+    app: speed-stream
+    component: checkpoint
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi

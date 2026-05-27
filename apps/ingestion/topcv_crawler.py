@@ -5,8 +5,11 @@ import re
 import time
 import random
 import unicodedata
+import shutil
 from urllib.parse import urlparse, urlunparse
-from datetime import datetime, UTC, timezone, timedelta
+from datetime import datetime, timezone, timedelta
+
+UTC = timezone.utc
 import logging
 import sys
 import os
@@ -152,6 +155,39 @@ def build_job_id_from_url(url):
     normalized_url = normalize_url(url)
     return sha256_hash(f"{SOURCE}|{normalized_url}")
 
+
+def _normalize_speed_processed_entry(entry):
+    """
+    Chuẩn hóa một entry trong speed processed cache.
+
+    Hỗ trợ cả:
+    - format cũ: {job_id: processed_at_ms}
+    - format mới: {
+          job_id: {
+              "processed_at_ms": ...,
+              "listing_updated_ts": ...
+          }
+      }
+    """
+    if isinstance(entry, int):
+        return {
+            "processed_at_ms": entry,
+            "listing_updated_ts": None,
+        }
+
+    if isinstance(entry, dict):
+        processed_at_ms = entry.get("processed_at_ms")
+        listing_updated_ts = entry.get("listing_updated_ts")
+
+        if isinstance(processed_at_ms, int):
+            return {
+                "processed_at_ms": processed_at_ms,
+                "listing_updated_ts": listing_updated_ts if isinstance(listing_updated_ts, int) else None,
+            }
+
+    return None
+
+
 def load_speed_processed_jobs(
     file_path=SPEED_PROCESSED_JOBS_FILE,
     ttl_days=SPEED_PROCESSED_TTL_DAYS,
@@ -173,11 +209,21 @@ def load_speed_processed_jobs(
 
         cutoff_ms = now_ms() - ttl_days * 24 * 60 * 60 * 1000
 
-        return {
-            job_id: ts
-            for job_id, ts in data.items()
-            if isinstance(job_id, str) and isinstance(ts, int) and ts >= cutoff_ms
-        }
+        normalized = {}
+        for job_id, entry in data.items():
+            if not isinstance(job_id, str):
+                continue
+
+            normalized_entry = _normalize_speed_processed_entry(entry)
+            if not normalized_entry:
+                continue
+
+            if normalized_entry["processed_at_ms"] < cutoff_ms:
+                continue
+
+            normalized[job_id] = normalized_entry
+
+        return normalized
 
     except Exception as e:
         logger.warning(f"[SPEED CACHE] Không đọc được cache speed processed jobs: {e}")
@@ -195,9 +241,47 @@ def save_speed_processed_jobs(processed_jobs, file_path=SPEED_PROCESSED_JOBS_FIL
     except Exception as e:
         logger.error(f"[SPEED CACHE] Không lưu được cache speed processed jobs: {e}")
 
-def mark_speed_processed_job(processed_jobs, job_id):
+def mark_speed_processed_job(processed_jobs, job_id, listing_updated_ts=None):
     if job_id:
-        processed_jobs[job_id] = now_ms()
+        processed_jobs[job_id] = {
+            "processed_at_ms": now_ms(),
+            "listing_updated_ts": listing_updated_ts if isinstance(listing_updated_ts, int) else None,
+        }
+
+
+def should_skip_by_speed_cache(processed_jobs, job_id, listing_updated_time=None):
+    """
+    Quyết định có nên bỏ qua 1 job ở speed mode hay không.
+
+    Rule:
+    - Nếu chưa có trong cache -> không skip.
+    - Nếu job card hiện tại không parse được listing_updated_time -> skip theo cache.
+      Lý do: không có tín hiệu nào cho thấy job đã được update.
+    - Nếu parse được listing_updated_time:
+        + chỉ skip khi timestamp hiện tại <= timestamp đã xử lý gần nhất.
+        + nếu timestamp mới hơn -> vẫn crawl lại để có cơ hội phát hiện hash_content đổi.
+    """
+    cache_entry = processed_jobs.get(job_id)
+    if not cache_entry:
+        return False
+
+    normalized_entry = _normalize_speed_processed_entry(cache_entry)
+    if not normalized_entry:
+        return False
+
+    if not isinstance(listing_updated_time, datetime):
+        return True
+
+    current_listing_updated_ts = int(listing_updated_time.timestamp() * 1000)
+    last_seen_ts = normalized_entry.get("listing_updated_ts")
+
+    if not isinstance(last_seen_ts, int):
+        last_seen_ts = normalized_entry.get("processed_at_ms")
+
+    if not isinstance(last_seen_ts, int):
+        return False
+
+    return current_listing_updated_ts <= last_seen_ts
 
 def save_batch_checkpoint(checkpoint, file_path=BATCH_CHECKPOINT_FILE):
     """
@@ -440,38 +524,78 @@ def requeue_detail_or_fail(links_queue, job_meta, link, reason, stats):
 # 3. GIAI ĐOẠN 1: HARVESTER (LẤY VÉ VIP BẰNG NODRIVER)
 # ===========================================================
 async def get_vip_ticket():
+    """
+    Lấy cookie TopCV bằng nodriver.
+
+    Bản merge:
+    - Giữ cleanup kỹ của topcv_crawler_1.py để giảm lỗi event loop/subprocess.
+    - Thêm cấu hình chạy ổn hơn trong Docker/Kubernetes từ topcv_crawler.py:
+      headless env, no_sandbox, --disable-dev-shm-usage, Chrome profile riêng.
+    """
     browser = None
+    chrome_profile_dir = None
 
     try:
         import nodriver as uc
 
         logger.info("[HARVESTER] Đang mở Chrome tàng hình (nodriver)...")
-        browser = await uc.start(
-            headless=False,
-            browser_args=["--disable-blink-features=AutomationControlled"],
+
+        headless = os.getenv("CRAWLER_HEADLESS", "true").lower() in {"1", "true", "yes"}
+        browser_executable_path = os.getenv("BROWSER_EXECUTABLE_PATH")
+
+        chrome_profile_dir = os.getenv(
+            "CRAWLER_CHROME_PROFILE_DIR",
+            f"/tmp/topcv_chrome_profile_{os.getpid()}",
         )
+        shutil.rmtree(chrome_profile_dir, ignore_errors=True)
+        os.makedirs(chrome_profile_dir, exist_ok=True)
+
+        browser_kwargs = {
+            "headless": headless,
+            "no_sandbox": True,
+            "user_data_dir": chrome_profile_dir,
+            "browser_args": [
+                "--no-sandbox",
+                "--disable-setuid-sandbox",
+                "--disable-dev-shm-usage",
+                "--disable-gpu",
+                "--window-size=1366,768",
+                "--disable-blink-features=AutomationControlled",
+            ],
+        }
+
+        if browser_executable_path:
+            browser_kwargs["browser_executable_path"] = browser_executable_path
+        elif os.path.exists("/usr/bin/google-chrome"):
+            browser_kwargs["browser_executable_path"] = "/usr/bin/google-chrome"
+        elif os.path.exists("/usr/bin/chromium"):
+            browser_kwargs["browser_executable_path"] = "/usr/bin/chromium"
+        elif os.path.exists("/usr/bin/chromium-browser"):
+            browser_kwargs["browser_executable_path"] = "/usr/bin/chromium-browser"
+
+        browser = await uc.start(**browser_kwargs)
 
         logger.info("[HARVESTER] Đang tiến vào TopCV...")
         page = await browser.get("https://www.topcv.vn")
 
         logger.info("[HARVESTER] Đang rà soát màng lọc Cloudflare...")
-        for _ in range(20):
+        for _ in range(90):
             title = await page.evaluate("document.title")
             if "Just a moment" not in title and "Cloudflare" not in title:
                 break
             await asyncio.sleep(1)
 
-        await asyncio.sleep(3)
+        await asyncio.sleep(10)
 
         cookies = await browser.cookies.get_all()
         cookie_dict = {c.name: c.value for c in cookies}
         user_agent = await page.evaluate("navigator.userAgent")
 
         if cookie_dict:
-            logger.info(f"[HARVESTER] Đã lấy {len(cookie_dict)} cookies.")
+            logger.info(f"[HARVESTER] Tuyệt vời! Đã hốt trọn bộ {len(cookie_dict)} Cookies.")
             return cookie_dict, user_agent
 
-        logger.error("[HARVESTER] Không lấy được cookie.")
+        logger.error("[HARVESTER] Thất bại! Không kéo được Cookie nào về.")
         return None, None
 
     except Exception as e:
@@ -480,22 +604,22 @@ async def get_vip_ticket():
 
     finally:
         if browser is not None:
-            # Đóng tab nếu có
+            # Đóng tab nếu có.
             with contextlib.suppress(Exception):
                 for tab in list(getattr(browser, "tabs", []) or []):
                     await tab.close()
 
-            # Đóng websocket/CDP connection nếu còn
+            # Đóng websocket/CDP connection nếu còn.
             with contextlib.suppress(Exception):
                 conn = getattr(browser, "connection", None)
                 if conn:
                     await conn.aclose()
 
-            # Gọi stop của nodriver
+            # Gọi stop của nodriver.
             with contextlib.suppress(Exception):
                 browser.stop()
 
-            # Chờ process Chrome chết hẳn nếu nodriver còn giữ _process
+            # Chờ process Chrome chết hẳn nếu nodriver còn giữ _process.
             proc = getattr(browser, "_process", None)
             if proc is not None:
                 with contextlib.suppress(Exception):
@@ -506,15 +630,21 @@ async def get_vip_ticket():
                     if inspect.isawaitable(wait_result):
                         await wait_result
 
-# THỨ 3: CƠ CHẾ CIRCUIT BREAKER - LỖI XIN VÉ THÌ NGỦ 1 TIẾNG RỒI THỬ LẠI LẦN CUỐI
+        if chrome_profile_dir and not os.getenv("CRAWLER_KEEP_CHROME_PROFILE"):
+            with contextlib.suppress(Exception):
+                shutil.rmtree(chrome_profile_dir, ignore_errors=True)
+
+
+# Cơ chế circuit breaker: nếu xin cookie lỗi thì nghỉ một khoảng rồi thử lại lần cuối.
 async def execute_harvester_with_breaker_async():
     cookie_dict, user_agent = await get_vip_ticket()
 
     if not cookie_dict:
-        logger.warning("[⚠️ BREAKER] Không lấy được vé VIP. Ngủ 1 tiếng...")
-        await asyncio.sleep(3600)
+        sleep_seconds = int(os.getenv("HARVESTER_BREAKER_SLEEP_SECONDS", "60"))
+        logger.warning(f"[⚠️ BREAKER] Không lấy được vé VIP. Nghỉ {sleep_seconds}s rồi thử lại...")
+        await asyncio.sleep(sleep_seconds)
 
-        logger.info("[⚠️ BREAKER] Thử lại lần cuối...")
+        logger.info("[⚠️ BREAKER] Hết thời gian cách ly. Tiến hành thử lại lần cuối cùng...")
         cookie_dict, user_agent = await get_vip_ticket()
 
     return cookie_dict, user_agent
@@ -1821,45 +1951,95 @@ def parse_job_html(html, url):
 # =======================================================
 # 6. MASTER ORCHESTRATOR (CURL_CFFI HYBRID + CACHING)
 # =======================================================
-def get_total_pages(session):
-    try:
-        url = "https://www.topcv.vn/tim-viec-lam-cong-nghe-thong-tin-cr257?sort=up_top&type_keyword=1&category_family=r257&saturday_status=0"
-        logger.info(f"[*] Đang lấy tổng số trang từ: {url}")
-        
-        # Gửi request bằng session tàng hình của curl_cffi
-        res = session.get(url, timeout=15)
-        
-        # Bẫy lỗi Cloudflare WAF
-        if res.status_code in [403, 401] or looks_blocked_or_empty(res.text):
-            logger.warning(f"[!] Bị chặn (Mã {res.status_code}) khi đang quét tổng số trang! Trả về mặc định 1 trang.")
-            return 1
-        soup = BeautifulSoup(res.text, "html.parser")
-        
+def get_total_pages(session, fallback_pages=1):
+    """
+    Lấy tổng số page list TopCV.
 
+    Bản merge sửa lỗi quan trọng:
+    - Không return 1 ngay khi cookie cache bị 403/401.
+    - Nếu bị chặn, recover cookie ngay trong bước lấy total pages.
+    - Trả về cả session vì recover_blocked_request() có thể tạo session mới.
+    - Nếu vẫn không parse được total pages thì fallback về fallback_pages.
+      Với speed mode, fallback_pages nên là max_pages, ví dụ 15.
+    """
+    url = (
+        "https://www.topcv.vn/tim-viec-lam-cong-nghe-thong-tin-cr257"
+        "?sort=up_top&type_keyword=1&category_family=r257&saturday_status=0"
+    )
+
+    try:
+        fallback_pages = int(fallback_pages or 1)
+    except Exception:
+        fallback_pages = 1
+    fallback_pages = max(1, fallback_pages)
+
+    logger.info(f"[*] Đang lấy tổng số trang từ: {url}")
+
+    res = None
+    try:
+        check_and_trigger_global_cooldown()
+        res = session.get(url, timeout=15)
+    except Exception as e:
+        logger.warning(f"[TOTAL PAGES] Lỗi request tổng số trang: {e}")
+
+    if res is None or is_blocked_response(res):
+        status = getattr(res, "status_code", None)
+        logger.warning(
+            f"[TOTAL PAGES] Bị chặn khi lấy tổng số trang "
+            f"(status={status}). Thử lấy cookie mới trước khi quyết định end_page."
+        )
+        session, res = recover_blocked_request(
+            session=session,
+            url=url,
+            context="TOTAL PAGES",
+        )
+
+    if res is None or is_blocked_response(res):
+        status = getattr(res, "status_code", None)
+
+        if fallback_pages is None:
+            raise RuntimeError(
+                "[TOTAL PAGES] Không lấy được total pages cho full batch. "
+                "Dừng để tránh crawl thiếu."
+            )
+
+        logger.error(
+            f"[TOTAL PAGES] Không lấy được tổng số trang sau khi recover "
+            f"(status={status}). Fallback về {fallback_pages} trang."
+        )
+        return session, fallback_pages
+
+    try:
+        soup = BeautifulSoup(res.text, "html.parser")
         element = soup.select_one("#job-listing-paginate-text")
 
         if not element:
-            logger.warning("[!] Không tìm thấy pagination element!")
-            return 1
+            logger.warning(
+                f"[TOTAL PAGES] Không tìm thấy pagination element. "
+                f"Fallback về {fallback_pages} trang."
+            )
+            return session, fallback_pages
 
         text = element.get_text(" ", strip=True)
-
-        match = re.search(r'/\s*(\d+)', text)
+        match = re.search(r"/\s*(\d+)", text)
 
         if not match:
-            logger.warning(f"[!] Không parse được total pages từ text: {text}")
-            return 1
+            logger.warning(
+                f"[TOTAL PAGES] Không parse được total pages từ text: {text}. "
+                f"Fallback về {fallback_pages} trang."
+            )
+            return session, fallback_pages
 
         total_pages = int(match.group(1))
-
         logger.info(f"[OK] Tổng số trang: {total_pages}")
-
-        return total_pages
+        return session, total_pages
 
     except Exception as e:
-        logger.error(f"[ERROR] Lỗi khi lấy total pages: {e}")
-
-        return 1
+        logger.error(
+            f"[TOTAL PAGES] Lỗi parse tổng số trang: {e}. "
+            f"Fallback về {fallback_pages} trang."
+        )
+        return session, fallback_pages
 def run_master_crawler(
     max_pages=5,
     list_pages_per_chunk=2,
@@ -1957,7 +2137,15 @@ def run_master_crawler(
         "no_time_cards": 0,
     }
 
-    site_total_pages = get_total_pages(session)
+    if max_pages is None or max_pages <= 0:
+        total_pages_fallback = None
+    else:
+        total_pages_fallback = max_pages
+
+    session, site_total_pages = get_total_pages(
+        session,
+        fallback_pages=total_pages_fallback,
+    )
 
     # Nếu max_pages = None hoặc <= 0 thì crawl đến tổng số page thật của website.
     # Phù hợp cho batch mode.
@@ -2107,9 +2295,14 @@ def run_master_crawler(
 
                         job_id = build_job_id_from_url(href)
 
-                        # Chỉ speed mode mới skip job_id đã xử lý trong TTL.
-                        # Batch mode không dùng cache để có thể crawl lại job cũ được cập nhật.
-                        if use_processed_cache and job_id in speed_processed_jobs:
+                        # Chỉ speed mode mới skip theo cache.
+                        # Tuy nhiên nếu listing_updated_time mới hơn lần đã xử lý trước,
+                        # vẫn phải crawl lại để có cơ hội bắt hash_content thay đổi.
+                        if use_processed_cache and should_skip_by_speed_cache(
+                            speed_processed_jobs,
+                            job_id,
+                            job_meta.get("updated_time"),
+                        ):
                             stats["skipped_by_speed_cache"] += 1
                             continue
 
@@ -2240,7 +2433,11 @@ def run_master_crawler(
                                 # Chỉ speed mode mới mark cache sau khi ghi/emit thành công.
                                 # Batch mode không mark để lần batch sau vẫn có thể crawl lại theo threshold.
                                 if use_processed_cache:
-                                    mark_speed_processed_job(speed_processed_jobs, record.get("job_id"))
+                                    mark_speed_processed_job(
+                                        speed_processed_jobs,
+                                        record.get("job_id"),
+                                        listing_updated_ts=updated_ts,
+                                    )
                                     save_speed_processed_jobs(speed_processed_jobs)
                             else:
                                 log_failed_link(link, "save_jsonl returned False")

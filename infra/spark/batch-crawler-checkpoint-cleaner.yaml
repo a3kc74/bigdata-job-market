@@ -1,0 +1,29 @@
+# Temporary Pod used to clean batch crawler checkpoint/state.
+#
+# Use this only when you intentionally want a fresh full crawl from page 1.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: batch-crawler-checkpoint-cleaner
+  namespace: spark
+spec:
+  restartPolicy: Never
+  containers:
+    - name: cleaner
+      image: busybox:1.36
+      command:
+        - sh
+        - -c
+        - |
+          echo "[cleaner] before:"
+          ls -lah /state || true
+          rm -rf /state/*
+          echo "[cleaner] after:"
+          ls -lah /state || true
+      volumeMounts:
+        - name: crawler-checkpoint
+          mountPath: /state
+  volumes:
+    - name: crawler-checkpoint
+      persistentVolumeClaim:
+        claimName: batch-crawler-checkpoint-pvc

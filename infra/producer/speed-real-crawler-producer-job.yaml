@@ -1,0 +1,163 @@
+﻿apiVersion: batch/v1
+kind: Job
+metadata:
+  name: speed-real-crawler-producer
+  namespace: spark
+  labels:
+    app: speed-real-crawler-producer
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 900
+  template:
+    metadata:
+      labels:
+        app: speed-real-crawler-producer
+    spec:
+      restartPolicy: Never
+      terminationGracePeriodSeconds: 60
+      serviceAccountName: spark
+      containers:
+        - name: speed-crawler-producer
+          image: spark-job-market:latest
+          imagePullPolicy: IfNotPresent
+          workingDir: /opt/spark/work-dir
+          env:
+            - name: PYTHONPATH
+              value: "/opt/spark/work-dir"
+
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "my-cluster-kafka-bootstrap.kafka.svc.cluster.local:9092"
+            - name: RAW_TOPIC
+              value: "jobs_raw"
+
+            - name: CRAWLER_HEADLESS
+              value: "false"
+            - name: DISPLAY
+              value: ":99"
+            - name: HARVESTER_BREAKER_SLEEP_SECONDS
+              value: "30"
+            - name: BROWSER_EXECUTABLE_PATH
+              value: "/usr/bin/google-chrome"
+            - name: HOME
+              value: "/tmp"
+            - name: XDG_RUNTIME_DIR
+              value: "/tmp/xdg-runtime"
+            - name: CRAWLER_LOCAL_OUTPUT_DIR
+              value: "/tmp/topcv-crawler-output"
+            - name: CRAWLER_LOG_DIR
+              value: "runtime/logs"
+
+            - name: SPEED_CRAWL_MAX_PAGES
+              value: "8"
+            - name: SPEED_UPDATED_WITHIN_MINUTES
+              value: "20"
+            - name: SPEED_LIST_PAGES_PER_CHUNK
+              value: "4"
+            - name: SPEED_DETAIL_BATCH_SIZE
+              value: "25"
+
+            - name: CRAWLER_JSONL_INPUT
+              value: "/tmp/topcv-crawler-output/source=topcv/ingest_date=*/jobs_speed_*.jsonl"
+            - name: CRAWLER_JSONL_EVENT_TIME_MODE
+              value: "now"
+            - name: CRAWLER_JSONL_LATEST_ONLY
+              value: "true"
+            - name: CRAWLER_JSONL_CHECKPOINT_FILE
+              value: "runtime/producer/crawler_jsonl_offsets.json"
+            - name: CRAWLER_JSONL_LOG_EVERY
+              value: "10"
+            - name: CRAWLER_JSONL_POLL_SECONDS
+              value: "1"
+            - name: PRODUCER_DRAIN_SECONDS
+              value: "5"
+
+          command:
+            - /bin/bash
+            - -lc
+          args:
+            - |
+              set -euo pipefail
+
+              mkdir -p /tmp/topcv-crawler-output runtime/producer runtime/crawler runtime/logs
+              mkdir -p /tmp/xdg-runtime /tmp/topcv_chrome_profile
+              chmod 700 /tmp/xdg-runtime
+
+              export DISPLAY=:99
+              export XDG_RUNTIME_DIR=/tmp/xdg-runtime
+
+              Xvfb :99 -screen 0 1366x768x24 >/tmp/xvfb.log 2>&1 &
+              XVFB_PID="$!"
+              sleep 2
+
+              cleanup() {
+                if [ -n "${PRODUCER_PID:-}" ] && kill -0 "$PRODUCER_PID" 2>/dev/null; then
+                  echo "[speed-real] stopping JSONL producer pid=$PRODUCER_PID"
+                  kill "$PRODUCER_PID" 2>/dev/null || true
+                  wait "$PRODUCER_PID" 2>/dev/null || true
+                fi
+
+                if [ -n "${CRAWLER_PID:-}" ] && kill -0 "$CRAWLER_PID" 2>/dev/null; then
+                  echo "[speed-real] stopping crawler pid=$CRAWLER_PID"
+                  kill "$CRAWLER_PID" 2>/dev/null || true
+                  wait "$CRAWLER_PID" 2>/dev/null || true
+                fi
+
+                if [ -n "${XVFB_PID:-}" ] && kill -0 "$XVFB_PID" 2>/dev/null; then
+                  echo "[speed-real] stopping Xvfb pid=$XVFB_PID"
+                  kill "$XVFB_PID" 2>/dev/null || true
+                  wait "$XVFB_PID" 2>/dev/null || true
+                fi
+              }
+
+              trap cleanup EXIT INT TERM
+
+              echo "[speed-real] Starting checkpointed JSONL producer in watch mode..."
+              python3 -m apps.producer.crawler_jsonl_producer \
+                --input "${CRAWLER_JSONL_INPUT}" \
+                --latest-only \
+                --watch \
+                --poll-seconds "${CRAWLER_JSONL_POLL_SECONDS}" \
+                --event-time-mode "${CRAWLER_JSONL_EVENT_TIME_MODE}" \
+                --bootstrap-servers "${KAFKA_BOOTSTRAP_SERVERS}" \
+                --topic "${RAW_TOPIC}" \
+                --checkpoint-file "${CRAWLER_JSONL_CHECKPOINT_FILE}" \
+                --log-every "${CRAWLER_JSONL_LOG_EVERY}" &
+              PRODUCER_PID="$!"
+
+              echo "[speed-real] Running TopCV speed crawler in background..."
+              python3 -m apps.ingestion.run_crawler \
+                --mode speed \
+                --max-pages "${SPEED_CRAWL_MAX_PAGES}" \
+                --updated-within-minutes "${SPEED_UPDATED_WITHIN_MINUTES}" \
+                --list-pages-per-chunk "${SPEED_LIST_PAGES_PER_CHUNK}" \
+                --detail-batch-size "${SPEED_DETAIL_BATCH_SIZE}" &
+              CRAWLER_PID="$!"
+
+              set +e
+              wait "$CRAWLER_PID"
+              CRAWLER_EXIT="$?"
+              set -e
+
+              if [ "$CRAWLER_EXIT" -ne 0 ]; then
+                echo "[speed-real] crawler failed with exit code $CRAWLER_EXIT"
+                exit "$CRAWLER_EXIT"
+              fi
+
+              echo "[speed-real] crawler finished; letting producer drain for ${PRODUCER_DRAIN_SECONDS}s"
+              sleep "${PRODUCER_DRAIN_SECONDS}"
+
+              echo "[speed-real] stopping JSONL producer after drain"
+              kill "$PRODUCER_PID" 2>/dev/null || true
+              wait "$PRODUCER_PID" 2>/dev/null || true
+              PRODUCER_PID=""
+
+              echo "[speed-real] Done."
+
+          volumeMounts:
+            - name: speed-runtime
+              mountPath: /opt/spark/work-dir/runtime
+
+      volumes:
+        - name: speed-runtime
+          persistentVolumeClaim:
+            claimName: spark-speed-checkpoints-pvc

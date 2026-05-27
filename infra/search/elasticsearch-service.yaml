@@ -1,0 +1,22 @@
+# Kubernetes Service for Elasticsearch.
+#
+# Internal services and Spark jobs use this service DNS name inside the cluster.
+# For local debugging, port-forward it:
+#   kubectl port-forward svc/elasticsearch 9200:9200 -n search
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch
+  namespace: search
+spec:
+  type: ClusterIP
+  selector:
+    app: elasticsearch
+  ports:
+    - name: http
+      port: 9200
+      targetPort: 9200
+    - name: transport
+      port: 9300
+      targetPort: 9300

@@ -1,0 +1,1195 @@
+﻿schedule,schedule_type,reason
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thứ 7 (từ 08:30 đến 12:00) | Nghỉ trưa: 1 tiếng 30 phút,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (từ 08:00 đến 12:00) | Thứ 7 chỉ làm buổi sáng, không bắt buộc phải lên văn phòng",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:30),T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 7 (từ 08:00 đến 12:00),T2-T7,header-T6+sat-body
+"[""Thứ 2 - Thứ 6 (từ 09:00 đến 18:00)\nThứ 7 (từ 08:00 đến 12:00)""]",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 07:30 đến 16:30),T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (từ 08:00 đến 12:00),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Thứ 7 (từ 09:00 đến 13:00),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Luân phiên Thứ 7 tù 8h-12h,T2-T6,header-T6-pure
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00),T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thứ 7 (từ 08:30 đến 12:30),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | 2 thứ 7 trong tháng: 8h30 - 17:00.,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 7 làm cách tuần,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 7 (từ 08:00 đến 16:30),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:30 đến 17:30),T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Từ thứ 2 đến thứ 6 và 1 thứ 7 đầu tiên của tháng.,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:15),T2-T7,header-T7
+"Thứ 2 - Thứ 7 (từ 08:30 đến 17:30) | Thứ 7 hai ngày off, 2 ngày lên công ty theo lịch",T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 7 làm việc cách tuần,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Sáng: Từ 8h-12h, Chiều: Từ 13h-17h | Từ thứ 2- thứ 7 (tháng nghỉ full 02 ngày thứ 7)",T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 - Thứ 6 (từ 08:00 đến 12:00),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Nghỉ 2 thứ 7 trong tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Thứ 7 cách tuần,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:30 đến 18:00) | Linh hoạt theo công việc của cá nhân và sắp xếp của Giám đốc,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:30 đến 17:30) | Từ thứ 2 - thứ 7: 8h30 - 17h30,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 07:30 đến 17:00) | Thứ 7 (từ 07:30 đến 11:30),T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 7 (từ 08:30 đến 17:30) | •	Thứ 2 – Thứ 7 từ 08h30 – 17h30 (nghỉ trưa 1,5h)",T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (từ 08:00 đến 11:30),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Từ 8h00 - 12h00 và 13h30 - 17h30 (từ thứ Hai đến thứ Sáu) | Từ 8h00 - 12h00 (thứ Bảy),T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Thứ 2 - Thứ 6 (từ 08:30 đến 18:00), sáng thứ 7 (8:00-12:00)",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:30 đến 18:00) | Thứ 2 - Sáng thứ 7 từ 08h30 đến 18h00 (Nghỉ trưa 1 tiếng 30 phút),T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:30 đến 17:30) | Làm việc 8 tiếng/ ngày.,T2-T7,header-T7
+"[""Từ 1/5 đến 30/11: Thứ Hai đến Thứ Sáu, 8h00–17h30 (nghỉ trưa 12h00–13h30); sáng Thứ Bảy linh hoạt theo yêu cầu và tiến độ công việc\nTừ 1/12 đến 30/4: Thứ Hai đến Thứ Sáu, 8h00–17h30 (nghỉ trưa 12h00–13h30); Thứ Bảy làm buổi sáng 8h00–12h00""]",T2-T7,freetext-T7
+Thứ 2 - Thứ 7 (từ 09:00 đến 18:00) | Thứ 7 (từ 09:00 đến 13:00),T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Và 02 thứ 7 trong tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 12:00) | Thứ 2 - Thứ 6 (từ 13:00 đến 17:00) | Thứ 7 (từ 08:00 đến 12:00),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ Bảy làm việc từ 8-12h nghỉ chiều Thứ 7,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thời gian: 9h00 đến 18h30 (Thứ 2 đến sáng thứ 7),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 09:00 đến 18:00) | - Thời gian từ: 9h00 - 18h | * Nghỉ trưa: 11h45 - 13h15,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Làm từ thứ 2 - 6 & Làm 2 thứ 7 - nghỉ 2 thứ 7 trong tháng,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Thời gian làm việc: Thứ 2- Thứ 6, thứ 7 làm việc buổi sáng.",T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Thứ 7 (từ 08:30 đến 12:00),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:15 đến 17:30) | Thứ 7 làm việc cách tuần,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 07:30 đến 17:00),T2-T7,header-T7
+Thứ 2 - Thứ 6: 8h00 - 17h00 | Thứ 7 cách tuần: 8h00 - 15h00,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Nghỉ 2 ngày thứ 7/ tháng.,T2-T7,header-T7
+"[""Thứ 2 - Thứ 6 (từ 08:00 đến 17:30)\nThứ 7 (từ 08:00 đến 12:00)""]",T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Từ 8h00 – 17h30 Thứ 2 – Thứ 6 (Nghỉ thứ 7 trước ngày 15 hàng tháng, sau ngày 15 đi làm nguyên ngày).",T2-T6,header-T6-pure
+– Ca sáng: Từ 8h00 đến 12h00 | – Ca chiều: Từ 13h30 – 17h30. Nghỉ trưa: 1h30 | – Làm việc từ sáng thứ 2 đến hết sáng thứ 7 hàng tuần,T2-T7,freetext-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 làm buổi sáng,T2-T7,header-T6+sat-body
+8h - 17h Thứ Hai đến sáng Thứ Bảy,T2-T7,freetext-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ Bảy (từ 08h00 - 12h00),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:15 đến 17:30) | Thứ 7 (từ 08:15 đến 12:15),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Thứ 7 (từ 09:00 đến 12:00),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 2 - Thứ 6: Từ 8:00 - 12:00 & 13:00 - 17:00 | Thứ 7 cách tuần: Từ 9:00 - 12:00 & 13:00 - 16:00,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 05:30) | Thứ 7 (từ 08:30 đến 12:00),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | + 2 ngày thứ 7/tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (từ 08:00 đến 12:00) | Nghỉ trưa: 1 tiếng,T2-T7,header-T6+sat-body
+"8h00 - 17h0, làm 2 thứ 7 một tháng",T2-T7,freetext-sat-signal
+"Thứ 2 đến thứ 6:  Buổi sáng 08h30  – 12h00, Buổi chiều 13h30 – 18h00. Thứ 7 làm việc cách tuần",T2-T7,freetext-T7
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 7 (từ 08:00 đến 12:00) | 842/1/33 Nguyễn Kiệm, Phường Hạnh Thông, TP Hồ Chí Minh",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 07:30 đến 16:30) | - Ngày làm 7 tiếng | - Sáng: 7h30-11h30 | chiều 13h30-16h30,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thứ 7 (từ 08:30 đến 17:30) | Các ngày thứ 7 cách tuần trong tháng,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Từ 8h30 – 18h00 (nghỉ trưa 1 tiếng rưỡi), từ Thứ 2 – sáng Thứ 7. | Riêng sáng Thứ 7 tuỳ theo tính chất công việc mà làm việc tại nhà hoặc tại công ty.",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 tuần 2-4 làm online,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thời gian làm việc: Từ 8h30 – 18h00 (nghỉ trưa 1 tiếng rưỡi), từ Thứ 2 – sáng Thứ 7. Riêng sáng Thứ 7 tuỳ theo tính chất công việc mà làm việc tại nhà hoặc tại công ty.",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:30 đến 17:30) | Thứ 7: Làm việc từ xa (WFH),T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (từ 08:00 đến 11:45),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 09:00 đến 18:00) | OFF 2 ngày Thứ Bảy trong tháng,T2-T7,header-T7
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 2 - Thứ 6 và 2 Thứ 7/tháng, 8h-12h và 13h30-17h30",T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 2 đến sáng thứ 7: 8h00 - 12h00, 13h30 - 17h30",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:25 đến 17:30) | Nghỉ tối thiểu 3 thứ Bảy/tháng. Các thứ Bảy còn lại làm theo lịch cố định của công ty.,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (từ 08:00 đến 12:00) | Thời gian linh hoạt theo yêu cầu của Sếp - chủ yếu ca hành chính và phát sinh ca tối khi sếp về quê hoặc đi tỉnh công tác,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 07:30 đến 17:30) | Giờ hành chính,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Sáng thứ 7: 8h00-12h00,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | Nghỉ thứ 7 cách tuần,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 7 đầu tiên của tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 07:30 đến 17:30),T2-T7,header-T7
+Thời gian làm việc: Sáng 8h30 - 12h; Chiều 13h30 - 17h30 từ Thứ 2 đến Sáng Thứ 7,T2-T7,freetext-T7
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Thứ 7: 08:30 - 12:00,T2-T7,header-T6+sat-body
+8h-17h (từ Thứ 2 đến hết sáng Thứ 7),T2-T7,freetext-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Và 2 ngày Thứ Bảy xen kẽ,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Thứ 7 (từ 08:30 đến 17:00) | Thứ 7 làm xen kẽ: tuần làm - tuần nghỉ,T2-T7,header-T6+sat-body
+"Linh động lịch giảng dạy từ thứ 2 đến thứ 7, theo 3 ca: | Sáng: 8h30 - 11h30 | Chiều: 13h30 - 16h30 | Tối: 18h00 - 21h00",T2-T7,freetext-T7
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | Từ thứ hai đến hết sáng thứ 7,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:15) | Thứ 7 (từ 08:00 đến 12:00),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (từ 08:00 đến 12:00) | Có thể linh hoạt theo tính chất công việc hoặc phát sinh ngoài giờ trong các giai đoạn cao điểm.,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thứ 7 (từ 08:30 đến 12:00),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 07:30 đến 16:30) | Nghỉ 2 ngày thứ 7 cách tuần,T2-T7,header-T7
+"Từ 8h - 17h30 thứ 2 đến hết sáng thứ 7, nghỉ trưa 1,5h",T2-T7,freetext-T7
+Thời gian làm việc: Thứ 2 – Thứ 6 và thêm 2 ngày Thứ 7 cách tuần,T2-T7,header-T6+sat-body
+"[""Thứ 2 - Thứ 7 (từ 08:30 đến 17:45)\n- Thứ 2 - Thứ 6: 8h30 - 17h45 (Nghỉ trưa 12h00 - 13h15)\n- Thứ 7 đi làm: 8h30 - 17h00 (Nghỉ trưa 12h00 - 13h15)\n- Nghỉ thứ 7 cách tuần""]",T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 07:45 đến 17:30) | Sáng từ 7h45 đến 11h 30 . Chiều 1h45 đến 17h 30,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:15 đến 17:45),T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thứ 7 (từ 08:30 đến 15:00),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | và thứ 7 cách tuần,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7: 8h00-12h00 (có thể WFH),T2-T7,header-T6+sat-body
+"[""Thứ 2 - Thứ 6 (từ 08:30 đến 17:30)\nCác thứ Bảy trong tháng chia lịch nghỉ cách tuần hoặc đảm bảo tối thiểu định mức công của tháng. Thời gian đi làm ngày thứ Bảy theo giờ quy định đối với các ngày trong tuần.""]",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | Nghỉ 02 ngày thứ Bảy trong mỗi tháng theo sự sắp xếp của Ban Giám đốc kinh doanh,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 7 (từ 08:00 đến 12:00) | Nghỉ trưa 1h30’,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Giờ hành chính từ thứ Hai đến hết sáng Thứ Bảy (Từ 8h00 - 17h00 giờ mùa hè, 8h00 - 17h30 giờ mùa đông)",T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 12:00) | Thứ 2 - Thứ 6 (từ 13:30 đến 17:30) | Thứ 7 (từ 08:00 đến 12:00),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 09:00 đến 18:00) | Nhưng chỉ làm có 2 ngày thứ Bảy trong một tháng,T2-T7,header-T7
+"Thời gian làm việc: 8g30 – 17g30 (Thứ 2 – Thứ 7), nghỉ trưa 12g – 13g00",T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thứ 7 (từ 08:30 đến 12:00) | Làm việc từ thứ 2 đến hết sáng thứ 7,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | 8h30 - 17h30 từ thứ 2 - thứ 6, thứ 7 làm việc luân phiên cách tuần",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thứ 7 (từ 08:30 đến 12:00) | Làm việc Online buổi sáng thứ 7,T2-T7,header-T6+sat-body
+"[""Thứ 2 - Thứ 6 (từ 08:00 đến 17:00)\nThứ 2 - Thứ 6: 8h-17h30, Thứ 7: 8h - 12h""]",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thứ 7 linh động theo yêu cầu Team,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (từ 08:00 đến 15:30),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 18:00),T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thứ 7 (từ 08:00 đến 12:00),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | 1/2 thứ 7 trong tháng,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Thứ Hai đến Thứ Sáu: Sáng từ 7h45 đến 17h00. | Thứ Bảy: Làm việc đến 12h00.,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Thứ 7 (từ 09:00 đến 18:00) | Làm 2 thứ 7 trong một tháng,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 7 (từ 08:00 đến 12:00) | Nghỉ trưa 1,5 tiếng",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 () | Làm việc từ thứ 2 - thứ 7,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Nghỉ 2 thứ 7 luân phiên,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:30 đến 18:00) | Làm thứ 7 cách tuần | Nghỉ trưa từ 12h - 13h30,T2-T7,header-T7
+"T2 - T6: 8h00 - 18h00 | T7: 8h00 - 15h00 (làm 2 thứ 7, nghỉ cách tuần)",T2-T7,freetext-T6+sat
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | 1/2 thứ 7 trong tháng,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Ngày làm việc: Thứ 2 – Thứ 6 hàng tuần, làm việc 2 Thứ 7 trong tháng (thứ 7 đầu tháng và cuối tháng)",T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 7 (từ 08:00 đến 16:45) | Thứ 2 đến Thứ 6, và 01 ngày thứ 7 trong tháng",T2-T7,header-T7
+"[""Thứ 2 - Thứ 6 (từ 08:00 đến 17:30)\nThứ 7 (từ 08:00 đến 12:00)\nMonday to Friday: 8:00 AM – 5:30 PM (90-minute lunch break)\nSaturday: 8:00 AM – 12:00 PM (2 Saturday mornings per month)""]",T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | - Làm thêm hai thứ Bảy tuần 1,3 | - Nghỉ trưa 12h - 13h30",T2-T7,header-T6+sat-body
+Thứ 7 (từ 08:00 đến 17:00) | Thứ 2 - Thứ 7 (từ 11:00 đến 20:00),T2-T7,freetext-T7
+"Từ thứ 2 - sáng thứ 7 hàng tuần. | Sáng 8h30 - 12h30, chiều 13h30-17h30.",T2-T7,freetext-T7
+Thứ 2 - Thứ 7 (từ 09:00 đến 18:00) | Thời gian làm việc: thứ hai - thứ sáu:  9:00 - 18:00 | Thứ bảy: 9:00 - 12:00,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Thứ 7 làm việc online 1 buổi,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:30 đến 18:00),T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Sáng: 8:00 - 11:30 | Chiều: 13:30 - 17:00,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | Từ Thứ Hai đến Sáng Thứ Bảy,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:30 đến 17:30) | Fulltime (Thứ 2 – Thứ 7) | -   Buổi sáng: 08h30 – 12h00; | -   Buổi chiều: 13h00 – 17h30.,T2-T7,header-T7
++ Thứ 2 - Thứ 6: 8h30 - 18h00 (nghỉ trưa 1h30ph) | + Thứ 7: 8h30 - 16h30 (cách tuần),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 7 (từ 08:00 đến 11:45) | Làm 2 sáng thứ 7 cách tuần,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:15) | Thứ 7 làm tới 16h,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 2 - Thứ 6 và thứ 7 cách tuần,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Từ 8h30 đến 17h30 (Nghỉ trưa từ 12h00 - 13h30) | Từ thứ Hai – thứ Sáu | Thứ Bảy làm việc cách tuần,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (từ 08:00 đến 12:00) | T2 - Sáng T7, 8h00 - 12h00, 13h00 - 17h00",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Thứ 7 nghỉ cách tuần,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 7 (từ 08:00 đến 12:00) | Nghỉ trưa: 12:00 - 13:30,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thứ 2-Thứ 6, Thứ 7 nghỉ xen kẽ (08:30-17:30)",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (từ 08:00 đến 16:00),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | - Giờ làm: 8h - 17h30 (nghỉ trưa: 12h00 - 13h30). | Chấm công linh hoạt 8h00-8h30 hàng ngày | - Thứ 7: Làm 2 Thứ 7 luân phiên cách tuần trong tháng.,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | thứ 7 được nghỉ chiều,T2-T7,header-T7
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Làm việc từ thứ 2 đến thứ 6 và thứ 7 cách tuần (1 tuần làm thứ 7, 1 tuần nghỉ thứ 7)",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (từ 08:00 đến 12:00) | Nghỉ trưa 12h - 13h00.,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 07:30 đến 16:30) | Thứ 7 làm việc cách tuần (tuần làm, tuần nghỉ)",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thứ 7 làm tại nhà,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 20:00),T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 09:00 đến 18:00),T2-T7,header-T7
+"[""Thứ 2 - Thứ 6 (từ 08:30 đến 18:00)\nThứ 7 (từ 08:30 đến 18:00)\nThứ 2 – Thứ 6\nThứ 7 cách tuần""]",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Thứ 7 (từ 08:30 đến 12:00),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Thứ 7 làm cách tuần (tuần 1 và tuần 3 của tháng),T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Thứ 7 tuần 01 và 03,T2-T7,header-T6+sat-body
+"Từ thứ 2 đến thứ 6 (08:30-17:30), thứ 7 (08:30-12:00).",T2-T7,freetext-T7
+"Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | - Thời gian làm việc: Thứ 2 – Thứ 6, làm việc 2 ngày Thứ 7/tháng",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 7 (từ 08:00 đến 12:00) | Đi làm 2 sáng thứ 7/tháng | Nghỉ trưa 1 tiếng rưỡi,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 làm việc online,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:30 đến 17:30) | Thứ 7 có thể làm online cả ngày,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (từ 08:00 đến 12:00) | Sáng Thứ Bảy cách tuần,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:30 đến 18:00) | Làm 1 thứ 7/tháng,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Trong tháng làm 2 thứ 7 xen kẽ nhau,T2-T7,header-T6+sat-body
+"Từ thứ 2 đến sáng thứ 7: 8h - 17h30, nghỉ trưa 12h-13h30",T2-T7,freetext-T7
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | làm việc từ thứ 2 đến thứ 6 và 1 thứ 7/tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 09:00 đến 17:30),T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 7 (từ 08:00 đến 12:00) | Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 7 ( từ 08:00 đến 12h),T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | giờ hành chính, thứ 7 trực luân phiên",T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | Làm việc từ thứ 2 - thứ 7. Làm 02 ngày thứ 7/ tháng,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:00 đến 12:00) | Thứ 2 - Thứ 7 (từ 13:30 đến 17:30) | Nghỉ thứ 7 cách tuần,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:00) | Thứ 7 (từ 08:00 đến 12:00),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 12:00) | Thứ 2 - Thứ 6 (từ 13:00 đến 17:30) | Thứ 7 () | Thứ 7 cách tuần,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 7 (từ 08:00 đến 12:00) (làm 2 buổi sáng thứ 7 cách tuần trong tháng) | Nghỉ trưa từ 12h đến 13h30,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (từ 08:00 đến 12:00) | Nghỉ trưa 1 tiếng,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 7 (từ 22:00 đến 07:00) | 6 buổi/tuần, làm việc theo ca và lịch nghỉ hàng tuần do quản lý sắp xếp | Thời gian làm việc ở kho Vĩnh Long: | Ca đêm: 22:00 – 07:00",T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Thứ 7 (từ 09:00 đến 18:00) | Nghỉ Thứ 7 cách tuần,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thứ 7 làm việc cách tuần,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Sáng thứ 7 nếu dự án có yêu cầu.,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (từ 08:00 đến 11:30) | Nghỉ trưa từ 11h30 - 13h,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:30 đến 18:00) | 02 thứ 7 làm việc tại nhà,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Thứ 7 (từ 08:30 đến 12:00) | - 2 buổi sáng Thứ 7/tháng: 8h30 - 12h00,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:30 đến 17:30) | Nghỉ thứ 7 cách tuần,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (từ 08:00 đến 16:30) | Theo ca tại cửa hàng,T2-T7,header-T6+sat-body
+• Thứ 2 – Thứ 6: 8h00–12h00 | 13h30–17h30 | • Thứ 7: Làm cách tuần,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 07:45 đến 17:00),T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Thứ 2 –  Thứ 7 ( Thứ 7 nếu không có việc cần lên vp thì CBNV được nghỉ),T2-T7,header-T7
+"[""Thứ 2 - Thứ 6 (từ 08:00 đến 17:30)\nThứ 7 (từ 08:00 đến 12:00)\nThứ 2 - Thứ 6 (từ 08:00 đến 17:30)\n2 Buổi sáng Thứ 7/tháng""]",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (từ 08:00 đến 12:00): Linh hoạt theo sự sắp xếp của bộ phận,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thứ 7: 08:30 – 12:30 (Làm việc Online).,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thứ 7 (từ 09:00 đến 12:00) | Sáng Thứ 7 cách tuần,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Từ Thứ 2 đến Thứ 6 Và 2 Thứ 7 cách tuần,T2-T7,header-T6+sat-body
+"[""Thứ 2 - Thứ 6 (từ 08:00 đến 17:30)\nThứ 7 làm việc cách tuần""]",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | _Thứ 2 – Thứ 6: 8h30 – 18h00 | _Thứ 7: 8h30 – 12h00 | _Nghỉ trưa: 12h00 – 13h30,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (từ 08:30 đến 12:30),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 16:30) | Thứ 7 (từ 08:00 đến 12:00),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 7 làm 8h00 đến 14h30,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 7 (từ 08:30 đến 18:00) | Làm việc từ Thứ 2 - Thứ 6, Thứ 7 làm cách tuần | Nghỉ trưa 12h - 13h30",T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:15 đến 17:30) | Từ thứ 2 tới thứ 6 hàng tuần | Buổi sáng: 8h15 - 12h00 | Buổi chiều: 13h30 - 17h30 | Thứ 7 cách tuần | Buổi sáng: 8h15 - 12h00 | Buổi chiều: 13h30 - 16h00,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 07:00 đến 17:00),T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:30 đến 18:30),T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Thêm 1 thứ bảy linh hoạt trong tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:30 đến 17:30) | Thứ 7 làm việc luân phiên cách tuần,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:30 đến 12:00) | Thứ 2 - Thứ 7 (từ 13:00 đến 17:30),T2-T7,header-T7
+"Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Thời gian làm việc: Thứ 2 – Thứ 6 cả ngày, Thứ 7 làm nửa ngày. Bắt đầu từ 8:30-18:00, nghỉ trưa 1h30p.",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:30 đến 17:30) | Từ thứ 2 – sáng thứ 7. Trong đó: | - Từ Thứ 2 đến thứ 6 hàng tuần: 8h30 – 17h30 | - Thứ 7 hàng tuần: Từ 8h00 – 12h00,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:30 đến 18:00) | Làm 2 thứ 7/tháng,T2-T7,header-T7
+"Thời gian làm việc: Thứ 2 – Thứ 6 (7h30 – 17h), Thứ 7 (nửa ngày).",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thứ 7 làm việc tại nhà,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 2 - Sáng Thứ 7 từ 8h00 đến 17h00,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | Nghỉ trưa từ: 12h00 - 13h30,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Thứ 7 (từ 09:00 đến 13:00) | Từ T2 - T6 (9h - 18h) & T7 (9h - 13h),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Và 02 thứ 7/tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Thứ 7: từ 8h30 - 12h,T2-T7,header-T6+sat-body
+"9h00 - 18h00, từ thứ 2 đến thứ 6. | 9h00 - 13h00, thứ 7 (Work from home) | Nghỉ trưa 1 tiếng",T2-T6,freetext-T6
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | thứ 7 làm 2 ngày / tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 09:00 đến 18:30) | Nghỉ trưa từ 12h- 13h30 | Thứ 7 có thể WFH và chỉ đến công ty khi có yêu cầu và tính chất công việc,T2-T7,header-T7
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Làm việc từ thứ Hai đến thứ Sáu và thứ Bảy cuối cùng của tháng, giờ làm việc từ 8:30 đến 17:30 (8 giờ/ngày), ngày lễ theo quy định của nhà nước;",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thứ 7 (từ 09:00 đến 16:00) | Thứ 7 làm cách tuần,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 09:00 đến 19:00),T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 WFH từ 8h00 đến 12h00,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:30 đến 12:20) | Thứ 2 - Thứ 7 (từ 13:30 đến 17:30) | Sáng: 8h30’ - 12h20’ | Chiều: 13h30’ - 17h30’,T2-T7,header-T7
+"linh hoạt: 8h-17h/ 8h30-17h30/ 9h-18h, Thứ 2 - Thứ 6 và 02 Thứ 7 đầu tháng Địa điểm làm việc (đã được cập nhật theo Danh mục Hành chính mới - thêm quận/huyện cũ tương ứng để dễ dàng tra cứu) - Hà Nội: 247 Cầu Giấy, Phường Cầu Giấy (quận Cầu Giấy cũ)",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 8h-12h,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (từ 08:00 đến 12:00) | D.	THỜI GIAN LÀM VIỆC | •	Thứ 2 - Thứ 6: 08:00 – 17:00 (Nghỉ trưa 1 tiếng). | •	Thứ 7: Làm việc buổi sáng. | •	Nghỉ lễ/tết theo luật lao động Việt Nam,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 12:30) | Thứ 2 - Thứ 6 (từ 13:30 đến 17:30) | Thứ 7 (từ 08:30 đến 17:30) | 2 thứ 7 cách tuần,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | Thứ 2 - Thứ 6 :08:00 đến 17h30 (nghỉ trưa từ 12:00 đến 13:30) | Thứ 7: 08:00 - 12:00,T2-T7,header-T7
+Thứ 2 - Thứ 6: 9h00 - 18h00 | Thứ 7 cách tuần: 9h00 - 15h00,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 09:00 đến 18:00) | Từ thứ 2 – sáng thứ 7. Trong đó: | - Từ Thứ 2 đến thứ 6 hàng tuần: 8h30 – 17h30 | - Thứ 7 hàng tuần: Từ 8h00 – 12h00,T2-T7,header-T7
+-	Thời gian làm việc:  Thứ 2- Thứ 6: 8h00 - 17h00 (nghỉ trưa 12h00 – 13h30) | Thứ 7: 8h00 - 12h00,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 làm cách tuần,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 07:30 đến 16:30) | Nghỉ trưa 1 tiếng,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | 2 ngày Thứ 7/tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:30 đến 17:31),T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Làm 2 thứ 7 trong tháng. Thứ 7 : 8h - 16h | Nghỉ trưa 12h - 13h30,T2-T7,header-T6+sat-body
+"[""Thứ 2 - Thứ 6 (từ 08:00 đến 17:30)\nT2-T6 Giờ hành chính 8-17h30 (nghỉ trưa 1h30p), 2 thứ 7 trên tháng""]",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | 8:00 – 12:00; Chiều 13:15 – 17:15 (Từ thứ 2 đến hết sáng thứ 7 hàng tuần),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 7 (từ 08:00 đến 11:30),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Nghỉ hai thứ 7 trong tháng,T2-T7,header-T7
+8h30 – 18h00 Thứ 2 – Sáng Thứ 7 (Nghỉ trưa 12h00 - 13h30),T2-T7,freetext-T7
+"[""Thứ 2 - Thứ 7 (từ 07:30 đến 17:00)""]",T2-T7,header-T7
+"Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | Thời gian làm việc: Từ Thứ Hai đến Thứ Bảy, làm việc từ 08h00 đến 17h30, nghỉ trưa từ 12h00 đến 13h30. | (Tổng thời gian làm việc: 8 giờ/ngày.)",T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thứ 7: 8h-12h,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 07:30 đến 16:45),T2-T7,header-T7
+Từ Thứ 2 đến Thứ 6 và Thứ 7 cách tuần.,T2-T7,freetext-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 2 - Thứ 7 (từ 08:00 đến 12:00),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Và 1 sáng thứ Bảy đầu tiên của tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Nghỉ trưa từ 12:00 - 13:00,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thứ 7 (từ 08:30 đến 12:00) | Thứ 7: Làm việc online tại nhà,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | - Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | - 2 thứ 7 luân phiên: Làm việc đến 16h30,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (từ 08:00 đến 12:00),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 7 (từ 08:00 đến 12:00) | Trong tuần trực tiếp tại văn phòng | Thứ 7 online,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Làm việc từ thứ 2 đến thứ 7 giờ hành chính (tăng ca nếu có),T2-T7,header-T7
+"Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | + Linh hoạt chọn ca và chủ động giờ giấc, không chấm công. Có 3 ca làm việc (8:00 - 17:30, 8:30 - 18:00, 9:00 - 18:30). Nghỉ trưa từ 12:00 - 13:30 (1,5h); | + Làm việc từ thứ 2 đến thứ 6, 2 sáng Thứ 7/tháng (có thể remote).",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Nghỉ Thứ 7 - 2 tuần giữa tháng,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 09:00 đến 12:00) | Sáng Thứ 7 làm việc remote,T2-T7,header-T6+sat-body
+"Từ thứ 2 đến thứ 6 và buổi sáng thứ 7, sáng từ 8h00 đến 12h00, chiều từ 13h30 đến 17h30.",T2-T7,freetext-T7
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thứ 7 làm việc luân phiên cách tuần,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 09:00 đến 18:00) | Ca 1: 9:00 - 12:00 | Ca 2: 13:30 - 18:00 | Thứ 7 chỉ làm buổi sáng,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | làm việc sáng thứ 7,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | Ca 1: Làm việc từ 08h00 đến 17h00, nghỉ trưa từ 12h00 đến 13h30. | (Tổng thời gian làm việc: 8 giờ/ngày, nghỉ trưa 1 giờ 30 phút.)",T2-T7,header-T7
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 2-Thứ 6, Thứ 7 nghỉ xen kẽ (từ 08:00 đến 17:00)",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 7 (từ 08:00 đến 12:00) | Làm 2 buổi sáng thứ Bảy/tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00). | Nghỉ 2 ngày thứ Bảy/tháng.,T2-T7,header-T7
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Từ thứ 2 - sáng thứ 7 [ 1 tháng trực chiều t7 từ 2-3 buổi, linh động được lịch trực ( có hỗ trợ lương, phụ cấp thêm)]",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Thứ 7 (từ 00:00 đến 00:00) | Monday to Friday: 9am to 6pm and overtime upon request and needs | Saturday: only upon request and needs,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 () | Full time từ 8h-17h00 (nghỉ trưa từ 12h-13h00) từ thứ 2 đến thứ 6 hàng tuần | Tháng làm 2 ngày thứ 7 trong tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | 2 thứ 7 trong tháng,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Thứ 7 làm việc tới 15h, nghỉ 2 thứ 7 mỗi tuần.",T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 7 trong tháng làm việc so le,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 7 (từ 08:00 đến 12:00) | Nghỉ thứ 7 theo lịch (Nghỉ 2 T7/ tháng),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:15 đến 17:30) | Làm 02 thứ 7/ tháng cách tuần,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:30 đến 11:30) | Thứ 2 - Thứ 7 (từ 13:30 đến 17:30),T2-T7,header-T7
+8h00 - 17h00 (Từ thứ 2 - thứ 6 và hai thứ 7 cách tuần),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 2 - Thứ 6: 9h00 - 18h00 | Thứ 7 cách tuần: 9h00 - 15h00,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 07:30 đến 17:30) | Sáng: 7h30-11h30 | Chiều: 13h30 - 17h30,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:30 đến 18:00) | Nghỉ 2 thứ 7 trong tháng,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Thứ 7 làm việc xen kẽ 2 tuần/tháng,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:00 đến 12:00) | Thứ 2 - Thứ 7 (từ 13:30 đến 17:30) | Sáng: 08:00 – 12:00; Chiều: 13:30-17:30,T2-T7,header-T7
+- Thứ 2 - Thứ 6: 8h30 - 17h30 | - 2 sáng thứ 7/ tháng (sáng thứ 7 đầu tiên và thứ 7 cuối cùng),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | Giờ hành chính: Từ 8h - 17h30 hàng ngày; từ thứ 2 đến thứ 7 (nghỉ buổi chiều các ngày thứ 7 giữa tháng).,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:45) | Thứ 2-6 từ 8h-17h45 | Thứ 7 từ 8h-16h45 (được nghỉ 2 thứ 7/tháng),T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 làm việc linh hoạt vào buổi sáng (8:00 - 12:00),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Sáng thứ 7 hàng tuần làm online,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Tháng nghỉ 02 ngày thứ 7.,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 12:00) | Thứ 2 - Thứ 7 (từ 13:30 đến 17:30),T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 2 - Thứ 7 (từ 08:00 đến 12:00),T2-T6,header-T6-pure
+Từ thứ 2 đến thứ 6: 08h15 - 17h15; Thứ 7: 9h00 - 12h00. Nghỉ trưa 60 phút (12h00 - 13h00). Nghỉ cố định 1 thứ Bảy ở tuần thứ hai trong tháng.,T2-T7,freetext-T7
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Thứ 7 linh động,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 08:15 đến 17:30) | Thứ 2 đến Thứ 6 và 2 Thứ 7 cách tuần từ 8h15 đến 17h30, nghỉ trưa 1h15",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6: 8h - 17h | Thứ 7: 8h - 12h,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 09:00 đến 18:00) | Thứ 7 làm việc hai buổi sáng cách tuần,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:30 đến 18:00) | Thứ Hai đến sáng Thứ Bảy (hoặc full 2 thứ 7 trong tháng),T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7:  8h-12h,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | Nghỉ trưa 1h30’,T2-T7,header-T7
+"Thứ 2 - Thứ 7 (từ 07:30 đến 16:30) | Thứ 2 - Thứ 7 (từ 07:30 đến 16:30), Nghỉ trưa 1 tiếng",T2-T7,header-T7
+"Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | - 8h00 – 17h30, từ thứ T2-T7 và nghỉ thứ 7 cách tuần. | - Nghỉ trưa 1,5h.",T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:00) | Thứ 7 (từ 08:30 đến 11:30) | Không cố định tùy theo thời gian có thể làm việc,T2-T7,header-T6+sat-body
+"Thời gian làm việc: 08g30 - 17g30 thứ Hai đến thứ Sáu, 08g30 - 12g00 thứ Bảy",T2-T7,freetext-T7
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Nghỉ trưa từ 12h00 đến 13h00,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:15) | Nghỉ 2 thứ 7/tháng,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thứ 7: Làm việc Online,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 7 (từ 08:00 đến 12:00) | 8h/ngày, 6 ngày/tuần",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | T2-T6: 08:00 - 17:00 | Sáng T7: 08:00 - 12:00,T2-T7,header-T7
+"[""Thứ 2 - Thứ 6 (từ 08:00 đến 17:30)\nThứ 7 (từ 08:00 đến 12:00)\nNghỉ trưa 1h30'""]",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Từ thứ 2 đến sáng thứ 7,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thời gian làm việc: Từ T2 – T6 (8h – 12h, 13h30 - 17h30), thứ 7 làm việc so le.",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 12:00) | Thứ 2 - Thứ 6 (từ 13:00 đến 17:00) | Thứ 7 (từ 09:00 đến 13:00) | Thứ 7 linh động tại nhà,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 2 - Thứ 6 (từ 08:00 đến 17:30), Nghỉ trưa 12h00 đến 13h30 | Thứ 7 (từ 08:00 đến 12:00) | Nghỉ phép 1,5 ngày + 1 ngày WFH/tháng",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:29) | Thứ 7 (từ 08:00 đến 12:00),T2-T7,header-T6+sat-body
+"Thứ 2 đến hét sáng thứ 7, 8h-17h30, nghỉ trưa 12h-13h30",T2-T7,freetext-sat-signal
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thứ 7 (từ 08:30 đến 17:30),T2-T7,header-T6+sat-body
+Từ thứ Hai – thứ Sáu và hai buổi sáng thứ Bảy trong tháng.,T2-T7,freetext-T6+sat
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (từ 08:00 đến 12:00) | Thời gian nghỉ trưa 1h30 phút,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Thời gian làm việc từ Thứ 2 - Thứ 7 (Nhân viên chính thức được nghỉ 2 ngày Thứ 7/tháng),T2-T7,header-T7
+"Từ thứ 2 đến hết sáng thứ 7, 8h-17h30, nghỉ trưa 12h-13h30",T2-T7,freetext-T7
+Thứ 2 - Thứ 7 () | Thứ 2 – Thứ 7 (nghỉ trưa 1h30’),T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | 2 ngày thứ 7 cách tuần | Nghỉ trưa 12h - 13h30,T2-T7,header-T6+sat-body
+"Từ Thứ 2 - Thứ 6 (8h-17h30) , Thứ 7 làm việc và nghỉ xem kẽ. Giờ làm việc linh hoạt, áp dụng Ngày làm remote cho nhân viên chính thức.",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Thứ 7 làm cách tuần,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 07:30 đến 16:30) | Working time: Monday to Saturday: 7:30 am - 4:30 pm. Flexible take half day off on Saturday,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:30 đến 18:00) | Thứ 7 làm việc cách tuần | Nghỉ trưa từ 12h - 13h30 | Làm việc Part Time theo ca đăng ký,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:45 đến 18:00) | Từ thứ 2 - thứ 6 | Và 2 thứ 7/tháng,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 7 (từ 08:00 đến 12:00) | Địa chỉ cũ: 346 Bến Vân Đồn, P.1, Q.4, TP.HCM (Lầu 5, Block A1) | Thời gian làm việc: Thứ 2 – sáng Thứ 7 | Sáng: 8h00 – 12h00 | Chiều: 13h30 – 17h30",T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | Sáng 8h00-12h00, chiều 13h30-17h30",T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:15 đến 17:15) | Thứ Bảy nghỉ cách tuần,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | Làm 2 thứ 7, nghỉ 2 thứ 7 theo lịch của công ty",T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:45) | Thứ 7 (từ 08:30 đến 12:00),T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | Nghỉ trưa: 1,5 tiếng",T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 18:00) | Làm full 2 thứ 7/tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Và thứ 7 đầu tiên trong tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | 1 ngày thứ 7 trong tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (từ 08:00 đến 12:00) | (Nghỉ trưa từ 12:00 – 13:00),T2-T7,header-T6+sat-body
+"[""Thứ 2 - Thứ 6 (từ 08:00 đến 17:00)\ntừ thứ 2 – thứ 6 & 2 sáng thứ 7/tháng""]",T2-T7,header-T6+sat-body
+Thời gian làm việc: Từ thứ 2 đến thứ 6: 08h15 - 17h15; Thứ 7: 9h00 - 12h00. Nghỉ trưa 60 phút (12h00-13h00). Nghỉ cố định 1 thứ Bảy ở tuần thứ hai trong tháng.,T2-T7,freetext-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 2 - Thứ 6(từ 08:00 đến 17:30). Thứ 7(từ 8:00 đến 12:00),T2-T6,header-T6-pure
+"[""Thứ 2 - Thứ 7 (từ 08:00 đến 17:00)""]",T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 7 tuần lẻ,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:30 đến 18:00) | Làm việc từ thứ 2 đến thứ 6 và 2 thứ 7 luân phiên,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:30 đến 17:30) | T7 làm WFH,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | 8h - 17h30 từ thứ 2 – thứ 6 và 2 thứ 7/tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | + 2 ngày thứ Bảy/ tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 21:00) | 3 Ca Xoay linh động,T2-T7,header-T7
+"[""Thứ 2 - Thứ 6 (từ 08:00 đến 17:00)\n8h00 – 17h00 Thứ 2 – Thứ 6, Thứ 7 làm cách tuần""]",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | Thứ Bảy làm cách tuần,T2-T7,header-T7
+"8h - 17h00 từ Thứ 2 đến Thứ 7, thứ 7 làm việc online",T2-T7,freetext-T7
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Làm việc 2 Sáng thứ 7 cách tuần: 9:00 - 12:00,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (từ 08:00 đến 12:00) | Nghỉ trưa 12h00 – 13h00 | Trực xử lý phát sinh ngoài giờ tại nhà,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Thứ 7 (từ 08:00 đến 12:00),T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (từ 08:00 đến 12:00) | Sáng thứ 7 làm việc linh hoạt.,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Và thứ 7 cách tuần,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | Nghỉ thứ bảy ngày chẵn,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | Thứ 2 - Thứ 6:08:00 đến 17h30 (nghỉ trưa từ 12:00 đến 13:30) | Thứ 7: 08:00 - 12:00,T2-T7,header-T7
+"Thứ 2 - Thứ 7 () | Thời gian làm việc: Từ thứ 2 đến thứ 7 | Hình thức làm việc: Full-Time, Remote",T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:15 đến 17:30) | Nghỉ 1 thứ 7 cuối tháng,T2-T7,header-T7
+Thứ 2 - Thứ 6 () | Thứ 2 đến thứ 6 và 1 buổi sáng thứ 7 đầu tiên của tháng | Buổi sáng checkin linh hoạt từ 7h30-9h,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | Từ thứ 2 đến Sáng thứ 7,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 07:30 đến 17:00) | + Sáng 7h30 - 11h30 | + Chiều 13h00 - 17h00,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:30 đến 17:30) | Nghỉ 2 thứ 7 trong tháng,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 07:45 đến 17:30),T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:20),T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Làm từ thứ 2 tới hết sáng thứ 7 hàng tuần,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:45) | - Và hai ngày Thứ 7 cách tuần trong tháng | - Nghỉ trưa từ 12:15 - 13:30.,T2-T7,header-T6+sat-body
+"8h30 - 17h30, Thứ 2 – Thứ 7 (làm 2 thứ 7/ tháng, nghỉ cách tuần)",T2-T7,header-T7
+"[""Thứ 2 - Thứ 6 (từ 08:00 đến 17:00)\nThứ 7 - Thứ 6 (từ 08:00 đến 12:00)""]",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 7 (từ 08:00 đến 12:00) | .,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Thứ 2 - Sáng Thứ 7,T2-T7,header-T7
+"9h00-18h00, thứ 2 đến thứ 6 | 9h00-13h00, thứ 7 ( Work from home) | Nghỉ trưa 1 tiếng",T2-T6,freetext-T6
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Sáng thứ 7 chơi cầu lông 2h toàn công ty, có hưởng lương.",T2-T7,header-T6+sat-body
+Thứ 2 – Thứ 6 (Thứ 7 làm việc cách tuần),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:30 đến 18:00) | Nghỉ trưa 12h30 - 14h. Nghỉ 2 thứ 7 luân phiên trong 1 tháng.,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | 02 buổi sáng Thứ Bảy/tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Và 2 ngày thứ 7 xen kẽ/tháng,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | Sáng: 8:00-12:00 | Chiều: 13:30-17:30 | Nghỉ trưa 1,5 tiếng",T2-T7,header-T7
+"8h00 - 17h00, làm 2 thứ 7 một tháng",T2-T7,freetext-sat-signal
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thời gian Làm việc từ Thứ Hai đến hết sáng Thứ Bảy (Nghỉ phúc lợi 02 Thứ Bảy/ Tháng),T2-T7,header-T6+sat-body
+Thời gian làm việc: Từ thứ 2 đến thứ 7; Sáng 8:00-12:00; Chiều 13:00-17h00; | có thể tăng ca,T2-T7,freetext-T7
+Thứ 2 - Thứ 7 (từ 08:00 đến 18:00) | Nghỉ trưa 12h30 - 14h30,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 7 (từ 08:00 đến 15:00) | Thời gian nghỉ trưa: Từ 12h00 - 13h30,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 08:15 đến 17:30) | - Thứ 2 - Thứ 6 : từ 08:15 đến 17:30 ( nghỉ trưa 1,5h) | - Thứ 7 cách tuần: từ 08:15 đến 16:00 ( nghỉ sớm 1,5h)",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Làm việc từ thứ 2 - thứ 6 và 4 sáng thứ 7 hoặc 2 thứ 7,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 07:30 đến 16:00) | và 2 nửa thứ 7 bất kỳ trong tháng,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Thứ 7 (từ 08:00 đến 12:00) | Giờ làm việc tiêu chuẩn: Thứ Hai – Thứ Sáu (giờ bắt đầu linh hoạt: 8:00 / 8:30 / 9:00) và 2 buổi sáng Thứ Bảy mỗi tháng (8:00–12:00) (có thể làm việc từ xa).,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Làm việc 1 thứ Bảy/tháng,T2-T7,header-T6+sat-body
+"Từ thứ 2 đến thứ 6: Sáng 8:00 - 12:00, chiều: 13:00 - 17:00, | Sáng thứ 7 (tuần làm tuần nghỉ): 8:00 - 12:00",T2-T7,freetext-T6+sat
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | - Thời gian làm việc: | + Thứ Hai: 8h30 - 18h00 (Nghỉ trưa 12h00 - 13h30) | + Thứ Ba - Thứ Sáu: 09h00 - 18h00 (Nghỉ trưa 12h00 - 13h30) | + Thứ Bảy: 01 buổi sáng đầu tiên trong tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ hai đến thứ sáu và sáng thứ bảy,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 2 - Thứ 6: 08h00 - 17h15 | Thứ 7: 08h00 - 12h00,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Làm 2 Thứ Bảy sáng 08h00-12h00 (cách tuần),T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 7 (từ 08:30 đến 18:00) | Làm việc từ 08:30, nghỉ trưa 1 tiếng rưỡi, tan ca 18:00",T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 07:45 đến 17:00) | Thứ 7 thường làm Online và làm cách tuần nếu các dự án chạy mượt,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | 1-2 tháng đào tạo và thử việc sau đó ký hợp đồng chính thức | Làm từ 8h00 tới 17h00 từ thứ 2 tới thứ 6 | Có 2 thứ 7 trong một tháng làm việc tại văn phòng,T2-T7,header-T7
+"Thứ 2 - Thứ 7 (từ 08:30 đến 17:30) | Giờ Hành chính: 8h30-17h30, nghỉ trưa 1 tiếng. Thứ 7 làm việc luân phiên cách tuần",T2-T7,header-T7
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Từ 8:00 - 12:00 và 13:30 - 17:30, từ Thứ 2 đến Thứ 6 hàng tuần. Thứ 7 từ 8:00 - 12:00,",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | 1 năm được nghỉ phép 12 ngày,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | Từ thứ 2 đến sáng thứ 7,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 2 đến thứ 6: 8h30 – 17h30 | Thứ 7: 8h30 – 12h30,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 7 (từ 08:30 đến 17:30) | Làm việc 8 giờ/ngày, 6 ngày/tuần theo lịch do quản lý sắp xếp.",T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:30 đến 12:00) | Thứ 2 - Thứ 7 (từ 14:00 đến 18:00) | Ca sáng: 8h30 - 12h | Ca chiều: 14h - 18h,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (từ 08:00 đến 15:00),T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Sáng thứ 7 chơi cầu lông 2h toàn cty, có hưởng lương.",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (từ 08:00 đến 12:00) | thứ 7 ( 8h-12h),T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | Nghỉ trưa 1,5 tiếng",T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (từ 08:00 đến 12:00) | Thứ 2 - Thứ 6: 8h-17h | Thứ 7: 8h-12h,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | Thứ 7 làm cách tuần,T2-T7,header-T7
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 làm buổi sáng, tuần làm tuần nghỉ",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 16:45),T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (từ 08:00 đến 12:00) | Sáng thứ 7 làm việc linh hoạt,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Thứ 7 (từ 09:00 đến 12:00) | Nghỉ trưa 12:00 – 13:30 | Thứ 7 : làm remote,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 tuần 2 và tuần 4 làm online,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (từ 08:00 đến 12:00) | Từ Thứ 2 đến sáng Thứ 7,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | Nghỉ trưa: 11h30-13h,T2-T7,header-T7
+"[""8 tiếng/ngày từ Thứ Hai đến Thứ Sáu, Thứ Bảy làm việc từ 8h00 - 12h00\nGiai đoạn từ 01/05 - 30/11 hàng năm: Thời gian làm việc thứ Bảy hàng tuần linh động theo yêu cầu và tiến độ của công việc thực tế phát sinh""]",T2-T7,freetext-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 7: 08h00-12h00,T2-T7,header-T6+sat-body
+"[""Thứ 2 - Thứ 6 (từ 08:00 đến 17:30)\nThứ 7 cách tuần""]",T2-T7,header-T6+sat-body
+"Từ thứ 2 đến thứ 6, Thứ 7 làm cách tuần | Chọn thời gian làm linh hoạt 09h00-18h00 hoặc 08h00-17h00 (nghỉ trưa 1h)",T2-T7,freetext-T7
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:30), Nghỉ trưa 12h00 đến 13h30 | Thứ 7 (từ 08:00 đến 12:00) | Nghỉ phép 1,5 ngày + 1 ngày WFH/tháng",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:15) | Thứ 7 làm sáng từ 8h đến 11h30,T2-T7,header-T6+sat-body
+"Thứ 2 đến sáng thứ 7 ( từ 8h-17h30, nghỉ trưa 1h30)",T2-T7,freetext-T7
+Thứ 2 - Thứ 7 (từ 08:00 đến 16:30),T2-T7,header-T7
+"Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Riêng T7, CBNV đảm bảo làm đủ tối thiểu 02 ngày/tháng",T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | Nghỉ từ 12:00 đến 13:30,T2-T7,header-T7
+"7h - 16h, từ thứ 2 đến thứ 6 và  2 ngày thứ 7 cách tuần trong 1 tháng.",T2-T7,freetext-T7
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Nghỉ 2 thứ 7/tháng,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:15 đến 17:30) | Từ thứ 2 đến thứ 6 và 2 thứ 7 cách tuần trong tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:15 đến 17:30) | Thứ 7 làm việc cách tuần,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Thứ 7 (từ 08:30 đến 12:30),T2-T7,header-T6+sat-body
+"Sáng 8h00-12h00, chiều: 13h00-17h00, làm thứ 7 cách tuần",T2-T7,freetext-sat-signal
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Từ Thứ 2 đến Thứ 6 (8h30 - 17h30), làm thứ 7 cách tuần",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | Tháng được nghỉ 2 thứ 7.,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thứ 7 (từ 08:30 đến 17:30) | Nghỉ trưa từ 12h - 13h | Thứ 7 làm việc cách tuần,T2-T7,header-T6+sat-body
+"[""Thứ 2 - Thứ 6 (từ 08:00 đến 17:00)\nThứ 7 (từ 08:00 đến 12:00)""]",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 cách tuần,T2-T7,header-T6+sat-body
+"[""8h00 – 17h00 (Thứ 2 – Sáng thứ 7), được nghỉ 1 sáng thứ 7 trong tháng""]",T2-T7,freetext-T7
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | 01 ngày Thứ 7 làm việc trong tháng.,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 07:45 đến 17:00) | Thứ 7 nghỉ luân phiên,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Được về sớm 1 tiếng vào thứ 7 cuối tháng,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Thứ 7 (từ 09:00 đến 14:00),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Off 2 ngày thứ 7 trong tháng,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 09:00 đến 18:00) | Thứ 7 làm cách tuần.,T2-T7,header-T7
+"Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Sáng Thứ 7 online, hoặc offline theo yêu cầu công việc (nếu có)",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Thứ 2 - Thứ 7 (từ 22:00 đến 06:00) | Đi luân phiên ca,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:00 đến 12:00) | Thứ 2 - Thứ 6 (từ 13:30 đến 17:30),T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Làm thứ 7 cách tuần | Nghỉ trưa từ 12h - 13h30,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 09:00 đến 17:00) | Thứ 2 - Thứ 6: Từ 09:00 đến 17:00 (Nghỉ trưa: 12:00 đến 13:00). | Thứ 7: Từ 09:00 đến 17:00 (Làm việc tại nhà).,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thứ 7 là ngày làm việc dự phòng,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7: từ 8h00 - 12h00,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 09:00 đến 18:30) | - Thời gian làm việc trong ngày: | Từ 9:00 đến 18:30 | Nghỉ trưa: 11:30-13:00; Nghỉ chiều : 16:00 - 16:15 | - Thời gian làm việc trong tuần/tháng: | Từ thứ Hai đến thứ Sáu, và 1 thứ Bảy trong tháng",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Sáng thứ 7 WFH,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | nghỉ trưa 1.5h, từ 12h-13h30",T2-T7,header-T7
+Thứ 2 - Thứ 7 () | Thời gian làm việc: thứ 2-sáng thứ 7,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 09:00 đến 17:30) | Thứ 7 (từ 09:00 đến 12:00),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | 8h-12h vs 13h30-17h00,T2-T7,header-T7
+"Thứ 2-6, luân phiên thứ 7",T2-T7,freetext-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 7 (từ 08:00 đến 11:30) | Giờ hành chính,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | - Làm việc từ Thứ 2 - Thứ 7 (Nghỉ luân phiên 2 Thứ 7/tháng) | - Chấm công linh hoạt từ 8h00-9h00 sáng (Miễn làm đủ 8 tiếng) | - Nghỉ trưa: 11h45-13h00,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:00 đến 12:00) | Thứ 2 - Thứ 7 (từ 13:00 đến 17:00) | Thứ 7 làm việc cách tuần,T2-T7,header-T7
+"8h-17h15, thứ 2 - sáng thứ 7",T2-T7,freetext-T7
+"Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | - Ngày làm việc: Thứ 2 – Thứ 6 hàng tuần, làm việc 2 Thứ 7 trong tháng (thứ 7 đầu tháng và cuối tháng)",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 16:30) | Thứ 7 (từ 08:00 đến 15:00),T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (từ 08:00 đến 12:00) | Thứ 7: 8h-12h,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | làm 2 thứ 7 cách tuần,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:15) | T7 làm từ 8:00 - 12:00 làm online),T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Được nghỉ 2 ngày Thứ Bảy / tháng.,T2-T7,header-T6+sat-body
+Thứ 2-Thứ 6 8h30-5h30 | Thứ 7 nghỉ cách tuần,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (từ 08:00 đến 12:00) | Nghỉ trưa 12g00 - 13g00,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Buổi sáng làm việc từ 8h – 11h30; buổi chiều làm việc từ 13h30 – 17h00,T2-T7,header-T7
+"Thứ 2 - Thứ 7 (từ 08:30 đến 18:00) | 8h30 - 18h00 (nghỉ trưa 1h30'), Thứ 2 - Thứ 7, nghỉ 2 ngày thứ 7 trong tháng",T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 07:30 đến 16:15),T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thời gian làm việc: Từ thứ 2 đến thứ 6; Thứ 7 làm việc cách tuần,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 09:00 đến 17:30) | Thứ 7 (từ 09:00 đến 13:00),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | 1 ngày Thứ 7 bất kì trong tháng,T2-T7,header-T6+sat-body
+"8h30 - 17h30, thứ 2 - thứ 7, nghỉ thứ 7 cách tuần",T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | Thứ 7 nhiều buổi linh hoạt,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:30 đến 18:00) | Thứ 2 – Thứ 6 và 2 Thứ 7/tháng,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 2 đến Thứ 6 & 2 ngày Thứ 7 trong tháng.,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7: 08:00 - 12:00,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Lịch làm từ thứ 2 đến thứ 7 (làm xen kẽ 2 thứ 7/tháng) | - Sáng: 8h00-12h00 | - Chiều: 13h30-17h30,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:30 đến 18:00) | 8h30 - 18h00 Thứ 2 -Thứ 6 và 2 thứ 7 cách tuần. | Fulltime hoặc ít nhất 8 buổi/tuần.,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:00 đến 21:00) | 3 Ca xoay linh động,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:30 đến 17:30) | Thứ 2 - Thứ 7 (từ 08:00 đến 12:00),T2-T7,header-T7
+"[""T2-T6: 8h-17h30\nT7: 8h-12h (Làm việc 2 ngày thứ 7/tháng)""]",T2-T7,freetext-T6+sat
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | 02 ngày Thứ Bảy/tháng làm việc từ xa (WFH) theo chính sách của công ty,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Thứ 2 –  Thứ 7 (Thứ 7 nếu không có việc cần lên vp thì CBNV được nghỉ),T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:30 đến 18:00) | Nghỉ chiều T7,T2-T7,header-T7
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 2 đến Thứ 6 (08h00-17h00), sáng Thứ 7 (08h00-12h00) | Nghỉ trưa 1 tiếng từ 12h00-13h00",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | • Thứ Bảy làm 02 ngày/ tháng (Công ty sẽ thông báo lịch làm việc Thứ Bảy theo từng tháng),T2-T7,header-T7
+"Thứ 2 - Thứ 7 (từ 08:30 đến 17:45) | Làm việc T2 - Sáng T7, ưu tiên ứng viên sắp xếp được công việc cuối tuần",T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | Từ Thứ Hai đến Sáng Thứ Bảy | Thời gian làm việc linh hoạt theo lịch học của ứng viên,T2-T7,header-T7
+"Thứ 2 - Thứ 7 (từ 08:15 đến 17:30) | 4 giờ/ngày, tối thiểu 3 buổi/tuần (có thể đăng ký lịch linh hoạt). Thứ 7 làm việc cách tuần.",T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thứ 7 (từ 09:00 đến 12:00) | Thứ 7 cách tuần,T2-T7,header-T6+sat-body
+Thứ 2 - sáng thứ 7 (8h - 17h),T2-T7,freetext-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Từ thứ 2-6 và 2 thứ 7 trong tháng,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Từ Thứ 2 - Thứ 6, Thứ 7 làm việc/nghỉ cách tuần",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 07:30 đến 17:00) | Thời gian làm việc: Thứ 2 - Thứ 7 (từ 07:30 đến 17:00) (Nghỉ trưa từ 11:30 - 13:00),T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 09:00 đến 18:00) | Thứ 2 – Thứ 7: 8h30-17h30 | Nghỉ 1 ngày có lương mỗi tháng,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Thứ 7 linh động làm việc,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thứ 7 (từ 08:30 đến 12:00) | Thứ 7 có thể WFH theo điều phối của cấp Quản lý,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 2 - thứ 6 và 2 sáng thứ 7 trong 1 tháng.,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:30 đến 18:00) | Nghỉ trưa 12h30 - 14h | Nghỉ 2 thứ 7 luân phiên trong 1 tháng.,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:15) | Thứ 7 (từ 08:00 đến 11:45),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | Nghỉ trưa: 1 giờ 30 phút,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 07:30 đến 17:30) | - Thứ 2 - Thứ 7 ( từ 7:00 đến 17:30),T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 7 (từ 08:00 đến 12:00) | Từ thứ Hai đến hết sáng thứ Bảy hằng tuần (Sáng T7 work from home),T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 7 (từ 08:30 đến 17:30) | Nghỉ trưa 1 giờ, nghỉ 2 thứ 7.",T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 2 - Thứ 6: 8h30 - 17h30 (Nghỉ trưa 12h00 - 13h30) | Thứ 7: 9h00 - 16h30 (Nghỉ trưa 12h00 - 13h30) (Chỉ làm 2 ngày thứ 7 trong tháng),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thứ 7: 08:30 to 12:00 - Remote working arrangement available.,T2-T7,header-T6+sat-body
+Thứ 2 - thứ 6 & 02 thứ 7 trong tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:30 đến 17:00),T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 7 (từ 08:00 đến 12:00) | Nghỉ trưa từ 12h00 - 13h30,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | 08h00 - 12h00, 13h00 - 17h00",T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:30 đến 17:30) | Nghỉ 2 ngày thứ 7/tuần,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | Làm việc từ thứ 2 đến hết sáng thứ 7,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 12:00) | Thứ 2 - Thứ 6 (từ 13:30 đến 17:30) | Thứ 7 (từ 08:00 đến 17:30) | Thứ 7 đi làm luân phiên cách tuần,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Làm việc giờ hành chính từ thứ 2 đến thứ 6 và làm 2 thứ 7/tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:30 đến 18:00) | Từ thứ Hai đến sáng Thứ Bảy,T2-T7,header-T7
+"[""Thứ 2 - Thứ 6 (từ 08:00 đến 17:30)\nThứ 7 (từ 08:00 đến 12:00)\nThứ Hai - Thứ Sáu & 2 buổi sáng Thứ Bảy/tháng""]",T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Từ thứ 2 đến thứ 6 (mỗi ngày làm 7.5 giờ, nghỉ trưa 1.5 giờ), Thứ 7- chỉ làm việc buổi sáng và nghỉ luân phiên mỗi tuần",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:45) | Thứ 7 (từ 08:30 đến 12:30),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | Làm 2 thứ 7/ tháng. | Nghỉ 2 thứ 7/ tháng,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Thứ 2 - Thứ 7 (từ 08:30 đến 12:00),T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Ngày làm việc: Thứ 2 – Thứ 6 hàng tuần, làm việc 2 Thứ 7 trong tháng",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:30 đến 17:30) | Thứ 7 (từ 08:30 đến 12:30),T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thứ 7 (từ 08:30 đến 17:30) | T7 làm WFH,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (từ 08:00 đến 12:00) | Có làm thêm giờ theo từng sự kiện, có lương làm thêm giờ",T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 7 (từ 08:00 đến 16:30) | Từ thứ 2 đến sáng thứ 7, 44h/tuần",T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Nghỉ thứ 7 cách tuần,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 7 (từ 08:00 đến 16:00),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | 2 thứ 7 cách tuần,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (từ 08:00 đến 12:00) | Thứ Hai - Thứ Sáu: 8:00 - 17:00, Nghỉ trưa: 12:00 - 13:00 | 1 tháng làm 1 buổi sáng thứ 7",T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | 8h30 - 17h30, thứ 2 - thứ 7 | Nghỉ thứ 7 cách tuần",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Thời gian làm việc: | + Thứ Hai: 8h30 - 18h00 (Nghỉ trưa 12h00 - 13h30) | + Thứ Ba - Thứ Sáu: 09h00 - 18h00 (Nghỉ trưa 12h00 - 13h30) | + Thứ Bảy: 01 buổi sáng đầu tiên trong tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 14:00 đến 21:30),T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Làm 2 buổi sáng thứ 7 trên 1 tháng,T2-T7,header-T6+sat-body
+"[""Thứ 2 - Thứ 6 (từ 08:00 đến 17:30)\n8-17h30 T2-T6, 2 thứ 7 trên tháng, nghỉ trưa 12-13h30""]",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | - Nghỉ trưa 90p.,T2-T7,header-T7
+"Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | T2-T7 (từ 8:00 đến 17:00, nghỉ trưa 1 tiếng từ 12:00 đến 13:00)",T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | 2 ngày thứ 7 trong tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Sáng: 8h00 - 12h00 | Chiều: 13h00 - 17h00,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Thứ 7 (từ 08:30 đến 12:00) | Nghỉ trưa 12h00 – 13h30,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:30 đến 18:00) | Thứ 2-Thứ 7 (nghỉ 2 ngày thứ 7 trong tháng). | 8h30-12h & 13h30-18h00 (Nghỉ trưa 1 tiếng 30 phút),T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | 2 thứ 7 trong tháng: 8:30 - 17:00 (Công ty có áp dụng remote working thứ 7),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | - Thời gian làm việc : từ 8h30- 17h30 thứ 2-6 và 2 thứ 7 cách tuần trong tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thứ 2 - thứ 6 ( 8h30 - 17h30 ) | Thứ 7 ( 8h30 - 12h30 ),T2-T7,header-T6+sat-body
+Thời gian làm việc: Sáng: 8h30 - 12h; Chiều: 13h30 - 17h30 từ Thứ 2 đến Sáng Thứ 7.,T2-T7,freetext-T7
+Thứ 2 - Thứ 7 (từ 09:00 đến 18:00) | Nghỉ trưa (12:00-13:30),T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 : Từ 8:00 - 12:00,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:15 đến 17:45) | Thứ 7 (từ 09:00 đến 17:45),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:30 đến 18:00) | Thứ 7 nghỉ luân phiên,T2-T7,header-T7
+"[""Thứ 2 - Thứ 6 (từ 00:00 đến 00:00)\nThời gian làm việc: từ thứ 2 – thứ 6 & 2-3 sáng thứ 7/ tháng""]",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Làm việc 2 thứ 7 trong tháng: 8h30 - 17:00.,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thứ 7 WFH,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 09:00 đến 17:00) | Thứ 7 (từ 09:00 đến 16:00),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 07:30 đến 17:00) | Nghỉ chiều thứ 7 -Hưởng nguyên lương,T2-T7,header-T7
+"Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Thứ 7 (từ 08:00 đến 12:00) | Thứ Hai – Sáng thứ Bảy (08h30 – 18h00, nghỉ trưa 1,5 tiếng)",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:30 đến 17:30) | Thời gian làm việc: Từ Thứ 2 đến Thứ 6; Thứ 7 làm việc luân phiên cách tuần.,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 : Twd 8:00 - 12:00,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Thứ 7 làm các tuần lẻ,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 12:00) | Thứ 2 - Thứ 7 (từ 13:30 đến 17:30) | Nghỉ thứ bảy cách tuần,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Nghỉ 2 Thứ 7/tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | 44h/tuần từ Thứ Hai đến sáng Thứ 7 | 1 tháng nghỉ 2 ngày thứ 7,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Làm việc online 2 ngày thứ 7 (8h-16h) trong tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (từ 07:00 đến 00:16),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Sáng thứ 7 hàng tuần,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 7 cách nhật,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | 2 thứ 7 cách tuần,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 7 (từ 08:00 đến 12:00) | Từ Thứ 2 đến Thứ 6 (8h-17h30); Thứ 7 (8h-12h00). Nghỉ trưa 12h-13h30.,T2-T7,header-T6+sat-body
+Thời gian: Từ 9:00 - 18:00 từ Thứ 2 – Thứ 6 và Thứ 7 cách tuần,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Từ Thứ 2 đến hết sáng Thứ 7,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:15 đến 17:30) | Thứ 7 (từ 08:15 đến 12:00),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 09:00 đến 18:00) | Nghỉ trưa 12h-13h30,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:30 đến 18:00) | Thứ 2 - thứ 6 và 2 thứ 7 làm cách tuần | Nghỉ trưa từ 12h - 13h30,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | nghỉ chiều thứ 7 được hưởng nguyên lương,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Giờ làm việc tiêu chuẩn: Thứ Hai – Thứ Sáu (giờ bắt đầu linh hoạt: 8:00 / 8:30 / 9:00) và 2 buổi sáng Thứ Bảy mỗi tháng (8:00–12:00) (có thể làm việc từ xa).,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7  (từ 08:00 đến 17:00),T2-T7,header-T7
+"Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Từ thứ 2 đến sáng thứ 7, từ 8h30 đến 17h30 (Nghỉ trưa 1 tiếng)",T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | Thời gian làm việc: Từ thứ 2 đến thứ 6 :8h-17h30 , Thứ 7 : 8h-12h , Nghỉ trưa:12h-13h30.",T2-T7,header-T7
+Thứ 2 - Thứ 6 (8:00 - 17:00) | Thứ 7 (8:00 - 12:00),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | hai ngày Thứ Bảy cách tuần trong tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Sáng: 8h đến 12h | Chiều: 13h đến 17h,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thứ 7 (từ 08:00 đến 11:30) | - Sáng: 8:30 - 11:30 | - Chiều: 13:30 - 17:30,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thời gian thử việc: 02 tháng | Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (8h00 - 12h00),T2-T7,header-T6+sat-body
+Thời gian làm việc: | * Sáng: 8:30 – 12:00; Chiều: 13:30 – 18:00 | * Làm việc từ thứ 2 đến sáng thứ 7,T2-T7,freetext-T7
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Từ thứ Hai - thứ Sáu và 02 ngày thứ Bảy/tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 2 - Thứ 6: 9 AM - 6 PM | Thứ 7 (remote): 8:30 AM - 12:30 PM,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Từ thứ 2 – Thứ 6, sáng thứ 7 hàng tuần | Sáng: Từ 8h30 – 12h, chiều: 13h30 – 18h, nghỉ trưa 1h30p",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:15) | Sáng thứ 7: 8:00 - 12:00 ( làm online),T2-T7,header-T7
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Làm việc từ thứ hai đến sáng thứ bảy, 8:00 đến 17:00",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | và Thứ 7 cách tuần,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:30 đến 17:30) | Thứ 7 làm cách tuần,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:15) | 1 buổi sáng thứ 7 tuần cuối cùng của tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Tháng làm 2 thứ 7 cách tuần,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | - Làm việc giờ hành chính: Sáng: 07h30-11h30 Chiều: 13h30-17h30,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | 8h-17h từ thứ 2 đến sáng thứ 7,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 7 Làm Sáng: 8:00 - 12:00,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:15) | Thứ bảy từ 08:00 đến 12h00,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Ca sáng: 8h -12h | Ca chiều: 13h - 17h,T2-T7,header-T7
+Thứ 2 - Thứ 7 () | Thứ 2 đến sáng Thứ 7,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 7 (từ 08:00 đến 12:00) | nghỉ trưa 1h30’,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Thứ 2 - Sáng Thứ 7: 8h00 đến 17h00,T2-T7,header-T7
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | - Từ 08h - 17h30 từ Thứ 2- thứ 6, 1 thứ 7 cuối tháng.",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (từ 08:00 đến 17:00) | Thứ 2 - thứ 6 và 2 ngày thứ 7 cách tuần/ tháng,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Thứ 7: làm việc online, chỉ lên VP 2 buổi sáng cuối cùng trong tháng.",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Sáng từ 8h-12h | Chiều từ 13h-17h,T2-T7,header-T7
+"Thứ 2 - Thứ 6 (từ 07:30 đến 16:00) | Trường hợp phát sinh sự cố vào thứ 7, nhân sự cần hỗ trợ xử lý từ xa (remote).",T2-T6,header-T6-pure
+Thứ 2 - Thứ 7 (từ 18:00 đến 23:00),T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Thứ 2 đến Thứ 6 (8h30 - 18h00) - Nửa sáng ngày thứ 7 (Nếu quản lý có yêu cầu),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 2 - Sáng Thứ 6: 08:00 - 17:00 | Sáng Thứ 7: 08:00 - 12:00,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | - Nghỉ trưa 1 tiếng 30 phút từ 12h00 - 13h30. | - Làm việc 02 Thứ 7/tháng (Tuần 1 & Tuần 3),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thứ 7 (từ 08:30 đến 15:00) | nghỉ trưa 1 giờ,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 07:30 đến 16:30) | Hành chính + Tăng ca,T2-T7,header-T7
+"Sáng 8h - 12h, chiều 13h30 - 17h30 | Từ thứ 2 đến sáng thứ 7",T2-T7,freetext-T7
+"Từ thứ 2 - sáng thứ 7 hàng tuần. | Sáng 8h00 - 12h00, chiều 13h30-17h30.",T2-T7,freetext-T7
+"Thời gian làm việc: Từ thứ 2 đến Sáng thứ 7, Sáng 8:00 – 12:00, Chiều 13:30 – 17:30",T2-T7,freetext-T7
+Thứ 2 - Thứ 6 (từ 07:30 đến 17:00) | Thứ 7 (từ 07:30 đến 15:00),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:40 đến 16:40),T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Nghỉ 2 thứ 7,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Đi làm 2 ngày thứ 7 xen kẽ,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Và 2 sáng Thứ 7 trong tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Làm 3 thứ 7/ tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (từ 08:00 đến 12:00) | Thứ 2 - Thứ 6: 8h - 17h | Thứ 7: 8h - 12h,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 7 (từ 08:00 đến 12:00) | Làm việc từ thứ 2 đến hết sáng thứ 7, nghỉ trưa 1h30’",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Thứ 7 (từ 08:00 đến 12:00),T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Từ Thứ 2 - Thứ 6, làm 2 Thứ 7 cách tuần | Làm Part time theo ca đăng ký",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | 2 ngày thứ 7 trong tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 7 (từ 07:30 đến 12:30),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 07:00 đến 16:00) | Thứ 7 luân phiên (7:00-16:00),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | Nghỉ trưa 1.5 tiếng,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 là ngày làm việc dự phòng,T2-T6,header-T6-pure
+Thứ 2 - Thứ 7 (từ 06:00 đến 14:30) | Thứ 2 - Thứ 7 (từ 14:00 đến 22:30),T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thứ 7 cách tuần,T2-T7,header-T6+sat-body
+"7:45 đến 16:45, từ thứ 2 đến thứ 6, và 2 ngày thứ 7 trong một tháng (theo lịch làm việc thứ 7 cố định)",T2-T7,freetext-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (từ 08:00 đến 11:00),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Làm 2 thứ 7 cách tuần/tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | 2 thứ 7 trong tháng: 8:30 - 17:00,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Làm việc 02 buổi sáng thứ 7/tháng: từ 08h00 - 12h00,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Làm xoay ca 8 tiếng,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | Từ 08:00 - 17:30 (Từ Thứ Hai đến Thứ Sáu) | Từ 08:00 - 17:30 2 Thứ 7 trong tháng,T2-T7,header-T7
+"[""Địa điểm làm việc\n- 47 Nguyễn Tuân, Thanh Xuân, Hà Nội\n- Thời gian làm việc: 8:00 – 17h30 (Thứ 2 - Thứ 7)""]",T2-T7,freetext-T7
+"Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | Thứ 2 - Thứ 7. Sáng từ 8h-12h, chiều từ 13h30 - 17h30",T2-T7,header-T7
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:15) | Thứ 7 (từ 08:00 đến 12:00) | Nghỉ trưa 75 phút, Nghỉ 2 ngày thứ 7 trong tháng",T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Thời gian làm việc: 8h – 17h,",T2-T7,header-T7
+"[""Thứ 2 - Thứ 6 (từ 08:00 đến 17:30)\nThứ 7 (từ 08:00 đến 12:00)\ntừ thứ 2 – thứ 6 & 2 sáng thứ 7/tháng""]",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thứ 7 làm việc online,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 : Từ 8:00 - 12:00,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Từ thứ 2 đến trưa thứ 7,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | 7h30-17h00,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | Chiều thứ 7 làm remote,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Sáng thứ 7 theo điều động của PM (nếu phát sinh công việc),T2-T7,header-T6+sat-body
+Thứ 2 Đến Thứ 6 : Từ 8h00 đến 17h00 | Thứ 7 : Từ 8h00 đến 12h00,T2-T7,freetext-T6+sat
+Thứ 2 - Thứ 7 (từ 07:00 đến 16:30),T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Thứ 7 (từ 08:00 đến 12:00) | Làm tại văn phòng từ thứ 2 tới thứ 6. Làm việc tại nhà sáng thứ 7.,T2-T7,header-T6+sat-body
+Từ 8h30 – 17h30 từ Thứ 2 đến hết Thứ 6 | Thứ 7 làm đến 12h00,T2-T7,freetext-sat-signal
+"Thứ 2 - Thứ 7 (từ 09:00 đến 18:00) | Nhân sự làm việc 02 ngày thứ Bảy trong tháng, theo lịch do Công ty sắp xếp",T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 : Twd 8:00 - 12:00,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Riêng Thứ 7, CBNV đảm bảo làm đủ tối thiểu 02 ngày/tháng",T2-T7,header-T7
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 2 - Thứ 6 (từ 08:00 đến 11:30) | Làm việc: Thứ Hai - Thứ Sáu (08:00 - 17:00), Thứ Bảy (08:00 - 11:30) - 03 ngày thứ Bảy trong tháng.",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Từ Thứ 2 đến Thứ 6 và Xen kẽ các thứ 7 trong tháng.,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Sáng Thứ 7,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Thứ 7 (từ 08:30 đến 12:00) | Xoay ca linh hoạt,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thời gian làm việc 44h/tuần. Thứ 7 làm việc cách tuần,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7: 8h-12h,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6: 8:30 AM - 5:30 PM | ● Thứ 7 làm cách tuần: 8:30 AM - 4:00 PM | ● Nghỉ trưa từ 12:00 PM - 1:00 PM | ● Công chuẩn: 24 công/tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thời gian làm việc: từ thứ 2- thứ 6+ 2 thứ 7/ tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (từ 08:00 đến 17:00) | Thứ 2 - thứ 6 và 2 ngày thứ 7 của tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 11:45) | Thứ 2 - Thứ 6 (từ 13:15 đến 17:30) | Thứ 7 (từ 08:00 đến 11:45) | Làm việc 2 buổi sáng trong tháng.,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thứ 2 - Thứ 6, Thứ 7 tuần 1 & tuần 3 work from home",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Thứ 7 tuần làm tuần OFF,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Nghỉ 2 thứ 7 trong tháng,T2-T7,header-T7
+Thứ 2 - Thứ 7 () | Ca Sáng: 8h30 - 12h00 | Ca Chiều: 13h00 - 17h30 | Trưa nghỉ ngơi 1 (tiếng),T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | Từ thứ hai đến hết sáng thứ 7 : 8h-12h & 13h30-17h30,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 2 đến thứ 6. Sáng thứ 7 khi phát sinh,T2-T7,header-T6+sat-body
+Thứ 2 đến sáng Thứ 7 (08h00 - 17h00),T2-T7,freetext-T7
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Từ thứ 2 đến hết sáng Thứ 7,T2-T7,header-T7
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 2 - Thứ 6 (từ 08:00 đến 17:00), Thứ 7 : 08:00 - 12:00",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | (Thứ 7 nếu không có việc cần lên vp thì CBNV được nghỉ),T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 7: 8h00 - 12h00,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | 02 thứ 7/tháng (tuần 1 & tuần 3),T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ Bảy làm tuần 1,3,5. Nghỉ tuần 2,4",T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 09:00 đến 18:30) | Từ thứ 2 đến thứ 6, thứ 7 (1 tháng 1 buổi) | Buổi sáng: 9:00 - 11:30 | Buổi chiều: 13:00 - 18:30",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Nghỉ trưa: 12h -13h30 | 1 tháng làm 2 ngày thứ 7,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Từ Thứ 2 - Thứ 6, Thứ 7 làm việc/nghỉ cách tuần (8H00 - 12H00; 13H00 - 17H30).",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 07:30 đến 17:00) | Sáng 7h30 - 11h30 | Chiều 13h30 - 17h | Sẽ thống nhất khi phỏng vấn trực tiếp,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Thứ 7 làm online tại nhà,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Thứ 7 - WFH,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (từ 08:00 đến 17:00) | Làm 2 Thứ 7/Tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 00:00 đến 00:00) | Làm việc giờ hành chính từ thứ Hai đến hết thứ Bảy (cách 1 tuần được nghỉ 1 ngày thứ Bảy),T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 7 (từ 08:00 đến 12:00) | nghỉ trưa từ 12h- 13h30’,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Một tháng nghỉ 2 chiều thứ 7. Thử việc có 2 ngày phép.,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ Hai - Thứ Sáu (8h00 - 17h00) & Sáng Thứ Bảy (8h00 - 12h00),T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Thứ 7 (từ 08:30 đến 17:30) | - Văn phòng HCM: T2 - T6: 08h30 - 18h00; Thứ 7 8h30-17h30 làm việc online, xen kẽ cách tuần",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 làm việc Online,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (từ 08:00 đến 17:00) | Thứ 2 - thứ 6 và 2 ngày thứ 7 trong tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:30 đến 18:00) | Thứ 7 về sớm 16h,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Từ thứ 2 đến sáng thứ 7,T2-T7,header-T7
+"Thứ 2 - Thứ 7 (từ 08:30 đến 18:00) | Từ T2- sáng T7 hoặc 2 thứ 7 trong tháng , hoặc tự đăng ký lịch T7 miễn đủ tổng công T7.",T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | - Thời gian làm việc: Thứ 2 - Sáng Thứ 7,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:30 đến 17:30) | Thứ 7 làm việc tại nhà,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 2 đến thứ 6 và 1 buổi sáng thứ 7 đầu tiên của tháng | Buổi sáng checkin linh hoạt từ 07h30 - 09h00,T2-T7,header-T6+sat-body
+Từ Thứ 2 – thứ 6: 08:00-17:00 | Sáng thứ 7: 08:00-12:00 | Được nghỉ 1 ngày thứ 7 tùy chọn hàng tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:30) | Thứ 7 (từ 08:30 đến 12:00),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Làm Sáng Thứ 7,T2-T7,header-T6+sat-body
+"−	Thời gian làm việc: Xoay ca , Làm 6 ngày 1 tuần - nghỉ 1 ngày trong tuần | ▪	08h00 - 17h30 | ▪	20h00 - 04h30 | −	Địa điểm làm việc: Long Biên, Thanh Trì",T2-T7,freetext-T7
+Thời gian làm việc: 9:00 - 12:00 & 13:30 - 18:00 (26 ngày/ tháng),T2-T7,freetext-T7
+"Working hours: 8.8 hours/day (Mon to Fri), flexible checkin from 6:00 am to 10:00 am.",Flexible,keyword
+Thứ 2 - Thứ 5 (từ 08:30 đến 17:30),T2-T6,header-T6-pure
+"Xoay ca 24/7, ca 8 tiếng, off 2 ngày bất kì trong tuần",Other,shift
+"- Giai đoạn đầu: Remote Full-time, sau vài tháng sẽ làm Offline tại VP; | - Thời gian làm việc: 7h/ngày, Sáng Thứ 2 - Sáng T7 hàng tuần (9h00-12h00, Chiều 13h30-17h30)- Sáng T7 làm Remote;",T2-T7,freetext-sat-signal
+"● Hình thức: Làm việc online, trao đổi qua các kênh nội bộ của team. | ● Thời gian: Linh hoạt, đảm bảo deadline theo phân công.",Flexible,keyword
+"[""From Monday to Friday (40 hours)""]",T2-T6,freetext-T6
+"Yêu cầu ứng viên - Sinh viên năm 3 trở lên các ngành Mỹ thuật, Thiết kế đồ họa, Truyền thông hoặc liên quan, có nguyện vọng hướng đến các vị trí full-time sau khi tốt nghiệp hoặc đang tìm kiếm công việc dài hạn - Đã có kinh nghiệm Thiết kế đồ họa - Sử dụng các phần mềm thiết kế (như PTS, AI) - Có laptop cá nhân Quyền lợi - Mức lương: 35,000 VND/giờ - Môi trường làm việc trẻ trung, năng động - Hỗ trợ dấu thực tập nếu cần Địa điểm làm việc (đã được cập nhật theo Danh mục Hành chính mới - thêm quận/huyện cũ tương ứng để dễ dàng tra cứu) - Hà Nội: 34T Hoàng Đạo Thúy, Phường Yên Hòa (quận Cầu Giấy cũ)",Other,unrecognized
+Làm việc tại nhà,Flexible,keyword
+"linh hoạt, ưu tiên work-life balance. Trang thiết bị làm việc đầy đủ, chuyên nghiệp. Văn phòng làm việc hiện đại, chuyên nghiệp. Môi trường trẻ trung, năng động, sáng tạo, hòa đồng, vui vẻ. 3. Chính sách khác Phụ cấp ăn ca 40k/ngày công Thưởng lễ, tết Chính sách BHXH, BHYT và các phúc lợi khác theo quy định của Luật và của Công ty. Chế độ nghỉ mát theo quy chế của công ty Chế độ nghỉ phép theo quy định của Luật Lao động Chế độ hiếu, hỉ, sinh con Địa điểm làm việc (đã được cập nhật theo Danh mục Hành chính mới - thêm quận/huyện cũ tương ứng để dễ dàng tra cứu) - Hà Nội: 15 Lê Văn Thiêm, Phường Thanh Xuân (quận Thanh Xuân cũ)",Flexible,keyword
+T2 – Sáng T7 | - Sáng:    8h30 – 12h00 | - Chiều: 13h30 – 17h30,T2-T7,freetext-T7
+"lịch sẽ được công ty sắp xếp: Làm việc theo ca, tại công ty (không làm việc online) - Khung giờ chiều: 15h > 23h - Khung giờ đêm: 23h >7h LƯU Ý: Địa chỉ làm việc: Nguyễn Thị Nhung, Khu Đô Thị Vạn Phúc, Hiệp Bình Phước, TP. Thủ Đức Thu nhập Thu nhập khi đạt 100% KPI: Từ 12 triệu VND trở lên Thu nhập tính theo tỷ lệ đạt KPI Lương cứng không phụ thuộc doanh số Quyền lợi - Lương chính thức: 7 triệu. - Lương part- time giờ tỉ lệ. + Làm việc trong khung giờ: 18h > 22h: lương nhân thêm 10% + Làm việc trong khung giờ: 22h > 8h: lương nhân thêm 30% - Lương thử việc: 85% lương chính thức + x3 lương từ 7 đến 12 ngày lễ, tết trong năm. + Phép năm tích lũy + 6 tháng cộng thêm 1 bậc lương, + Thưởng Cuối năm + thưởng theo năng lực và thái độ sau 6 tháng làm việc + Thưởng nhân viên xuất sắc mỗi tháng, thưởng lễ, thưởng chuyên cần, thưởng profit - Môi trường làm việc thoải mái, thân thiện... - Được đào tạo kỹ năng giao tiếp, trao đổi, kỹ năng phát triển bản thân, tiếng Anh giao tiếp cơ bản - Teambuilding Địa điểm làm việc (đã được cập nhật theo Danh mục Hành chính mới - thêm quận/huyện cũ tương ứng để dễ dàng tra cứu) - Hồ Chí Minh: 195-197 Nguyễn Thị Nhung, Phường Hiệp Bình (Thành phố Thủ Đức cũ)",Other,shift
+"Thời gian làm việc: T2 - T7 (8:30 - 12:00; 13:30 - 17:30), T7 chỉ làm 02 ngày/1 tháng.",T2-T7,freetext-T7
+"tại nhà và 50% làm việc tại Cty Địa điểm làm việc (đã được cập nhật theo Danh mục Hành chính mới - thêm quận/huyện cũ tương ứng để dễ dàng tra cứu) - Hồ Chí Minh: R4-11 Hưng gia 1 Phú Mỹ Hưng Tân Hưng, Phường Tân Hưng (Quận 7 cũ)",Flexible,keyword
+"Hà Nội: Số 275 Nguyễn Trãi, Phường Thanh Xuân (quận Thanh Xuân cũ)",Other,unrecognized
+Thứ 2 đến Thứ 6 (09h00 đến 18h00 - Nghỉ trưa từ 12h00 đến 13h00) & Thứ 7 (09h00 đến 13h00 - Online tại nhà),T2-T7,freetext-T7
+"8 tiếng xoay ca linh hoạt, theo sự sắp xếp của Công ty. Off 4 ngày/tháng",Other,shift
+Ứng viên có thể chọn 1 trong 3 khung giờ làm việc (giờ VN): | 🔹 Option 1: Ca gãy 20:00–24:00 & 05:00–09:00 | 🔹 Option 2: Ca hành chính Mỹ 22:00–07:00 (nghỉ 1h giữa ca) | 🔹 Option 3: Ca gãy 02:00AM–11:00AM (nghỉ 1h giữa ca),Other,unrecognized
+"Giờ hành chính từ 8h00 – 17h15 từ Thứ 2 đến hết sáng thứ 7, nghỉ Chủ nhật, Lễ, Tết theo quy định.",T2-T7,freetext-T7
+Check in-out linh hoạt,Flexible,keyword
+"Đến trường khi có giờ giảng và đến trường 02 ngày/tuần để giải quyết các công việc hành chính, có chấm công theo quy trình chấm công của Trường. Thời gian làm việc có thể thay đổi để phù hợp với tình hình thực tế tại các thời điểm khác nhau.",Other,unrecognized
+"Monday- Friday, Flexible working hour",T2-T6,freetext-T6
+"Working time: Rotation Shift, including: 5 days a week, 9 hours per day, including 8 working hours and 1 hour for rest",T2-T6,freetext-T6
+"- Hình thức làm việc giai đoạn đầu: Remote Full-time, sau vài tháng sẽ làm Offline tại VP; | - Thời gian làm việc: 7h/ngày, Sáng Thứ 2 - Sáng T7 hàng tuần (9h00-12h00, Chiều 13h30-17h30) - Sáng T7 làm Remote.",T2-T7,freetext-sat-signal
+Partime theo Jobs,Other,unrecognized
+"Đăng kí theo ca lịnh hoạt. Làm việc 44h/tuần tương đương 11ca/tuần (Nghỉ 1,5 ngày/tuần) | Ca sáng: 8h00-12h00; | Ca chiều: 13h00-17h00; | Ca tối: 17h00-21h00.",T2-T6,freetext-T6
+10-19h,Other,unrecognized
+linh hoạt giờ check-in từ 8:00 - 9:00,Flexible,keyword
+Làm việc theo ca theo sự phân công của trưởng đơn vị.,Other,shift
+Làm việc trong giờ hành chính tại Nhật Bản (Trao đổi thêm khi phỏng vấn),Other,unrecognized
+Thứ 2 đến Thứ 6 (09h00 đến 18h00 - Nghỉ trưa từ 12h00 đến 13h00) và Thứ 7 (09h00 đến 13h00 - Work From Home),T2-T7,freetext-T7
+"Thời gian làm việc: 8:00 – 17:00, 5 ngày/tuần (nghỉ 2 ngày liên tiếp/tuần), nghỉ trưa 1 tiếng",T2-T6,freetext-T6
+"thoải mái, tự chủ động trong công việc Áp dụng mô hình phát triển phần mềm theo Agile, Scrum Được tiếp cận với các Công nghệ hiện tại tiên tiến nhất trên thế giới hiện nay Môi trường làm việc cởi mở và năng động với các giá trị cốt lõi sâu sắc truyền cảm hứng làm việc đến nhân viên Khuyến khích trao đổi ý tưởng, đề cao sự sáng tạo trong công việc Cơ hội tham gia gắn kết với tập thể thông qua các hoạt động văn hóa sôi động: Teambuilding, Tất niên, 8/3, 20/10, Giáng sinh... 3. Cơ hội phát triển: F88 cam kết cho bạn nền tảng vững chắc để học hỏi và phát triển. Tham gia đào tạo bài bản, chuyên nghiệp từ Học viện F88. Sẵn sàng trao quyền, cơ hội đột phá cho nhân viên. Địa điểm làm việc (đã được cập nhật theo Danh mục Hành chính mới - thêm quận/huyện cũ tương ứng để dễ dàng tra cứu) - Hà Nội: (Tất cả phường)",Other,unrecognized
+Vị trí làm việc theo mô hình trực ca. Trong một tuần sẽ có 4 ca trực. Thời gian giữa các ca trực cách nhau 24 tiếng. Có 2 loại ca trực: Ca sáng và Ca tối. Ca sáng: 8h - 18h và Ca tối: 18h - 8h. Một ca trực có ít nhất 2 kỹ sư cùng công tác.,Other,shift
+"Thời gian làm việc của giảng viên trong năm học là 44 tuần (tương đương 1.760 giờ hành chính) để thực hiện nhiệm vụ giảng dạy, nghiên cứu khoa học, phục vụ cộng đồng và thực hiện các nhiệm vụ chuyên môn khác.",Other,unrecognized
+Monday – Friday | 9:00 AM – 5:00 PM,T2-T6,freetext-T6
+"linh hoạt; - Thu nhập hấp dẫn, lương + % hoa hồng + thưởng; - Thưởng lễ tết; thưởng theo quý,.... - Được tham gia các khóa đào tạo kỹ năng & nghiệp vụ của công ty; - Được làm việc trong môi trường văn hóa doanh nghiệp trẻ, năng động, thân thiện và chuyên nghiệp. Địa điểm làm việc (đã được cập nhật theo Danh mục Hành chính mới - thêm quận/huyện cũ tương ứng để dễ dàng tra cứu) - Hà Nội: Pháo Đài Láng, Phường Láng (quận Đống Đa cũ)",Flexible,keyword
+"Từ 08h30 - 17h30, nghỉ trưa từ 12h00 - 13h00, nghỉ 4 ngày/tháng",Other,unrecognized
+- 08h-17h hàng ngày | - Nghỉ 1 ngày thường trong tuần,Other,unrecognized
+Làm ca 8 tiếng: 6h-14h; 14h-22h; 22h-6h | Làm xoay ca; nghỉ 1 buổi/tuần.,Other,shift
+Ca 1: 8h00- 17h20; Ca 2: 13h00-22h20,Other,shift
+"linh hoạt không cần ở văn phòng toàn thời gian BHXH theo quy định nhà nước cho nhân viên chính thức Du lịch định kỳ 1-2 lần/năm Địa điểm làm việc (đã được cập nhật theo Danh mục Hành chính mới - thêm quận/huyện cũ tương ứng để dễ dàng tra cứu) - Hà Nội: 241 Xuân Thủy, Phường Cầu Giấy (quận Cầu Giấy cũ)",Flexible,keyword
+"- Làm việc 6 ngày/ tuần. | - Nghỉ hàng tuần: 01 ngày/ tuần. | - Nghỉ Lễ, Tết và các ngày nghỉ hưởng lương theo quy định của Pháp Luật. | - Nghỉ phép: 15 ngày/ năm.",T2-T7,freetext-T7
+Xoay ca: 8h-17h30; 12h-21h30; 1 ngày OFF/tuần,Other,shift
+Xoay ca theo sự sắp xếp của Quản lý,Other,shift
+"(T2- T7) Sáng bắt đầu từ 8h-12h, Chiều bắt đầu từ 13h45 - 17h30 Lễ Tết nghỉ theo lịch Nhà nước và thưởng Lộ trình thăng tiến, KPI thưởng rõ ràng và công khai. Môi trường GENZ trẻ trung năng động, Sếp trẻ dễ tính thoải mái trong công việc Địa điểm làm việc (đã được cập nhật theo Danh mục Hành chính mới - thêm quận/huyện cũ tương ứng để dễ dàng tra cứu) - Hà Nội: 23 Duy Tân, Phường Cầu Giấy (quận Cầu Giấy cũ)",T2-T7,freetext-T7
+Theo ca thoả thuận,Other,shift
+Làm việc theo ca: | - Ca 1: 7h30 - 19h30 | - Ca 2: 19h30 - 7h30 (sau đó nghỉ 2 ngày),Other,shift
+"Xoay ca: Sáng (8h00-17h30); Chiều (12h00-21h30), Off 1 ngày trong tuần",Other,shift
+Giờ hành chính,Other,unrecognized
+Thứ 4 - Thứ 2 (từ 10:00 đến 22:00),Other,unrecognized
+"From 8:00 - 17:00, 5 days/week",T2-T6,freetext-T6
+9:00 - 12:00 & 13:30 - 18:00 - 26 công,Other,unrecognized
+"− Thời gian làm việc: Xoay ca , Làm 6 ngày 1 tuần - nghỉ 1 ngày trong tuần | + 08h00 - 17h30 | + 20h00 - 04h30",T2-T7,freetext-T7
+"full time, ưu tiên các ứng viên có thể đi làm ngay. Bắt buộc có máy tính cá nhân Sinh viên năm 4 hoặc năm 5 chuyên ngành Công nghệ thông tin hoặc các bạn trẻ định hướng làm công việc Kiểm thử Năng động, nhiệt huyết và sẵn sàng học cái mới Có trách nhiệm cao trong công việc Quyền lợi - Được tham gia vào dự án thực tế - Được đào tạo thêm chuyên môn - Có lương thực tập sinh - Trong quá trình thực tập nếu kinh nghiệm và kỹ năng tốt có thể đi làm ngay Địa điểm làm việc (đã được cập nhật theo Danh mục Hành chính mới - thêm quận/huyện cũ tương ứng để dễ dàng tra cứu) - Hà Nội: Số 2, ngách 53/8 Quang Tiến, Đại Mỗ - Nam Từ Liêm, Phường Đại Mỗ (quận Nam Từ Liêm cũ)",Other,unrecognized
+bán thời gian (theo tiết),Flexible,keyword
+Tự do,Flexible,keyword
+3 CA | CA 1 : 8: 00~16: 00 | CA 2 : 16: 00~24: 00 | CA 3 : 24: 00~08: 00,Other,shift
+Đăng ký theo lịch,Other,unrecognized
+"Ca ngày từ 8-17h, ca đêm 22-6h",Other,shift
+"lịch sẽ được công ty sắp xếp: Làm việc theo ca, tại công ty (không làm việc online) - Khung giờ chiều: 15h > 23h - Khung giờ đêm: 23h >7h LƯU Ý: Địa chỉ làm việc: Nguyễn Thị Nhung, Khu Đô Thị Vạn Phúc, Hiệp Bình Phước, TP. Thủ Đức Thu nhập Thu nhập khi đạt 100% KPI: 7 - 12 triệu VND Thu nhập tính theo tỷ lệ đạt KPI Lương cứng không phụ thuộc doanh số Quyền lợi - Lương chính thức: 7 triệu. - Lương part- time giờ tỉ lệ. + Làm việc trong khung giờ: 18h > 22h: lương nhân thêm 10% + Làm việc trong khung giờ: 22h > 8h: lương nhân thêm 30% - Lương thử việc: 85% lương chính thức + x3 lương từ 7 đến 12 ngày lễ, tết trong năm. + Phép năm tích lũy + 6 tháng cộng thêm 1 bậc lương, + Thưởng Cuối năm + thưởng theo năng lực và thái độ sau 6 tháng làm việc + Thưởng nhân viên xuất sắc mỗi tháng, thưởng lễ, thưởng chuyên cần, thưởng profit - Môi trường làm việc thoải mái, thân thiện... - Được đào tạo kỹ năng giao tiếp, trao đổi, kỹ năng phát triển bản thân, tiếng Anh giao tiếp cơ bản - Teambuilding Địa điểm làm việc (đã được cập nhật theo Danh mục Hành chính mới - thêm quận/huyện cũ tương ứng để dễ dàng tra cứu) - Hồ Chí Minh: 195-197 Nguyễn Thị Nhung, Phường Hiệp Bình (Thành phố Thủ Đức cũ)",Other,shift
+"Thứ 2 - Thứ 4 (từ 08:00 đến 17:00) | Thứ 4 - Thứ 7 (từ 13:00 đến 21:00) | C1: 8h00 đến 17h00 nghỉ trưa 12h00-13h00 (nghỉ trưa 1 tiếng, 8h làm việc) | C2: 13h00 đến 21h00 nghỉ chiều 18h00 đến 19h ăn chiều | 1 tháng làm 2 Chủ Nhật cố định 8h00 - 21h00 bao gồm cả Lễ. | Tháng nghỉ 2 chủ nhật +  1 ngày nghỉ phép có hưởng lương",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 7 (từ 08:00 đến 12:00) | Nghỉ chiều thứ 7 và chủ nhật,T2-T7,header-T6+sat-body
+Thứ 2 - Chủ nhật (từ 16:00 đến 02:00),T2-CN,header-CN
+"Thứ 2 - Chủ nhật (từ 08:00 đến 17:30) | C1: 8h00 đến 17h00 nghỉ trưa 12h00-13h00 (nghĩ trưa 1 tiếng, 8h làm việc) | C2: 13h đến 21h00 nghỉ chiều 18h00 đến 19h ăn chiều (nv ăn, nghĩ vào làm,  không tính giờ nghĩ trong ca này trừ công 8h làm việc)",T2-CN,header-CN
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Nghỉ chủ nhật và 2 thứ 7/tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Chủ nhật (từ 08:00 đến 17:30) | Khung thời gian làm việc: 8h00 - 17h30 (nghỉ trưa 12h00 -13h30) từ Thứ 2 đến Chủ nhật (Nghỉ 4 ngày/ tháng),T2-CN,header-CN
+"Thứ 2 - Thứ 6 () | Thời gian làm việc: từ thứ 2 – thứ 6, nghỉ thứ 7 – CN và lễ theo quy định.",T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 07:45 đến 17:30) | Làm việc từ thứ 2 đến thứ 6 hàng tuần, Thứ 7 tuần làm tuần nghỉ, Chủ Nhật Nghỉ, Lễ Tết nghỉ theo quy định.",T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Thời gian làm việc: 8h30 - 18h00 (từ thứ 2 - thứ 6 hàng tuần; nghỉ thứ 7, chủ nhật, nghỉ lễ tết theo quy định nhà nước). Nghỉ trưa từ 12h00 - 13h30.",T2-T6,header-T6-pure
+Đăng kí ca linh hoạt từ thứ 2 đến Chủ nhật (Ca sáng: 8h00 - 12h00; Ca chiều: 13h00 - 17h00; Ca tối: 17h00 - 21h00),T2-CN,freetext-CN
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | nghỉ 2 thứ 7 và 4 chủ nhật trong tháng (Có tăng ca),T2-T7,header-T7
+"[""Thứ 2 - Thứ 6 (từ 08:15 đến 17:30)\nNghỉ CN và 2 thứ 7 hàng tháng.""]",T2-T7,header-T6+sat-body
+Thứ 2 - Chủ nhật (từ 08:00 đến 17:00) | Linh hoạt,T2-CN,header-CN
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Nghỉ thứ 7 và chủ nhật,T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Nghỉ T7, CN",T2-T6,header-T6-pure
+"Hàng ngày: sáng 8h-12h00, chiều 13h30-17h30 | Hàng tuần: từ thứ 2-thứ 7 (nghỉ 2 thứ 7+các ngày chủ nhật trong tháng)",T2-T7,freetext-T7
+"Thứ 2 - Thứ 6 () | Từ Thứ 2 – Thứ 6 (Nghỉ ngày T7, CN)",T2-T6,header-T6-pure
+"Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Làm việc giờ Hành chánh: 8h00 sáng đến 17h00 chiều, từ tháng 2 đến thứ 7. Nghỉ Chủ nhật | 1 tháng được nghỉ 2 ngày bất kỳ (hoặc thứ 7 luân phiên) vẫn được tính lương",T2-T7,header-T7
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Nghỉ thứ 7 , Chủ nhật. Nghỉ trưa từ 12-13h30",T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | nghỉ chiều thứ 7, ngày CN và ngày lễ theo quy định.",T2-T6,header-T6-pure
+"[""Thứ 2 - Thứ 6 (từ 08:00 đến 17:00)\nThời gian làm việc: T2-T6, nghỉ T7 & CN\nThời gian check-in linh hoạt 8-9h""]",T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | T2 - T6 (8h30 - 17h30) , T7 CN nghỉ",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Nghỉ cố định Thứ 7& CN,T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Giờ làm việc linh hoạt | Nghỉ Thứ Bảy, Chủ Nhật",T2-T6,header-T6-pure
+"Thời gian làm việc: 5 ngày/tuần (nghỉ T7, CN)",T2-T6,freetext-T6
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | 8h00 -17h30 thứ 2 đến thứ 6 và 2 ngày T7 trong tháng (Nghỉ 2 ngày T7/ tháng- chủ nhật),T2-T7,header-T6+sat-body
+Thời gian: Thứ 2 – Thứ 7 | Sáng 7h45 – 11h55 | Chiều 13h40 – 17h30 | (Nghỉ Chủ nhật & Lễ theo quy định),T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Thứ 2 – Thứ 6 (Nghỉ Thứ 7 & Chủ Nhật),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thời gian làm việc: Thứ 2 - Thứ 6 | Nghỉ Thứ Bảy & Chủ Nhật,T2-T6,header-T6-pure
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | + Thứ hai – Thứ bảy: (08:00 – 17:00) | + Nghỉ chủ nhật,T2-T7,header-T7
+"Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | Nghỉ trưa từ 12h00 - 13h30, Nghỉ cố định Chủ Nhật",T2-T7,header-T7
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (từ 08:00 đến 12:00) | Từ thứ 2 đến trưa thứ 7 - chiều thứ 7, chủ nhật nghỉ | Làm việc lúc 08h00 - 17h00, nghỉ trưa 12h - 13h,",T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | Thứ 2 – Thứ 6: 08:00 – 17:30 (Nghỉ trưa: 12:00 – 13:30). | Thứ 7: Làm việc cách tuần ( làm 02 ngày Thứ 7/tháng). | Chế độ nghỉ ngơi: Nghỉ các thứ 7 còn lại và các ngày Chủ nhật, nghỉ Lễ, Tết theo quy định của Pháp luật.",T2-T7,header-T7
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | - Làm việc thứ 2 đến thứ 7, nghỉ Chủ Nhật, hoặc thứ 2 đến CN nghỉ thứ 7 | - Làm theo ca 1 tuần có 2-3 ngày làm việc từ 13h00 - 21h30 (nghỉ 30 phút) | Ca 1: 7h00 - 16h00 (nghỉ 1 tiếng) | Ca 2: 9h00 - 18h00 (nghỉ 1 tiếng)",T2-T6,header-T6-pure
+"[""Thứ 2 - Thứ 6 (từ 08:15 đến 17:30)\nNghỉ 2 ngày thứ 7 & tất cả Chủ Nhật""]",T2-T7,header-T6+sat-body
+"[""Thứ 2 - Thứ 6 (từ 09:00 đến 18:00)\nThời gian làm việc: 9h00 - 18h00 (Nghỉ cố định Thứ 7, Chủ Nhật)""]",T2-T6,header-T6-pure
+Thứ 2 - Chủ nhật (từ 08:00 đến 17:00) | OFF 1 ngày bất kỳ trong  tuần,T2-CN,header-CN
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | Làm từ thứ 2 đến thứ 7 nghỉ chủ nhật và lễ tết theo quy định.,T2-T7,header-T7
+"Thứ 2 - Chủ nhật (từ 08:30 đến 17:30) | Làm việc từ thứ 2 đến thứ Chủ nhật. Lịch làm việc theo sự sắp xếp của cấp trên hoặc phù hợp với tiến độ thi công dự án. Thời gian làm việc linh động theo yêu cầu công việc, đảm bảo 8h/ngày, OFF 1 ngày/tuần, đảm bảo đủ công chuẩn/tháng",T2-CN,header-CN
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | 2 ngày Thứ 7 cách tuần, nghỉ Chủ nhật",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | - Thời gian làm việc: 8h/ ngày: 8h - 12h + 13h30 - 17h30. Nghỉ chủ nhật + 2 ngày thứ 7/tháng,T2-T7,header-T7
+"[""Thứ 2 - Thứ 6 (từ 08:00 đến 17:00)\nThời gian làm việc: từ thứ 2 đến thứ 6 hàng tuần, nghỉ thứ 7, CN\nThời gian check-in: linh hoạt từ 8-9h""]",T2-T6,header-T6-pure
+Thứ 2 - Thứ 7 (từ 08:30 đến 17:30) | Thời gian làm việc: | - Từ 8h30 - 17h30 (Nghỉ trưa từ 12h00 - 13hh00) từ thứ 2 đến thứ 7 | - Nghỉ 02 thứ 7 và các ngày chủ nhật trong tháng.,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 07:30 đến 16:30) | Được nghỉ chủ nhật | Mỗi tháng được nghỉ 1 ngày thứ Bảy,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | - Thứ 7 làm việc cách tuần | - Nghỉ chủ nhật,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | 8h00 – 17h30, thứ 2 đến thứ 6, nghỉ thứ 7, chủ nhật",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Nghỉ T7-CN,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Nghỉ T7-CN,T2-T6,header-T6-pure
+"Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | thứ 2 - sáng thứ 7, nghỉ cố định chủ nhật | + sáng 8h -12h | + chiều 13h30 - 17h30",T2-T7,header-T7
+"8h30-17h30, Tháng Nghỉ 4 CN+2 thứ 7 cách tuần",T2-T7,freetext-sat-signal
+"[""Thứ 2 - Thứ 6 (từ 08:00 đến 17:00)\nThời gian làm việc: 8h00 - 17h00, từ thứ 2 đến thứ 6 hàng tuần, nghỉ thứ 7, CN.\nThời gian check in: linh hoạt từ 8h00 - 9h00""]",T2-T6,header-T6-pure
+Thứ 2 - Chủ nhật (từ 13:30 đến 01:30) | Thứ 6: làm việc từ 13h30 đến 19h00 | Thứ 7: off cố định hàng tuần | → (Cách 2 tiếng làm việc được nghỉ 30p),T2-CN,header-CN
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thời gian làm việc từ 8h – 17h30 hàng ngày, nghỉ trưa 1h30 phút từ thứ 2 đến thứ 6, nghỉ thứ 7 và Chủ nhật.",T2-T6,header-T6-pure
+"Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Làm việc từ Thứ Hai- Thứ Bảy, 8h00-17h00. Nghỉ 2 Thứ Bảy, 4 CHủ Nhật trong tháng",T2-T7,header-T7
+"Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Từ thứ 2 - thứ 6 và 2 thứ 7 cách tuần. Nghỉ Chủ Nhật, Lễ Tết theo quy định",T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 08:00 đến 18:00) | THỜI GIAN LÀM VIỆC | Thứ 2 - Thứ 6: 8h00 - 18h00, nghỉ trưa 12h00-13h30. | Nghỉ thứ 7, chủ nhật.",T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Nghỉ trưa từ 12-13h30 ,nghỉ thứ 7 và chủ nhật",T2-T6,header-T6-pure
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Làm việc từ T2 - T7 (Nghỉ 2 T7 và các CN),T2-T7,header-T7
+"Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Thời gian làm việc trong giờ hành chính; nghỉ thứ 7, chủ nhật; riêng chiều thứ Tư được làm việc từ xa | Nghỉ trưa 1 tiếng",T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:15 đến 17:30) | - Thời gian làm việc: 8h15 - 17h30 các ngày từ thứ 2 đến thứ 6 trong tuần | - Nghỉ thứ 7, chủ nhật và các ngày lễ khác, phép năm theo quy định của luật lao động",T2-T6,header-T6-pure
+"[""Thứ 2 - Thứ 7 (từ 08:15 đến 17:30)\nNghỉ 2 thứ 7 và các chủ nhật""]",T2-T7,header-T7
+Thứ 2 - Thứ 7 () | Từ Thứ 2 đến Thứ 7. Trường hợp do yêu cầu công việc phải làm việc vào ngày nghỉ hàng tuần (Chủ nhật) thì sẽ được bố trí nghỉ bù tương ứng theo quy định,T2-T7,header-T7
+"Thứ 2 - Thứ 7 (từ 08:30 đến 17:30) | Nếu chủ nhật phải đi làm, 9h mới bắt đầu vào làm",T2-T7,header-T7
+"từ thứ 2 - thứ 6 (nghỉ thứ 7, chủ nhật) - Du lịch, khám sức khỏe hàng năm - Thưởng lễ tết, sinh nhật, ốm đau, hiếu hỉ - Môi trường làm việc chuyên nghiệp, thân thiện Địa điểm làm việc (đã được cập nhật theo Danh mục Hành chính mới - thêm quận/huyện cũ tương ứng để dễ dàng tra cứu) - Hà Nội: Tầng 15, toà nhà Center Building, Số 1 Nguyễn Huy Tưởng, Phường Thanh Xuân (quận Thanh Xuân cũ)",T2-T6,header-T6-pure
+Thứ 2 - Chủ nhật (từ 08:00 đến 12:00) | Thứ 2 - Thứ 7 (từ 13:00 đến 17:00) | Thứ 2 - Thứ 7 (từ 17:30 đến 21:15),T2-CN,header-CN
+"Thứ 2 - Thứ 6 (từ 08:30 đến 17:30), Được nghỉ 2 ngày thứ 7 và các ngày chủ nhật trong tháng",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | Nghỉ chủ nhật và hai thứ 7 trong tháng,T2-T7,header-T7
+Thứ 2 - Chủ nhật (từ 08:00 đến 17:30) | Được OFF 1 ngày trong tuần,T2-CN,header-CN
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Mỗi tháng làm 2 thứ Bảy, nghỉ các thứ Bảy còn lại và các ngày Chủ nhật | Làm việc theo lịch Việt Nam",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Nghỉ 2 thứ 7/tháng và CN,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | Sáng thứ 7: 8:00 - 12:00 | Nghỉ chiều Thứ 7 và ngày Chủ Nhật,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (từ 08:00 đến 16:00) | Được nghỉ 2 thứ 7 và các chủ nhật trên 1 tháng,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 7 8h-17h30, nghỉ trưa 1h30, nghỉ Chủ Nhật.",T2-T7,header-T7
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:15) | Thứ 7 (từ 08:00 đến 12:00) | + Thời gian làm việc: | - 08h00 - 17h15 (Thứ 2 - Thứ 6, Nghỉ trưa 1h15p) & 08h00 - 12h00 (Sáng Thứ 7) | + Lịch nghỉ hàng tháng: nghỉ 2 sáng thứ 7 trong tháng, các chiều T7 và chủ nhật",T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Nghỉ trưa từ 12h-13h, nghỉ T7-CN",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Làm việc từ thứ 2 - thứ 6 (Nghỉ thứ 7 & chủ nhật) | Thời gian làm việc: 8h30 - 18h00 (Nghỉ trưa từ 12h - 13h30),T2-T6,header-T6-pure
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | T2-T6: 8h00-17h00 | T7 làm cách tuần | nghỉ chủ nhật,T2-T7,header-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Nghỉ T7-CN,T2-T6,header-T6-pure
+Thứ 2 - Chủ nhật (từ 07:15 đến 17:45) | Nghỉ 01 ngày/ tuần (nghỉ luân phiên và theo tình hình sản xuất),T2-CN,header-CN
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thứ 7: 08h30 - 12h30 | Nghỉ hàng tuần Chiều Thứ 7 - CN,T2-T7,header-T6+sat-body
+"- Làm việc thứ 2 đến thứ 7, nghỉ Chủ Nhật, hoặc thứ 2 đến CN nghỉ thứ 7 | - Làm theo ca 1 tuần có 2-3 ngày làm việc từ 13h00 - 21h30 (nghỉ 30 phút) | Ca 1: 7h00 - 16h00 (nghỉ 1 tiếng) | Ca 2: 9h00 - 18h00 (nghỉ 1 tiếng)",T2-T7,freetext-T7
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | - Hình thức làm việc: Thứ 2 đến Thứ 6, nghỉ Thứ 7 CN, 8h30 – 17h30 | - Địa điểm làm việc: Tòa nhà Gold View – 346 Bến Vân Đồn, Phường 1, Quận 4, Tp. Hồ Chí Minh.",T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 7 (từ 08:00 đến 12:00) | 8h/ngày, 5.5 ngày/tuần, nghỉ 1.5 ngày/tuần (0.5 ngày thứ Bảy và Chủ nhật)",T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 7 (từ 07:30 đến 16:30) | Làm giờ hành chính: Từ 7h30-16h30. | Nghỉ 02 thứ 7/ tháng, nghỉ tất cả các ngày CN, lễ tết.",T2-T7,header-T7
+"Thứ 2 - Thứ 7 (từ 08:00 đến 17:30) | T2-T7 Buổi sáng: 8:00-12:00, buổi chiều: 13h30-17h30, nghỉ chủ nhật",T2-T7,header-T7
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | • Thời gian làm việc linh hoạt ứng viên được lựa chọn: Từ 8h – 17h30 , 8h30 đến 18h, hoặc từ 9h- 18h30 từ thứ 2 đến thứ 6. Nghỉ trưa 1h30p,Thứ 7, CN và các ngày lễ tết theo quy định.",T2-T6,header-T6-pure
+"Giờ hành chính từ 8h00 đến 17h15, nghỉ 2 thứ 7 và toàn Chủ nhật trong tháng",T2-T7,freetext-sat-signal
+Thứ 2 - Thứ 5 (từ 08:00 đến 20:00) | Chủ nhật - Thứ 4 (từ 20:00 đến 08:00),T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Nghỉ thứ 7 ,chủ nhật",T2-T6,header-T6-pure
+Làm việc từ thứ 2 - thứ 6 (Nghỉ thứ 7 & chủ nhật) | Thời gian làm việc: 8h30 - 18h00 (Nghỉ trưa từ 12h - 13h30),T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ Bảy cách tuần,nghỉ chủ nhật",T2-T7,header-T6+sat-body
+Thứ 2 - Chủ nhật (từ 19:00 đến 05:00) | Thứ 2 - Chủ nhật (từ 04:00 đến 13:00) | Ca 1: 19:00 – 05:00 | Ca 2: 04:00 – 13:00,T2-CN,header-CN
+"Thứ 2 - Chủ nhật (từ 08:00 đến 17:00) | Làm việc 8 tiếng/ngày theo ca, từ Thứ 2- Chủ nhật, nghỉ 1 ngày trong tuần: | + Ca 1: 8h00 - 17h00 | + Ca 2: 9h00 - 18h00 | + Ca 3: 12h00 - 21h00",T2-CN,header-CN
+"Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thứ 7 (từ 08:30 đến 12:00) | Nghỉ chiều T7, ngày CN",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ Hai - Thứ Sáu: 8h00 - 18h00 | Thứ Bảy: 8h00 - 15h00 | Nghỉ: 02 Thứ Bảy và các Chủ nhật,T2-T7,header-T6+sat-body
+Thứ 2 - Chủ nhật (từ 07:30 đến 17:30),T2-CN,header-CN
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Nghỉ chủ nhật và trung bình 2 thứ 7/tháng (theo kế hoạch sản xuất),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Nghỉ các ngày CN và 1 Thứ 7/tháng,T2-T7,header-T7
+Thứ 2 - Chủ nhật (từ 08:00 đến 17:00) | Tuần được off 01 ngày,T2-CN,header-CN
+Đăng kí ca linh hoạt từ thứ 2 đến Chủ nhật: | + Ca sáng: 8h00 - 12h00; | + Ca chiều: 13h00 - 17h00; | + Ca tối: 17h00 - 21h00.,T2-CN,freetext-CN
+"Thứ 2 - Chủ nhật (từ 17:30 đến 08:00) | Thời gian làm việc: | Xoay ca theo lịch phân công | Làm việc ca tối từ 17h30 đến 08h00 sáng, làm buổi tối, buổi sáng còn lại nghỉ",T2-CN,header-CN
+"Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Tổng 24 ngày làm việc trong tháng, nghỉ 2 thứ 7 và 4 Chủ nhật",T2-T7,header-T7
+Thứ 2 - Chủ nhật (từ 08:00 đến 17:00),T2-CN,header-CN
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Thứ 7 - Chủ nhật () | Monday to Friday: 9am to 6pm and overtime upon request and needs | Saturday and Sunday: Schedule subject to change based on project needs,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thứ 7 (từ 08:30 đến 12:00) | nghỉ chiều thứ 7 và Chủ Nhật,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Nghỉ Thứ 7, Chủ nhật",T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Nghỉ Thứ Bảy, Chủ Nhật và các ngày Lễ, Tết theo quy định.",T2-T6,header-T6-pure
+"Thứ 2 - Chủ nhật (từ 08:30 đến 21:00) | Làm việc xoay ca, Ca 1 từ 8h30 -18h00,  nghỉ trưa 1 giờ. Ca 2: 12h00-21h00, nghỉ chiều 1 giờ. Nghỉ 01 ngày trong tuần.",T2-CN,header-CN
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thời gian làm việc: 8h/ ngày từ 8h30-17h30 (nghỉ trưa 1h) từ thứ 2 đến trưa thứ 7 (Nghỉ chiều t7 và CN),T2-T6,header-T6-pure
+Thứ 2 - Thứ 7 (từ 07:45 đến 17:30) | Làm việc thứ 2- thứ 7 ( Nghỉ 2 thứ 7 và các ngày chủ nhật ),T2-T7,header-T7
+"Từ 8h30-17h30, từ thứ 2 - thứ 7. Nghỉ 2 Thứ 7 và các ngày chủ nhật",T2-T7,header-T7
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Làm việc 1 buổi / ngày (trừ thứ 7, chủ nhật)",T2-T6,header-T6-pure
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Nghỉ chủ nhật,T2-T7,header-T7
+Thứ 2 - Thứ 7 (từ 08:00 đến 17:00) | Nghỉ Thứ 7 cách tuần và các ngày Chủ nhật,T2-T7,header-T7
+Thứ 2 - Chủ nhật (từ 09:00 đến 18:00) | Thứ 2 - Chủ nhật (từ 11:00 đến 20:00),T2-CN,header-CN
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Từ T2-T6, nghỉ T7, CN",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | 8h30 - 17h30 | Thứ 2 - Thứ 6 và 2 thứ 7 trong tháng (nghỉ CN),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 7 (từ 08:30 đến 17:30) | Tháng nghỉ 4 Chủ Nhật,T2-T7,header-T7
+"Thứ 2 - Thứ 6 (từ 09:00 đến 18:30) | Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | - Làm việc từ Thứ 2 đến thứ 6 (nghỉ thứ 7, CN và các ngày lễ theo Quy định). | - Khung giờ làm việc tùy chọn. | - Chế độ remote: 5 - 7 ngày/tháng.",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:15 đến 17:00) | Nghỉ thứ 7 và chủ nhật,T2-T6,header-T6-pure
+Thứ 2 - Chủ nhật (từ 08:00 đến 17:00) | Được nghỉ 1 ngày/ 1 tuần và 2 ngày thứ 7 trên 1 tháng,T2-CN,header-CN
+"Thứ 2 - Thứ 6, 1 Thứ 7, nghỉ 3 thứ 7 và 4 chủ nhật",T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thời gian làm việc: | - Sáng: 8h00 - 12h00 | - Chiều: 13h00 - 17h00 | + Từ tháng 3 đến hết tháng 11: Nghỉ sáng thứ 7 cách tuần, chiều thứ 7 và Chủ Nhật hàng tuần. | + Từ tháng 12 đến hết tháng 2: Nghỉ chiều thứ 7 và Chủ Nhật hàng tuần.",T2-T7,header-T6+sat-body
+Làm việc từ T2 – T7 (mỗi tháng nghỉ 2 ngày T7 + 4 ngày CN).,T2-T7,freetext-T7
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:30),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Từ Thứ 2 - Thứ 6 từ 10:00 PM - 5:00 AM,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 09:00 đến 17:30),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:00),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Check in linh hoạt,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 15:00) | 7 tiếng/ ngày từ thứ Hai đến thứ Sáu,T2-T6,header-T6-pure
+"Làm từ 8h30 - 17h30, từ Thứ 2 - Thứ 6 | Có thể linh động theo lịch học, ưu tiên làm được từ 70% công trở lên",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 09:00 đến 17:00),T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Monday to Friday, 9:00 AM and 6:00 PM.",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Working Hours | Monday - Friday: 08:00 to 17:30 | Saturday: 08:00 to 12:00,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thời gian làm việc: 8 giờ/ngày - 5 ngày/tuần; nghỉ cuối tuần,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:45) | Chấm công linh hoạt: sáng check in 8-9h; chiều check out 5h15-6h15 miễn đủ 8h làm việc,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Thứ 2 - Thứ 6 (từ 09:00 đến 18:30) | Nghỉ trưa 12h-13h30,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 18:00),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:30) | Nghỉ trưa: 1h30,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Nghỉ trưa 12:00 - 13:30,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Châm công linh hoạt,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 18:00) | Linh hoạt giờ check-in từ 8:00 - 9:00,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | CÔNG TY CỔ PHẦN GIẢI PHÁP FIRST TRUST,T2-T6,header-T6-pure
+"[""Thứ 2 - Thứ 6 (từ 13:30 đến 22:00)""]",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Có thể thỏa thuận về thời gian để phù hợp với lịch học.,T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:15 đến 17:30) | Working: From Monday to Friday, every other Saturday (8:15 AM – 5:30 PM daily) or (8:45 AM – 6:00 PM daily)",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Từ Thứ 2 đến Thứ 6 (8h00 - 17h30),T2-T6,header-T6-pure
+"[""Thứ 2 - Thứ 6 (từ 08:30 đến 17:30)""]",T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Thứ 2- Thứ 6, nghỉ trưa từ 12h – 13h30",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | - 8h00 - 17h30 từ Thứ hai đến Thứ sáu (Nghỉ trưa 1h30),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 18:00) | 44h/tuần,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 12:00) | Thứ 2 - Thứ 6 (từ 13:30 đến 17:30),T2-T6,header-T6-pure
+"[""Thứ 2 - Thứ 6 (từ 08:00 đến 17:00)""]",T2-T6,header-T6-pure
+"Làm việc từ Thứ 2 – Thứ 6 (Flexible time từ 8h30 – 9h00 đến 18h00 – 18h30), được chủ động quản lý thời gian làm việc.",T2-T6,header-T6-pure
+"[""Thứ 2 - Thứ 6 (từ 08:30 đến 18:00)""]",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Thời gian làm việc: 9h00 - 18h00 (Từ Thứ 2 - Thứ 6) nghỉ trưa 1h30,T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Từ 8h30 – 18h (Thứ 2- Thứ 6, nghỉ trưa từ 12h – 13h30)",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Từ T2 - T6 (có trực vận hành),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Nghỉ trưa: 12h00 - 13h30,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 16:30),T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 () | Thời gian: 8h30 - 18h, nghỉ trưa 1 tiếng 30 phút, T2 - T7, nghỉ 2 ngày T7 trong tháng",T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Giờ làm việc: 8:30 – 17:30 (Thứ 2 – Thứ 6, nghỉ trưa 1 tiếng), linh hoạt khi có sự kiện phát sinh (chia 2 ca - có thể chọn sáng hoặc chiều)",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Làm cách ngày T7 trong tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:45 đến 17:30),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Làm việc từ thứ 2 đến thứ 6 (nghỉ trưa 1h30 phút),T2-T6,header-T6-pure
+"Cân bằng linh hoạt (37.5 giờ/tuần, từ Thứ 2 đến Thứ 6). | Làm việc từ xa (Remote): 1 ngày mỗi tuần.",T2-T6,freetext-T6
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Nghỉ trưa 90 phút,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Working time: 8:30-18:00 (off 1.5h from 12:00 – 13:30 for lunch) from Monday to Friday,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Break Hour from 12:00 to 13:30,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Giờ vào làm việc linh hoạt từ 7h30 đến 9h00,T2-T6,header-T6-pure
+"[""Thứ 2 - Thứ 6 (từ 08:00 đến 17:30)""]",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:45),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 16:30) | Theo sự điều phối & sắp xếp công việc từ Quản lý,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Remote vào thứ 4 hàng tuần,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thời gian linh hoạt,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Nghỉ trưa: 12h00 - 13h15,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Nghỉ trưa từ 12h00 - 13h00,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:45),T2-T6,header-T6-pure
+"Tối thiểu 20h/tuần, từ thứ 2 đến thứ 6",T2-T6,freetext-T6
+"[""Thứ 2 - Thứ 6 (từ 08:00 đến 17:30)\nNghỉ trưa 1h30'""]",T2-T6,header-T6-pure
+"[""Thứ 2 - Thứ 6 (từ 09:00 đến 18:00)""]",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | 8g00-12g00 / 13g00 - 17g00,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:30) | Nghỉ trưa 1h30p,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Thứ 2 - Thứ 6 (từ 08:30 đến 18:00),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thời gian làm việc tử Thứ hai - Thứ sáu (8:00 AM – 5:30 PM); Nghỉ trưa: 12:00 AM – 1:30 PM.,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | 8 giờ/ngày - 5 ngày/tuần; nghỉ cuối tuần,T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | - Làm việc từ 8:30 đến 18:00, từ thứ 2 đến thứ 6",T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thời gian làm việc tự do, có thể đi làm trong thời gian 7:30 ~ 9:30",T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 2 - Thứ 6, ca sáng từ 8-12h và ca chiều từ 13-17h",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:15 đến 18:00),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 () | Monday – Friday,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 07:00 đến 16:00),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:15) | Flexible Checkin 8AM - 8:45AM,T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 00:00 đến 00:00) | Flexible (08h30 -> 10h bắt đầu, 17h30 -> 19h kết thúc)",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:15 đến 17:30),T2-T6,header-T6-pure
+"[""Thứ 2 - Thứ 6 (từ 08:00 đến 17:00)\n– Monday to Friday: 8:00 AM – 5:30 PM (90-minute lunch break)\n– Saturday: 8:00 AM – 12:00 PM (2 Saturday mornings per month)""]",T2-T7,header-T6+sat-body
+"[""Thứ 2 - Thứ 6 (từ 07:30 đến 16:30)""]",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:50) | Thứ 2 - Thứ 6 (từ 08:30 đến 18:20) | 2 ca làm việc được lựa chọn,T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thời gian làm việc có thể linh động theo lịch học của sinh viên, ưu tiên ứng viên làm được từ 70% ngày công/tháng",T2-T6,header-T6-pure
+"[""Thứ 2 - Thứ 6 (từ 09:00 đến 18:15)\nLinh hoạt chấm công""]",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 2 - Thứ 6 (từ 08:30 đến 18:00),T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | 8h30 - 17h30 (nghỉ trưa 1h30), từ thứ 2 - thứ 6",T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Check in linh hoạt từ 7h30 - 9h30 hàng ngày. | Mỗi tháng có 6 lần về sớm, mỗi lần tối đa 30 phút.",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 () | Làm việc từ Thứ 2 – Thứ 6 (check in linh hoạt 8h - 9h (đảm bảo đủ 8h làm việc/ngày),T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Sáng T7 làm việc từ 08h00 - 12h00, làm 2 sáng T7 cách tuần",T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 2 – Thứ 6, flexible check in (Linh hoạt 8h/ngày, check in tiêu chuẩn 8h-8h45)",T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:45 đến 18:00) | Working: From Monday to Friday, every other Saturday (8:15 AM – 5:30 PM daily) or (8:45 AM – 6:00 PM daily)",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Check tin linh loạt từ 07:00 - 09:00,T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | 8h30 - 18h00 từ Thứ Hai - Thứ Sáu | (Nghỉ trưa 1 tiếng 30 phút, nghỉ giải lao 30 phút)",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 09:00 đến 16:30),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:20 đến 16:45) | Từ thứ 2 đến sáng thứ 6,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 07:30 đến 16:30),T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Sáng 8h00 - 12h00, chiều 13h30 - 17h30",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 09:00 đến 17:30) | 7h/ngày - nghỉ trưa 1h30 phút,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 09:30 đến 18:00),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thời gian làm việc: 8 tiếng/ngày từ thứ 2 - thứ 6. Checkin linh hoạt từ 8h00-8h30.,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | T2-T6 và 2T7/tháng,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | 8h00 –  17h00, thứ 2 – thứ 6",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:20 đến 17:40),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thời gian làm việc: 08h30 - 17h30 T2 - T6; T7 làm việc cách tuần; | Nghỉ trưa: Từ 12h00-13h00,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Nghỉ trưa 1 giờ 30 phút: 11g30 ~ 13g00.,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Linh hoạt giờ check-in từ 8:00 - 9:00,T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | 8 tiếng/ngày từ thứ 2 - thứ 6, checkin linh hoạt từ 8h-8h30 sáng",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | linh hoạt giờ check-in từ 8:00 - 9:00,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 09:00 đến 17:00) | Có thể lựa chọn Fulltime hoặc Part-time,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Hoặc theo quy định làm việc của bên đối tác,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:30),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Thời gian làm việc: 9h00 - 18h00 (Từ Thứ 2 - Thứ 6),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 09:00 đến 06:30),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:15),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Hành chính,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 07:00 đến 12:00) | Thứ 2 - Thứ 6 (từ 13:00 đến 16:00),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 07:15 đến 17:30),T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:30 đến 17:45) | Check-in linh hoạt 8h-9h, check-out lúc 17h15-18h15. T2-T6",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Hai T7/Tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Nghỉ trưa 1h30p từ 12h-13h30,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Hoặc 8:00 - 17:30,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Nghỉ trưa: 12h - 13h30 | Nghỉ T7 cách tuần,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Trực theo ca kíp,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Nghỉ trưa từ 12:00 - 13:30,T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thời gian làm việc: Xoay ca (08:00 - 17:00 hoặc 12:00 - 21:00), OFF 1 ngày bất kỳ/tuần.",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Nghỉ giữa giờ | 15 ngày phép/năm,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 () | Từ Thứ Hai đến Thứ Sáu,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | T7 Làm online,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Làm việc t2 đến t6 và t7 tuần lẻ của tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Thời gian làm việc linh hoạt: | Check-in: 8:00 - 9:00 | Check-out: 17:00 - 18:00,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 09:30 đến 18:30),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 07:00 đến 17:00) | Thứ 2 - Thứ 6 (từ 13:00 đến 22:00),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Chấm công linh hoạt,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Flexible working time,T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Working time: Monday to Friday, hybrid, no check-in/check-out required.",T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00), T7 làm remote.",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:30) | (Thời gian nghỉ trưa: 1h30- Từ 12h00 -13h30),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Thứ 2 - Thứ 6 (từ 08:30 đến 12:00),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Thứ 2 - Thứ 6: 8g30 - 18g00 (tùy chọn linh hoạt),T2-T6,header-T6-pure
+Làm việc từ thứ 2- thứ 6 ( 8h30-18h),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 09:30 đến 18:15),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 2 - thứ 6,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Trực ngoài giờ theo phân công của đơn vị,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | T7 làm việc cách tuần,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Địa điểm làm việc: Hybrid (kết hợp giữa làm việc online / work from home và làm việc trực tiếp tại văn phòng công ty tại Quận 6, đường Võ Văn Kiệt)",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:20 đến 18:00),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Từ 8h00 - 12h00 và 13h30 - 17h30; Từ thứ 2 đến thứ 6.,T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 00:00 đến 00:00) | Only work from Mon-Fri, off Sat & Sun",T2-T6,header-T6-pure
+"Làm việc Thứ 2 - Thứ 6, checkin linh hoạt trong khung 08h00 - 09h00 (đảm bảo làm việc 8h/ngày)",T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:30 đến 17:45) | Linh hoạt, check in từ 8h-9h, check out từ 17h15-18h15",T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | 9h-18h45 (nghỉ trưa từ 12h00-13h45) | Làm 6 buổi/tuần, nghỉ 1 ngày bất kỳ trong tuần",T2-T6,header-T6-pure
+"[""Thứ 2 - Thứ 6 (từ 08:00 đến 17:30)\nNghỉ giải lao 15 phút mỗi buổi sáng/chiều""]",T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thứ 2- Thứ 6, 7,5h/ngày",T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Chấm công linh hoạt. Check in từ 8h - 8h30, check out từ 17g30 - 18g. | Nghỉ trưa 1 tiếng 30 phút. (11g45-13g15)",T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Hội sở Techcombank, số 6 Quang Trung, Hà Nội",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:40),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 2 - Thứ 6 (từ 09:00 đến 18:00),T2-T6,header-T6-pure
+"[""Thứ 2 - Thứ 6 (từ 08:00 đến 17:30)\nThứ 7 cách tuần""]",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Có chế độ làm việc Remote,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 12:00) | Thứ 2 - Thứ 6 (từ 13:00 đến 17:00),T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | 8h/ngày, làm T2-T6 và nghỉ T7 cách tuần.",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | T7 làm cách tuần,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 07:30 đến 17:30),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:30) | Flexible time: | - Checkin: 8h30-9h | - Checkout: 18h-18h30,T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | thời gian làm việc 8h00 – 17h30 từ thứ Hai tới thứ Sáu, nghỉ trưa 1,5h.",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 07:30 đến 18:30) | Thời gian làm việc 8 tiếng/ngày,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Công ty áp dụng chế độ làm việc linh hoạt Core time,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Hybrid working,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:20 đến 18:00) | - Sáng : 8h20 – 12h | - Chiều : 13h30 – 18h,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:15),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 07:50 đến 17:30),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 10:00 đến 18:00),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 09:00 đến 17:30) | Thứ 2 - Thứ 6 (từ 08:30 đến 17:00),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Flexible working time: | - Morning: 8:00 am -12:00 pm (check in from 8:00 am to 8:45 am) | - Afternoon: 1:00 pm - 5:45 pm (check out from 5:00 pm to 5:45 pm),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Giờ tiêu chuẩn: 9:00 – 18:00 (8h làm việc / 1h nghỉ) Có chế độ flex time: Giờ vào: 6:00 – 10:00 /Giờ ra: 15:00 – 21:00 ( Có thể thay đổi tùy dự án ),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Flexible time: | Check in from 08h00 to 09h00 AM | Check out from 5h15 to 6h15 PM,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 09:00 đến 22:00) | có thể nhắn tin IG: mattomo_ ngay để apply nhanh,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 12:00) | Thứ 2 - Thứ 6 (từ 13:30 đến 18:00),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Nghỉ trưa 12h - 13h30,T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Part-time: 24 giờ/tuần, Ca làm linh hoạt. Có thể làm thêm khi có sự kiện (trao đổi trước)",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thời gian theo thỏa thuận,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thứ 6 được về sớm,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 12:00) | Thứ 2 - Thứ 6 (từ 13:30 đến 17:30) | Check in linh động 8h00 - 8h30,T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thứ 2 - Thứ 6 (từ 08:30 đến 17:30, nghỉ trưa 12:00-13:00)",T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Monday to Friday, alternative Saturday",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Làm việc từ T2-T6 và 2 T7 cách tuần,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | nghỉ trưa 1 tiếng,T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thời gian làm việc từ thứ Hai tới thứ Sáu, 8 am ~ 5:48 pm",T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Từ thứ 2 đến thứ 6: Sáng 08:30 - 12:00, Chiều 13:00 - 17:30",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 18:00) | linh hoạt giờ check-in từ 8:00 - 9:00,T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 09:00 đến 18:30) | Working hours: Monday to Friday, 9:00 AM – 6:30 PM.",T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | 08h00 - 17h30, nghỉ trưa 1h30p, thứ 2 đến ngày thứ 6",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | T2-T6: 8:30-17:30 | T7: buổi sáng làm từ xa nếu có dự án,T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Ứng viên có thể đăng ký ca, ngày làm phù hợp.",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Ca ngày từ 8-17h có tăng ca,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Từ thứ hai đến thứ sau ( 9h sáng đến 18h chiều),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | chấm công linh hoạt,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Hỗ trợ làm việc Hybrid/Remote. Cân bằng giữa công việc và cuộc sống,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thời gian làm việc có thể thay đổi phụ thuộc vào nhu cầu vận hành của nhà máy. Nhưng không vượt quá mức 44 tiếng/tuần. Có tính lương OT và chế độ nghỉ bù.,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Làm 2 ngày T7/tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 11:30) | Thứ 2 - Thứ 6 (từ 13:00 đến 17:15),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 07:45 đến 16:25),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | 8H30-17H30,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thời gian thử việc: 2 tháng. | Thời gian làm việc: 05 ngày/ tuần.,T2-T6,header-T6-pure
+"[""Thứ 2 - Thứ 6 (từ 08:00 đến 17:30)\nNghỉ trưa 1h30': 12:00 -13:30""]",T2-T6,header-T6-pure
+"[""Thứ 2 - Thứ 6 (từ 08:15 đến 17:30)\nLàm việc từ 8h15 - 17h30 từ T2-T6, nghỉ 2 T7 trong tháng""]",T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Linh hoạt thời gian theo lịch học,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | 9h sáng đến 18h tối ( từ thứ hai đến thứ sáu),T2-T6,header-T6-pure
+"[""Thứ 2 - Thứ 6 (từ 08:30 đến 18:00)\nThứ 2 - Thứ 6 (từ 09:00 đến 18:30)""]",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Buổi sáng: 8h30 - 12h00 | Nghỉ trưa: 12h00- 13h30 | Buổi chiều: 13h30 -17h30,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Đăng ký linh hoạt 8:00 - 9:00 đến 17:00 - 18:00 từ Thứ 2 - Thứ 6,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Thời gian làm việc: Thứ 2 – Thứ 6 hàng tuần (8h30 sáng - 5h30 chiều),T2-T6,header-T6-pure
+"8h30-18h00, từ Thứ 2 đến Thứ 6",T2-T6,freetext-T6
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Từ thứ 2 đến thứ 6 (8h/ngày),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 12:00) | Thứ 2 - Thứ 6 (từ 13:00 đến 17:30),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Nghỉ trưa 1h30p từ 12h - 13h30,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Có thể làm việc ngoài thời gian trên tùy theo nhu cầu của từng dự án cụ thể,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 07:30 đến 17:00),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Nghỉ trưa từ 12h – 13h30,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Có chế độ Remote 100%,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Nghỉ trưa 01 tiếng,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:30) | Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Thứ 2 - Thứ 6 (từ 09:30 đến 19:00),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Flexible shift,T2-T6,header-T6-pure
+"[""Thứ 2 - Thứ 6 (từ 09:00 đến 18:00)\nNghỉ trưa 1h""]",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Nghỉ trưa 1 tiếng 30 phút,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Lunch Break: 12:00 PM – 1:30 PM,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Mon–Fri & alternative Saturday working schedule with 44 hours/week,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thời gian làm việc linh động, tự sắp xếp, sựa trên tiến độ và mục tiêu từng Sprint, không theo giờ hành chính cố định.",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | - Thời gian làm việc linh hoạt theo tính chất công việc. | - Địa điểm: Remote giai đoạn đầu và có mặt theo lịch của quản lý,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | T7 tuần lẻ,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 09:00 đến 18:15) | Linh hoạt, check in từ 8h-9h, check out từ 17h15-18h15",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 21:30 đến 05:30),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Xoay ca: 8h-17h30 ; 12h-21h30; 1 ngày off/tuần,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 07:00 đến 17:00) | Thời gian linh hoạt. Remote 30% thời gian làm việc mỗi tháng.,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Buổi sáng:  08:00 - 12:00 | Buổi chiều: 13:30 - 16:00 (16:00 - 16:30 giờ teabreak) | 16:30 - 17:30,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:15 đến 17:45),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 12:00) | Thứ 2 - Thứ 6 (từ 13:30 đến 17:30),T2-T6,header-T6-pure
+"Từ thứ 2 - thứ 6, khung giờ làm việc linh hoạt: | Ca 1: 8:00 AM - 5:30 PM | Ca 2: 8:30 AM - 6:00 PM | Ca 3: 9:00 AM - 6:30 PM",T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Giờ làm việc: 7,5 tiếng mỗi ngày, từ Thứ 2 đến Thứ 6 hàng tuần. Nghỉ trưa: 1h30'",T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 09:00 đến 17:30) | Toàn thời gian,  trưa (12h-13h).",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 07:30 đến 16:30) | Thời gian làm việc: 7h30 - 16h30 các ngày từ T2 - T6,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 10:00 đến 18:30),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Nghỉ trưa 12h-13h30,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6: 8h30 - 17h30,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 09:30 đến 18:30) | Được nghỉ trưa 1 tiếng,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Nghỉ trưa 1h30p,T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | nghỉ trưa 1,5h",T2-T6,header-T6-pure
+"[""Thứ 2 - Thứ 6 (từ 13:00 đến 22:00)""]",T2-T6,header-T6-pure
+"[""Thứ 2 - Thứ 6 ()""]",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 07:30 đến 15:30),T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 09:00 đến 17:00) | Linh động, làm việc tại nhà, không cần thiết có mặt tại văn phòng",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 12:00) | Thứ 2 - Thứ 6 (từ 13:30 đến 18:00),T2-T6,header-T6-pure
+"[""Thứ 2 - Thứ 6 (từ 08:30 đến 17:00)""]",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:50),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Giờ làm việc 8:30 - 18:00 từ thứ 2 tới thứ 6; ưu tiên sự linh hoạt và chủ động quản trị hiệu suất,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | T7 WFH nửa buổi sáng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | - Nghỉ trưa 1 tiếng 30 phút. | - Làm việc 2 ngày T7/tháng (Tuần 1 & Tuần 3),T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 08:15 đến 17:00),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | 8h00-17h00,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Check in linh hoạt 8h - 8h30,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 07:30 đến 16:30) | Theo ca,T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Chấm công/làm việc linh hoạt từ 08h00 - 09h30, miễn đủ 8 tiếng, đảm bảo hiệu suất và tiến độ công việc. Nghỉ trưa từ 12h00 - 13h30, thứ 4 nghỉ trưa từ 12h00 - 14h00.",T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:15) | Linh hoạt, check in từ 8h-9h, check out từ 17h15-18h15",T2-T6,header-T6-pure
+"8h30 - 17h30 (Thứ 2 - Thứ 6), nghỉ trưa 12h - 13h",T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thời gian làm việc: 8 tiếng/ngày từ thứ 2 - thứ 6, checkin linh hoạt từ 8h - 8h30 sáng",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:20 đến 17:30) | Làm việc từ thứ 2 đến thứ 6,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Nghỉ trưa 1h30p.,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 07:30 đến 16:15),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:30) | Thời gian linh động theo tính chất công việc.,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | và T7 cách tuần,T2-T7,header-T6+sat-body
+"Thứ 2 - Thứ 6 (từ 20:00 đến 05:00) | Thứ 2 - Thứ 6 (từ 23:00 đến 08:00) | Working time: Rotation Shift, including: 5 days a week, 9 hours per day, including 8 working hours and 1 hour for rest",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Fulltime - Parttime,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 07:45 đến 16:45),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Thời gian làm việc 7.5h/ ngày.,T2-T6,header-T6-pure
+"[""Thứ 2 - Thứ 6 (từ 08:00 đến 17:00)\nThứ 7 cách tuần""]",T2-T7,header-T6+sat-body
+"[""Thứ 2 - Thứ 6 (từ 08:00 đến 17:00)\nFrom Monday to Friday (40 hours/Week)""]",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:15 đến 17:15),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Làm 2 ngày T7/ tháng,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | T7 làm việc cách tuần,T2-T7,header-T6+sat-body
+Thứ 2 - Thứ 6 (từ 20:00 đến 04:00) | Ca 1: 08 PM - 04 AM | Ca 2: 04 AM - 12 PM | Ca 3: 11:00 PM - 6 AM | (5.5 days per week),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 07:40 đến 16:35),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Thứ 2 – Thứ 6 (2 ngày thứ 6 làm việc tại nhà),T2-T6,header-T6-pure
+"[""Thứ 2 - Thứ 6 (từ 08:30 đến 18:00)\nNghỉ trưa 1 tiếng 30 từ 12h-13h30""]",T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:00 đến 18:15) | Linh hoạt, check in từ 8h-9h, check out từ 17h15-18h15",T2-T6,header-T6-pure
+Thứ 2 - Thứ 5 (từ 08:00 đến 18:00) | Thứ 6 (từ 08:00 đến 17:00),T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | Thời gian làm việc: Từ 8h30 – 18h (Thứ 2- Thứ 6, nghỉ trưa từ 12h – 13h30)",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Từ thứ 2 đến thứ 6. | 8h-12h | 13h30-17h30,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | -       Làm việc theo giờ hành chính (từ 8h30 đến 17h30 thứ hai đến thứ sáu. Nghỉ trưa 2 tiếng).,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:30) | Hybrid working mode | Flexible check-in time,T2-T6,header-T6-pure
+8H30 - 17H30 từ Thứ 2 - Thứ 6,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:20 đến 17:30),T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thời gian làm việc: 15h đến 22h30 (live 4h, còn lại nghỉ ngơi ăn uống). Tháng nghỉ 6 ngày ( tự chọn hoặc theo sắp xếp lịch của leader)",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thứ 2 - Thứ 6 (40 giờ/tuần),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Thời gian làm việc: 9h - 18h (Từ Thứ 2 - Thứ 6),T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Chấm công/làm việc linh hoạt từ 08h00 - 09h30, miễn đủ 8 tiếng, đảm bảo hiệu suất và tiến độ công việc",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Nghỉ trưa từ 12-13h30,T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:00 đến 18:15) | Linh hoạt, check in từ 8h-9h, check out từ 17h15-18h15, từ T2-T6",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Check-in linh hoạt: từ 07:30 - 09:00 sáng,T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:00) | Thời gian: 08:00 – 17:00 (Thứ 2 – Thứ 6), nghỉ Lễ, Tết theo quy định.",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 09:00 đến 17:00) | - Thời gian làm lịch linh hoạt | - Remote 2 lần/tháng,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 17:45) | Nghỉ trưa 12h-13h15,T2-T6,header-T6-pure
+"Thứ 2 - Thứ 6 (từ 08:00 đến 17:30) | Hình thức làm việc hybrid, 2 ngày WFH/ tuần",T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 00:00 đến 00:00) | Thứ 2 – Thứ 6 (linh hoạt theo công việc),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Nghỉ giữa ca 12:00 – 13:00,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Thứ 2 - Thứ 6 (từ 08:00 đến 17:00),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:00 đến 16:00),T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:15 đến 18:00) | Thời gian làm việc: Thứ hai đến Thứ Sáu,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 08:30 đến 18:00) | nghỉ trưa từ 12h00 - 13h30,T2-T6,header-T6-pure
+Thứ 2 - Thứ 6 (từ 09:00 đến 18:00) | Thứ 2 - Thứ 6 (từ 13:00 đến 22:00),T2-T6,header-T6-pure
