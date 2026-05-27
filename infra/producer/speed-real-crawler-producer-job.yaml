@@ -7,12 +7,14 @@ metadata:
     app: speed-real-crawler-producer
 spec:
   backoffLimit: 0
+  activeDeadlineSeconds: 900
   template:
     metadata:
       labels:
         app: speed-real-crawler-producer
     spec:
       restartPolicy: Never
+      terminationGracePeriodSeconds: 60
       serviceAccountName: spark
       containers:
         - name: speed-crawler-producer
@@ -33,7 +35,7 @@ spec:
             - name: DISPLAY
               value: ":99"
             - name: HARVESTER_BREAKER_SLEEP_SECONDS
-              value: "60"
+              value: "30"
             - name: BROWSER_EXECUTABLE_PATH
               value: "/usr/bin/google-chrome"
             - name: HOME
@@ -46,13 +48,13 @@ spec:
               value: "runtime/logs"
 
             - name: SPEED_CRAWL_MAX_PAGES
-              value: "15"
+              value: "8"
             - name: SPEED_UPDATED_WITHIN_MINUTES
-              value: "30"
+              value: "20"
             - name: SPEED_LIST_PAGES_PER_CHUNK
-              value: "5"
+              value: "4"
             - name: SPEED_DETAIL_BATCH_SIZE
-              value: "40"
+              value: "25"
 
             - name: CRAWLER_JSONL_INPUT
               value: "/tmp/topcv-crawler-output/source=topcv/ingest_date=*/jobs_speed_*.jsonl"
@@ -65,9 +67,9 @@ spec:
             - name: CRAWLER_JSONL_LOG_EVERY
               value: "10"
             - name: CRAWLER_JSONL_POLL_SECONDS
-              value: "2"
+              value: "1"
             - name: PRODUCER_DRAIN_SECONDS
-              value: "10"
+              value: "5"
 
           command:
             - /bin/bash
