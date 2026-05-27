@@ -6,7 +6,7 @@ Dự án thu thập và phân tích dữ liệu việc làm từ TopCV theo mô 
 
 - **Batch layer**: crawler ghi raw JSON/JSONL vào HDFS, Spark batch ETL chuyển Raw -> Bronze -> Silver -> Gold, sau đó index Gold vào Elasticsearch.
 - **Speed layer**: producer đẩy job event vào Kafka, Spark Structured Streaming làm sạch/score dữ liệu realtime, ghi Kafka clean/DLQ và Elasticsearch realtime indexes.
-- **Serving layer**: Elasticsearch + Kibana cho dashboard/search, FastAPI cho API tìm kiếm batch Gold.
+- **Serving layer**: Elasticsearch + Kibana cho dashboard, search và phân tích dữ liệu batch/realtime.
 - **Platform/Ops**: Docker image, Kubernetes/Minikube, Airflow DAGs, scripts và Makefile.
 
 ## Architecture Diagram
@@ -59,10 +59,8 @@ Dự án thu thập và phân tích dữ liệu việc làm từ TopCV theo mô 
                v
        Elasticsearch gold-jobs-flat
                |
-        +------+------+
-        |             |
-      Kibana      FastAPI Search API
-              apps/api/search_api.py
+             Kibana
+      batch dashboards / realtime dashboards
 ```
 
 ## Tech Stack
@@ -74,7 +72,7 @@ Dự án thu thập và phân tích dữ liệu việc làm từ TopCV theo mô 
 | Batch processing | PySpark, HDFS, Parquet Snappy |
 | Streaming | Spark Structured Streaming, Kafka source/sink, Elasticsearch foreachBatch sinks |
 | ML | Spark ML salary prediction model dùng chung cho batch và speed |
-| Serving | Elasticsearch, Kibana, FastAPI |
+| Serving | Elasticsearch, Kibana |
 | Orchestration/Ops | Kubernetes/Minikube, Docker, Airflow, Makefile, PowerShell/Bash scripts |
 | Tests | pytest unit/schema tests trong `tests/` |
 
@@ -122,10 +120,6 @@ Raw JSON/JSONL -> Bronze Parquet -> Silver Parquet -> Gold Parquet -> Elasticsea
 ```text
 bigdata-job-market/
 ├── apps/
-│   ├── api/                         # Current FastAPI search API for gold-jobs-flat
-│   │   ├── Dockerfile
-│   │   ├── requirements.txt
-│   │   └── search_api.py
 │   ├── batch/jobs/                  # Spark batch ETL and ML training jobs
 │   │   ├── raw_to_bronze.py
 │   │   ├── bronze_to_silver.py
@@ -143,7 +137,7 @@ bigdata-job-market/
 │   │   ├── schemas/
 │   │   ├── stateful_jobs/
 │   │   └── sinks/
-│   └── serving/                     # Legacy Redis speed API, not current K8s serving path
+│   └── serving/                     # Legacy/experimental serving code, not deployed in current K8s setup
 ├── configs/                         # Settings and logging helpers
 ├── data/
 │   ├── raw/
@@ -160,7 +154,7 @@ bigdata-job-market/
 │   ├── namespaces/
 │   ├── producer/                    # K8s producer job
 │   ├── search/                      # Elasticsearch and Kibana manifests
-│   ├── serving/                     # FastAPI deployment/service
+│   ├── serving/                     # Legacy manifests, not used in current deployment
 │   └── spark/                       # Spark Dockerfile, RBAC, CronJobs, streaming Job
 ├── scripts/                         # Bash/PowerShell helpers and smoke tests
 ├── shared/                          # Shared schemas, UDFs, quality rules
@@ -178,7 +172,6 @@ bigdata-job-market/
 | `kafka` | Strimzi Kafka cluster and topics from `infra/kafka/` |
 | `spark` | Spark RBAC, batch CronJobs, ML training CronJob, streaming Job, checkpoint PVCs |
 | `search` | Elasticsearch and Kibana |
-| `serving` | FastAPI search API deployment/service |
 | `airflow` | Airflow scheduler/webserver/Postgres and DAGs |
 
 Các manifest chính:
@@ -193,7 +186,6 @@ Các manifest chính:
 | ML training | `infra/spark/salary-model-train-cronjob.yaml` |
 | Speed stream | `infra/spark/speed-stream-es-job.yaml` |
 | Search | `infra/search/elasticsearch-statefulset.yaml`, `elasticsearch-service.yaml`, `kibana-deployment.yaml`, `kibana-service.yaml` |
-| API | `infra/serving/job-search-api-deployment.yaml`, `job-search-api-service.yaml` |
 | Airflow | `infra/airflow/*.yaml`, DAGs in `infra/airflow/dags/` |
 
 ## Main Runtime Commands
@@ -206,8 +198,6 @@ make hdfs-up
 make kafka-up
 make search-up
 make spark-build
-make api-build
-make serving-up
 make platform-up
 make speed-k8s-up
 make status
