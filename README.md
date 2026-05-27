@@ -1,207 +1,266 @@
-# Big Data Job Market — Lambda Architecture
+# Project Architecture - Big Data Job Market
 
-This project analyzes IT job postings from Vietnamese job boards using a **Lambda Architecture** with batch, speed, and serving layers.
+## Overview
 
-## What Was Implemented
+Dự án thu thập và phân tích dữ liệu việc làm từ TopCV theo mô hình **Lambda Architecture**:
 
-### Speed Layer (Spark Structured Streaming)
+- **Batch layer**: crawler ghi raw JSON/JSONL vào HDFS, Spark batch ETL chuyển Raw -> Bronze -> Silver -> Gold, sau đó index Gold vào Elasticsearch.
+- **Speed layer**: producer đẩy job event vào Kafka, Spark Structured Streaming làm sạch/score dữ liệu realtime, ghi Kafka clean/DLQ và Elasticsearch realtime indexes.
+- **Serving layer**: Elasticsearch + Kibana cho dashboard/search, FastAPI cho API tìm kiếm batch Gold.
+- **Platform/Ops**: Docker image, Kubernetes/Minikube, Airflow DAGs, scripts và Makefile.
 
-- **Kafka topics**: `jobs_raw`, `jobs_clean`, `jobs_dead_letter`
-- **Producer**: File-based producer reads crawler JSON output → `jobs_raw`
-- **Spark Structured Streaming**: Reads `jobs_raw`, parses raw schema, normalizes fields
-- **Dead-letter handling**: Malformed JSON and missing required fields → `jobs_dead_letter`
-- **Watermarking**: 1-hour event-time watermark for late data
-- **Deduplication**: By `job_id` within the watermark window
-- **Realtime aggregations**:
-  - Jobs per 10 minutes (by source, province)
-  - Top skills by hour (ranked top 10)
-  - Salary bins per 10 minutes (by province)
-- **Elasticsearch indexing**: All aggregations written to Elasticsearch realtime indexes for dashboard/search serving
-- **Checkpointing**: Per-query checkpoint paths for crash recovery
-- **Idempotent sinks**: Deterministic document IDs for Elasticsearch upserts
-- **Scripts**: Setup, run, stop, test, smoke test, and cleanup scripts
-- **Unit tests**: Salary parser, skill normalizer, event time fallback, validation
+## Architecture Diagram
 
-### Design Explanation
+```text
+                         +----------------------+
+                         |        TopCV         |
+                         +----------+-----------+
+                                    |
+               +--------------------+--------------------+
+               |                                         |
+        Batch crawler                              Realtime producer
+ apps/ingestion/batch_crawler.py              apps/producer/*.py
+ apps/ingestion/run_crawler_to_hdfs.py                |
+               |                                      Kafka
+               v                         jobs_raw / jobs_clean / jobs_dead_letter
+          HDFS Raw                                      |
+     /raw/jobs/...                                      v
+               |                       Spark Structured Streaming
+               v                         apps/stream_etl/stream_main.py
+      Spark batch ETL                                   |
+ apps/batch/jobs/raw_to_bronze.py                       |
+               |                         +--------------+--------------+
+               v                         |                             |
+          HDFS Bronze                Elasticsearch                 Kafka DLQ/Clean
+     /bronze/jobs/...          realtime_jobs_v1 and agg indexes
+               |
+               v
+      Spark batch ETL
+ apps/batch/jobs/bronze_to_silver.py
+               |
+               v
+          HDFS Silver ------------------+
+     /silver/jobs/...                   |
+               |                        v
+               |              Salary model training
+               |          apps/batch/jobs/train_salary_model.py
+               |                        |
+               v                        v
+      Spark batch ETL           HDFS salary model
+ apps/batch/jobs/silver_to_gold.py
+               |
+               v
+           HDFS Gold
+ /gold/jobs/job_market_index
+               |
+               v
+    apps/batch/jobs/gold_to_elasticsearch.py
+               |
+               v
+       Elasticsearch gold-jobs-flat
+               |
+        +------+------+
+        |             |
+      Kibana      FastAPI Search API
+              apps/api/search_api.py
+```
 
-The speed layer is designed as the realtime part of a Lambda Architecture. The existing crawler remains unchanged and is treated as a legacy data source. A Kafka producer reads crawler output and publishes raw job events to the `jobs_raw` topic using `job_id` as the Kafka key. Spark Structured Streaming consumes `jobs_raw`, parses the raw JSON schema, normalizes event time, salary, location, experience, and skills, and separates invalid records into the `jobs_dead_letter` topic. Valid records are written to `jobs_clean`. The stream then applies event-time watermarking and deduplication by `job_id` before computing realtime aggregations: jobs per 10 minutes, top skills by hour, and salary bins. Checkpoints provide recovery, while deterministic sink keys and upserts make external writes idempotent.
+## Tech Stack
+
+| Area | Current implementation |
+|---|---|
+| Crawler/Ingestion | Python, requests/BeautifulSoup/cloudscraper/curl-cffi/nodriver/playwright, helper upload HDFS |
+| Messaging | Kafka on Kubernetes via Strimzi manifests |
+| Batch processing | PySpark, HDFS, Parquet Snappy |
+| Streaming | Spark Structured Streaming, Kafka source/sink, Elasticsearch foreachBatch sinks |
+| ML | Spark ML salary prediction model dùng chung cho batch và speed |
+| Serving | Elasticsearch, Kibana, FastAPI |
+| Orchestration/Ops | Kubernetes/Minikube, Docker, Airflow, Makefile, PowerShell/Bash scripts |
+| Tests | pytest unit/schema tests trong `tests/` |
+
+## Data Flow
+
+### Batch Path
+
+1. Dữ liệu crawler raw được lưu ở HDFS path `hdfs://hdfs-namenode.hdfs.svc:9000/raw/jobs`.
+2. `apps/batch/jobs/raw_to_bronze.py` đọc Raw JSON/JSONL và ghi Bronze Parquet vào `/bronze/jobs`.
+3. `apps/batch/jobs/bronze_to_silver.py` parse JSON-LD, chuẩn hóa salary/location/experience, dedup theo `job_id`, và ghi Silver Parquet vào `/silver/jobs`.
+4. `apps/batch/jobs/train_salary_model.py` train Spark ML salary model từ toàn bộ Silver table và lưu vào `/models/salary_prediction/latest`.
+5. `apps/batch/jobs/silver_to_gold.py` tạo Gold records dạng denormalized, bổ sung salary prediction fields, và ghi Parquet vào `/gold/jobs/job_market_index`.
+6. `apps/batch/jobs/gold_to_elasticsearch.py` index Gold vào Elasticsearch index `gold-jobs-flat`.
+
+### Speed Path
+
+1. `apps/producer/crawler_jsonl_producer.py`, `apps/producer/file_to_kafka.py`, hoặc `apps/producer/fake_crawler_producer.py` publish raw events vào Kafka topic `jobs_raw`.
+2. `apps/stream_etl/stream_main.py` consume `jobs_raw`, validate/parse raw schema, chuẩn hóa fields, load salary model, và score các job có salary thỏa thuận khi bật cấu hình.
+3. Dòng hợp lệ được ghi vào `jobs_clean`; dòng lỗi được ghi vào `jobs_dead_letter`.
+4. Realtime records và aggregations được ghi vào Elasticsearch:
+   - `realtime_jobs_v1`
+   - `realtime_job_counts_10m_v1`
+   - `realtime_skill_counts_hourly_v1`
+   - `realtime_top_skills_hourly_v1`
+   - `realtime_salary_bins_hourly_v1`
+5. Streaming checkpoints được lưu dưới `/mnt/spark-checkpoints` trong Kubernetes qua `infra/spark/speed-checkpoint-pvc.yaml`.
+
+## Medallion Data Model
+
+```text
+Raw JSON/JSONL -> Bronze Parquet -> Silver Parquet -> Gold Parquet -> Elasticsearch
+```
+
+| Layer | Main path/index | Source of truth |
+|---|---|---|
+| Raw | `hdfs://hdfs-namenode.hdfs.svc:9000/raw/jobs` | `data/raw/raw_data_format.md` |
+| Bronze | `hdfs://hdfs-namenode.hdfs.svc:9000/bronze/jobs` | `data/bronze/bronze_data_format.md` |
+| Silver | `hdfs://hdfs-namenode.hdfs.svc:9000/silver/jobs` | `data/silver/silver_data_format.md` |
+| Gold | `hdfs://hdfs-namenode.hdfs.svc:9000/gold/jobs/job_market_index` | `data/gold/gold_data_format.md` |
+| Batch serving index | `gold-jobs-flat` | `apps/batch/jobs/gold_to_elasticsearch.py` |
+| Realtime serving indexes | `realtime_*_v1` indexes | `apps/stream_etl/sinks/*.py` |
 
 ## Repository Structure
 
 ```text
-.
-├── README.md
-├── configs/
-│   ├── .env.example          # Environment variable template
-│   ├── streaming.dev.yaml    # Spark streaming config
-│   ├── kafka.dev.yaml        # Kafka topic definitions
-│   └── app.dev.yaml          # App-level config
-├── infra/
-│   ├── docker-compose/
-│   │   └── docker-compose.dev.yml
-│   ├── compose/
-│   │   └── docker-compose.yml  (legacy)
-│   └── kafka/
+bigdata-job-market/
 ├── apps/
-│   ├── producer/
-│   │   ├── kafka_job_producer.py       # Live crawl → Kafka
-│   │   └── crawler_output_producer.py  # File → Kafka
-│   ├── stream_etl/
-│   │   ├── stream_main.py             # Main streaming pipeline
+│   ├── api/                         # Current FastAPI search API for gold-jobs-flat
+│   │   ├── Dockerfile
+│   │   ├── requirements.txt
+│   │   └── search_api.py
+│   ├── batch/jobs/                  # Spark batch ETL and ML training jobs
+│   │   ├── raw_to_bronze.py
+│   │   ├── bronze_to_silver.py
+│   │   ├── silver_to_gold.py
+│   │   ├── gold_to_elasticsearch.py
+│   │   └── train_salary_model.py
+│   ├── ingestion/                   # TopCV crawler and HDFS ingestion entrypoints
+│   ├── ml/                          # Shared salary prediction pipeline
+│   ├── producer/                    # Kafka producers for speed layer
+│   ├── spark/                       # Utility Spark app(s)
+│   ├── stream_etl/                  # Spark Structured Streaming pipeline
+│   │   ├── stream_main.py
+│   │   ├── transform.py
+│   │   ├── normalizers.py
 │   │   ├── schemas/
-│   │   │   ├── job_raw_schema.py      # Raw JSON PySpark schema
-│   │   │   └── job_clean_schema.py    # Clean output fields
-│   │   ├── transforms/
-│   │   │   ├── normalize_event_time.py
-│   │   │   ├── normalize_salary.py
-│   │   │   ├── normalize_skills.py
-│   │   │   ├── normalize_location.py
-│   │   │   └── validate_job.py
-│   │   ├── aggregations/
-│   │   │   ├── jobs_per_10m.py
-│   │   │   ├── top_skills_hourly.py
-│   │   │   └── salary_bins.py
-   │   │   ├── sinks/
-│   │   │   ├── elasticsearch_sink.py
-│   │   │   ├── jobs_per_10m_sink.py
-│   │   │   ├── top_skills_hourly_sink.py
-│   │   │   ├── salary_bins_realtime_sink.py
-│   │   │   └── kafka_sink.py
-│   │   └── tests/
-│   │       ├── test_salary_parser.py
-│   │       ├── test_skill_normalizer.py
-│   │       ├── test_event_time.py
-│   │       └── test_validation.py
-│   ├── stream/                # Legacy stream code
-│   └── ingestion/             # Legacy ingestion code
-├── scripts/
-│   ├── setup_all.sh
-│   ├── run_all.sh
-│   ├── stop_all.sh
-│   ├── create_kafka_topics.sh
-│   ├── run_crawler.sh
-│   ├── run_producer.sh
-│   ├── run_streaming.sh
-│   ├── run_batch.sh
-│   ├── run_tests.sh
-│   ├── smoke_test_pipeline.sh
-│   └── clean_checkpoints.sh
-├── docs/
-│   ├── speed_layer_design.md
-│   └── runbook.md
-└── TV1_workspace/
-    ├── crawler.py             # Original crawler (NOT modified)
-    └── job_posting.json       # Sample data
+│   │   ├── stateful_jobs/
+│   │   └── sinks/
+│   └── serving/                     # Legacy Redis speed API, not current K8s serving path
+├── configs/                         # Settings and logging helpers
+├── data/
+│   ├── raw/
+│   ├── bronze/
+│   ├── silver/
+│   └── gold/                        # Data contract docs
+├── docs/                            # Runbooks, integration guides, dashboard docs
+├── infra/
+│   ├── airflow/                     # Airflow image, RBAC, Postgres, DAGs
+│   ├── docker-compose/              # Local compose files
+│   ├── hdfs/                        # HDFS NameNode/DataNode manifests
+│   ├── kafka/                       # Strimzi Kafka cluster and topic manifests
+│   ├── kibana/saved_objects/        # Kibana dashboards
+│   ├── namespaces/
+│   ├── producer/                    # K8s producer job
+│   ├── search/                      # Elasticsearch and Kibana manifests
+│   ├── serving/                     # FastAPI deployment/service
+│   └── spark/                       # Spark Dockerfile, RBAC, CronJobs, streaming Job
+├── scripts/                         # Bash/PowerShell helpers and smoke tests
+├── shared/                          # Shared schemas, UDFs, quality rules
+├── tests/                           # pytest tests for producers, stream schemas, aggregations
+├── Makefile
+├── pyproject.toml
+└── README.md
 ```
 
-## Prerequisites
+## Kubernetes Deployment Model
 
-| Tool | Required |
-|------|----------|
-| Docker | Yes |
-| Docker Compose | Yes |
-| Python 3.10+ | Yes |
-| Java 11+ | For Spark |
-| Apache Spark 3.5.x | For streaming |
-| PySpark | `pip install pyspark` |
-| confluent-kafka | `pip install confluent-kafka` |
-| pytest | `pip install pytest` |
-| python-dotenv | `pip install python-dotenv` |
+| Namespace | Main resources |
+|---|---|
+| `hdfs` | HDFS NameNode/DataNode from `infra/hdfs/hdfs.yaml` |
+| `kafka` | Strimzi Kafka cluster and topics from `infra/kafka/` |
+| `spark` | Spark RBAC, batch CronJobs, ML training CronJob, streaming Job, checkpoint PVCs |
+| `search` | Elasticsearch and Kibana |
+| `serving` | FastAPI search API deployment/service |
+| `airflow` | Airflow scheduler/webserver/Postgres and DAGs |
 
-## Quick Start
+Các manifest chính:
+
+| Component | Manifest |
+|---|---|
+| Namespaces | `infra/namespaces/all.yaml` plus `infra/hdfs/hdfs.yaml` for `hdfs` |
+| HDFS | `infra/hdfs/hdfs.yaml` |
+| Kafka | `infra/kafka/kafka-cluster.yaml`, `infra/kafka/jobs-topics.yaml` |
+| Spark image | `infra/spark/Dockerfile` |
+| Batch CronJobs | `infra/spark/raw-to-bronze-cronjob.yaml`, `bronze-to-silver-cronjob.yaml`, `silver-to-gold-cronjob.yaml`, `gold-to-elasticsearch-cronjob.yaml` |
+| ML training | `infra/spark/salary-model-train-cronjob.yaml` |
+| Speed stream | `infra/spark/speed-stream-es-job.yaml` |
+| Search | `infra/search/elasticsearch-statefulset.yaml`, `elasticsearch-service.yaml`, `kibana-deployment.yaml`, `kibana-service.yaml` |
+| API | `infra/serving/job-search-api-deployment.yaml`, `job-search-api-service.yaml` |
+| Airflow | `infra/airflow/*.yaml`, DAGs in `infra/airflow/dags/` |
+
+## Main Runtime Commands
+
+`Makefile` cung cấp các thao tác Minikube chính:
 
 ```bash
-# 1. Setup environment
-cp configs/.env.example .env
-
-# 2. Setup infrastructure
-bash scripts/setup_all.sh
-
-# 3. Run the system
-bash scripts/run_all.sh
+make namespaces-up
+make hdfs-up
+make kafka-up
+make search-up
+make spark-build
+make api-build
+make serving-up
+make platform-up
+make speed-k8s-up
+make status
 ```
 
-## Run Components Separately
+Các script thường dùng:
 
-```bash
-# Run crawler (single URL)
-bash scripts/run_crawler.sh https://www.topcv.vn/viec-lam/example.html
+| Purpose | Script |
+|---|---|
+| Create Kafka topics | `scripts/create_kafka_topics.sh`, `scripts/create_kafka_topics.ps1` |
+| Run fake producer | `scripts/run_fake_crawler.sh`, `scripts/run_fake_crawler.ps1` |
+| Run JSONL producer | `scripts/run_crawler_jsonl_producer.sh`, `scripts/run_crawler_jsonl_producer.ps1` |
+| Run speed pipeline | `scripts/run_stream_speed_layer.sh`, `scripts/run_stream_speed_layer.ps1`, `scripts/run_speed_pipeline.sh` |
+| Run batch pipeline | `scripts/run_batch_pipeline.sh` |
+| Smoke test speed layer | `scripts/smoke_test_speed_layer.sh`, `scripts/smoke_test_speed_layer.ps1` |
+| Cleanup checkpoints | `scripts/clean_stream_etl_checkpoints.sh`, `scripts/clean_stream_etl_checkpoints.ps1` |
 
-# Run producer (file-based)
-bash scripts/run_producer.sh file TV1_workspace/job_posting.json
+## API and Indexes
 
-# Run producer (live crawl)
-bash scripts/run_producer.sh live --keyword "react native"
+### Batch Search API
 
-# Run Spark streaming
-bash scripts/run_streaming.sh
+Đường serving hiện tại trên Kubernetes:
 
-# Run unit tests
-bash scripts/run_tests.sh
+- Code: `apps/api/search_api.py`
+- Image: `apps/api/Dockerfile`
+- Deployment: `infra/serving/job-search-api-deployment.yaml`
+- Service: `infra/serving/job-search-api-service.yaml`
+- Elasticsearch URL: `http://elasticsearch.search.svc:9200`
+- Default index: `gold-jobs-flat`
 
-# Run smoke test
-bash scripts/smoke_test_pipeline.sh
-```
+Các endpoint chính:
 
-## Kafka Topics
+- `GET /health`
+- `GET /jobs/search`
+- `GET /jobs/{job_id}`
+- `GET /stats/overview`
+- `GET /suggest/languages`
+- `GET /suggest/frameworks`
+- `GET /suggest/provinces`
 
-| Topic | Purpose | Key |
-|-------|---------|-----|
-| `jobs_raw` | Raw job postings from crawler | `job_id` |
-| `jobs_clean` | Validated, normalized postings | `job_id` |
-| `jobs_dead_letter` | Failed/invalid records | original key |
+### Realtime Elasticsearch Indexes
 
-### Consumer Commands
+Các sink module của speed layer trong `apps/stream_etl/sinks/` ghi:
 
-```bash
-# Consume clean jobs
-docker exec speed-kafka kafka-console-consumer \
-  --bootstrap-server localhost:9092 --topic jobs_clean --from-beginning
+- `realtime_jobs_v1`
+- `realtime_job_counts_10m_v1`
+- `realtime_skill_counts_hourly_v1`
+- `realtime_top_skills_hourly_v1`
+- `realtime_salary_bins_hourly_v1`
 
-# Consume dead-letter
-docker exec speed-kafka kafka-console-consumer \
-  --bootstrap-server localhost:9092 --topic jobs_dead_letter --from-beginning
-```
+## Notes and Current Repo Caveats
 
-## Data Contracts
-
-### Raw Schema (jobs_raw)
-See [job_raw_schema.py](apps/stream_etl/schemas/job_raw_schema.py) — nested JSON with `source`, `job_id`, `payload` (title, salary, skills, etc.), and `quality_flags`.
-
-### Clean Schema (jobs_clean)
-See [job_clean_schema.py](apps/stream_etl/schemas/job_clean_schema.py) — flat record with normalized fields: `salary_min_vnd`, `salary_bin`, `skills[]`, `province`, `event_ts`, `quality_flags`.
-
-## Fault Tolerance
-
-| Mechanism | Description |
-|-----------|-------------|
-| Checkpointing | Per-query checkpoint dirs under `/tmp/job-market-checkpoints/speed/` |
-| Dead-letter topic | Malformed or invalid records → `jobs_dead_letter` |
-| Watermark | 1-hour late-data tolerance on `event_ts` |
-| Dedup | `dropDuplicates(["job_id"])` within watermark window |
-| Realtime aggregations | Jobs per 10 min, top skills, salary bins via Spark Structured Streaming |
-| Elasticsearch indexes | realtime_jobs_v1, realtime_job_counts_10m_v1, realtime_skill_counts_hourly_v1, realtime_top_skills_hourly_v1, realtime_salary_bins_hourly_v1 |
-
-## Testing
-
-```bash
-# Run all unit tests
-bash scripts/run_tests.sh
-
-# Run specific test
-pytest apps/stream_etl/tests/test_salary_parser.py -v
-
-# Run smoke test (requires running infrastructure)
-bash scripts/smoke_test_pipeline.sh
-```
-
-## Troubleshooting
-
-See [docs/runbook.md](docs/runbook.md) for detailed troubleshooting.
-
-| Issue | Quick Fix |
-|-------|-----------|
-| Kafka not reachable | `docker ps` — ensure speed-kafka is running |
-| Spark Kafka package missing | Use `--packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1` |
-| Checkpoint conflicts | `bash scripts/clean_checkpoints.sh` |
-| No messages in jobs_clean | Check producer logs, check DLQ topic |
+- `apps/serving/api.py` là Redis-based speed API cũ. K8s serving manifests hiện tại deploy `apps/api/search_api.py`.
+- `infra/kafka/jobs-topics.yaml` là topic manifest thực tế trong repo. Target `kafka-topics-up` trong `Makefile` hiện đang trỏ tới `infra/kafka/topics.yaml`, file này không tồn tại.
+- `infra/namespaces/all.yaml` định nghĩa `spark`, `search`, `serving`, `kafka`, và `airflow`; namespace `hdfs` được tạo trong `infra/hdfs/hdfs.yaml`.
+- Một số tài liệu cũ vẫn mô tả folder name hoặc Redis serving trước đây. Xem file này cùng `data/*/*_data_format.md` là reference kiến trúc hiện tại.
