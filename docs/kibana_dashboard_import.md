@@ -28,9 +28,25 @@ Dashboard filter riêng cho batch:
 
 - Job Market - Batch Filter View
 
-Nếu sau này speed dashboard đã xử lý lại field thời gian ổn định, có thể thêm:
+### `job_market_realtime_ml_dashboard.ndjson`
 
-- `job_market_speed_dashboard.ndjson`
+Dashboard realtime cho speed layer và ML salary prediction:
+
+- Job Market - Realtime ML Dashboard
+
+Dashboard này đọc dữ liệu từ các realtime index:
+
+- `realtime_jobs_v1`
+- `realtime_job_counts_10m_v1`
+- `realtime_salary_bins_hourly_v1`
+- `realtime_top_skills_hourly_v1`
+- `realtime_skill_counts_hourly_v1`
+
+Dashboard realtime dùng để demo luồng:
+
+```text
+TopCV crawler -> Kafka jobs_raw -> Spark Structured Streaming -> Elasticsearch -> Kibana
+```
 
 ## 2. Điều kiện trước khi import
 
@@ -49,7 +65,47 @@ curl.exe "http://localhost:9200/_cat/indices/gold-jobs-flat?v"
 curl.exe "http://localhost:9200/gold-jobs-flat/_count?pretty"
 ```
 
-Nếu chưa có index `gold-jobs-flat` thì cần chạy batch pipeline trước. Dashboard vẫn import được nhưng sẽ không có dữ liệu.
+Nếu chưa có index `gold-jobs-flat` thì cần chạy batch pipeline trước. Dashboard batch vẫn import được nhưng sẽ không có dữ liệu.
+
+Với realtime dashboard, kiểm tra các realtime index:
+
+```powershell
+curl.exe "http://localhost:9200/_cat/indices/realtime_*?v"
+curl.exe "http://localhost:9200/realtime_jobs_v1/_count?pretty"
+curl.exe "http://localhost:9200/realtime_job_counts_10m_v1/_count?pretty"
+curl.exe "http://localhost:9200/realtime_salary_bins_hourly_v1/_count?pretty"
+curl.exe "http://localhost:9200/realtime_top_skills_hourly_v1/_count?pretty"
+curl.exe "http://localhost:9200/realtime_skill_counts_hourly_v1/_count?pretty"
+```
+
+Nếu realtime index chưa có dữ liệu, cần đảm bảo Spark Streaming đang chạy:
+
+```powershell
+kubectl get pods -n spark -l spark-app-name=speed-stream-es -o wide
+```
+
+Nếu Spark Streaming chưa chạy, trigger DAG:
+
+```text
+job_market_speed_layer_bootstrap
+```
+
+Khuyến nghị config khi chỉ cần bật lại stream:
+
+```json
+{
+  "reset_checkpoint": false,
+  "run_real_crawler": false
+}
+```
+
+Sau khi Spark Streaming `Running`, chạy crawler speed:
+
+```text
+job_market_speed_real_crawler
+```
+
+DAG này chạy định kỳ để crawl TopCV và đẩy dữ liệu vào Kafka. Spark Streaming sẽ tự consume Kafka và ghi vào Elasticsearch.
 
 ## 3. Mở Kibana
 
@@ -65,6 +121,14 @@ Mở trình duyệt:
 http://localhost:5601
 ```
 
+Nếu service Kibana có tên khác, kiểm tra bằng:
+
+```powershell
+kubectl get svc -n search
+```
+
+rồi port-forward đúng service.
+
 ## 4. Import dashboard bằng giao diện Kibana
 
 Vào:
@@ -73,10 +137,16 @@ Vào:
 Stack Management -> Saved Objects -> Import
 ```
 
-Chọn file cần import, ví dụ:
+Chọn file cần import, ví dụ batch:
 
 ```text
 infra/kibana/saved_objects/job_market_batch_dashboards.ndjson
+```
+
+Hoặc realtime:
+
+```text
+infra/kibana/saved_objects/job_market_realtime_ml_dashboard.ndjson
 ```
 
 Khi Kibana hỏi conflict, chọn:
@@ -117,100 +187,38 @@ Dashboard sau khi import:
 
 - Job Market - Batch Filter View
 
-## 6. Import bằng command line
+## 6. Import realtime dashboard
 
-Nếu Kibana đang mở ở `http://localhost:5601`, có thể import bằng API.
-
-Import bộ dashboard batch chính:
-
-```powershell
-curl.exe -X POST "http://localhost:5601/api/saved_objects/_import?overwrite=true" `
-  -H "kbn-xsrf: true" `
-  -F "file=@infra\kibana\saved_objects\job_market_batch_dashboards.ndjson"
-```
-
-Import dashboard filter:
-
-```powershell
-curl.exe -X POST "http://localhost:5601/api/saved_objects/_import?overwrite=true" `
-  -H "kbn-xsrf: true" `
-  -F "file=@infra\kibana\saved_objects\job_market_batch_filter_dashboard.ndjson"
-```
-
-## 7. Kiểm tra sau khi import
-
-Vào:
+Import file:
 
 ```text
-Dashboards
+infra/kibana/saved_objects/job_market_realtime_ml_dashboard.ndjson
 ```
 
-Kiểm tra có các dashboard:
+Dashboard sau khi import:
 
-- Job Market - 01 Overview
-- Job Market - 02 Salary Analysis
-- Job Market - 03 Skills & Specialties
-- Job Market - 04 Geography & Companies
-- Job Market - 05 Tables
-- Job Market - Batch Filter View
+- Job Market - Realtime ML Dashboard
 
-Nếu dashboard mở ra nhưng không có dữ liệu, kiểm tra:
-
-```powershell
-curl.exe "http://localhost:9200/_cat/indices/gold-jobs-flat?v"
-```
-
-và kiểm tra time range/filter trong Kibana.
-
-## 8. Lỗi thường gặp
-
-### Dashboard không có dữ liệu
-
-Nguyên nhân thường gặp:
-
-- Elasticsearch chưa có index `gold-jobs-flat`
-- Data view chưa trỏ đúng index
-- Đang bật filter hoặc time range không phù hợp
-
-Cách kiểm tra:
-
-```powershell
-curl.exe "http://localhost:9200/gold-jobs-flat/_count?pretty"
-```
-
-### Import báo conflict
-
-Chọn:
+Dashboard realtime nên chỉnh time range theo mục đích kiểm tra/demo:
 
 ```text
-Overwrite
+Last 10 minutes / Last 20 minutes
 ```
 
-để dùng bản dashboard trong repo.
-
-### Import báo thiếu data view
-
-File NDJSON có thể thiếu data view. Với dashboard batch, cần có data view:
-
-- `gold-jobs-flat`
-
-Nếu thiếu, tạo thủ công trong Kibana:
+Khi muốn kiểm tra đúng dữ liệu vừa được crawler speed đẩy vào Kafka và Spark Streaming vừa index vào Elasticsearch.
 
 ```text
-Stack Management -> Data Views -> Create data view
+Last 1 hour / Last 12 hours
 ```
 
-Thông tin:
+Dùng khi muốn xem đầy đủ hơn các panel hourly, salary bucket, top skills và ML prediction, vì các aggregate này có thể ít dữ liệu nếu crawler mới chỉ lấy được vài job.
 
-- Name: `gold-jobs-flat`
-- Index pattern: `gold-jobs-flat`
+Khuyến nghị khi demo live:
 
-Nếu Kibana hỏi time field mà không chắc, có thể chọn:
+- Time range: `Last 10 minutes` hoặc `Last 20 minutes`
+- Refresh: `10 seconds`
 
-```text
-I do not want to use the time filter
-```
+Nếu các panel hourly/ML bị trống do quá ít job mới, tăng time range lên:
 
-### Import báo version/migration lỗi
-
-Có thể file NDJSON được export từ Kibana version mới hơn. Cần dùng file NDJSON được export từ đúng Kibana version của project.
+- `Last 1 hour`
+- `Last 12 hours`
