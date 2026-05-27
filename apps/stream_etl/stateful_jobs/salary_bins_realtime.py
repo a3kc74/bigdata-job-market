@@ -5,14 +5,14 @@ from pyspark.sql import functions as F
 
 
 def build_salary_bins_hourly(clean_df: DataFrame) -> DataFrame:
-    """Aggregate jobs by hourly salary bin, city, and level."""
+    """Aggregate jobs by hourly salary bin, primary city, and category."""
 
     return (
         clean_df.withWatermark("event_time", "2 hours")
         .groupBy(
             F.window(F.col("event_time"), "1 hour").alias("time_window"),
-            F.coalesce(F.col("city"), F.lit("unknown")).alias("city"),
-            F.coalesce(F.col("level"), F.lit("unknown")).alias("level"),
+            F.coalesce(F.col("primary_city"), F.lit("unknown")).alias("primary_city"),
+            F.coalesce(F.col("occupationalCategory"), F.lit("unknown")).alias("occupationalCategory"),
             F.coalesce(F.col("salary_bin"), F.lit("unknown")).alias("salary_bin"),
         )
         .agg(
@@ -25,8 +25,8 @@ def build_salary_bins_hourly(clean_df: DataFrame) -> DataFrame:
             F.to_date(F.col("time_window.start")).alias("bucket_date"),
             F.col("time_window.start").alias("window_start"),
             F.col("time_window.end").alias("window_end"),
-            "city",
-            "level",
+            "primary_city",
+            "occupationalCategory",
             "salary_bin",
             "job_count",
             "avg_salary_min_million",

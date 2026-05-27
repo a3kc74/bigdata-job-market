@@ -56,7 +56,7 @@ def write_jobs_per_10m(batch_df, batch_id: int) -> None:
     _bulk_index(
         ES_INDEX_JOB_COUNTS_10M,
         rows,
-        ["window_start", "source", "city", "category"],
+        ["window_start", "source", "primary_city", "company_field"],
     )
     print(
         f"[jobs_per_10m] indexed {len(rows)} rows to "

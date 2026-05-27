@@ -56,6 +56,6 @@ def write_salary_bins_hourly(batch_df, batch_id: int) -> None:
     _bulk_index(
         ES_INDEX_SALARY_BINS_HOURLY,
         rows,
-        ["window_start", "city", "level", "salary_bin"],
+        ["window_start", "primary_city", "occupationalCategory", "salary_bin"],
     )
     print(f"[salary_bins_hourly] indexed {len(rows)} rows to Elasticsearch in batch {batch_id}")
