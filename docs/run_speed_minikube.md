@@ -89,18 +89,33 @@ Rebuild `spark-job-market:latest` after changing `apps/*`. Rebuild
 `job-market-airflow:2.9.3` after changing `infra/airflow/dags`,
 `infra/spark`, `infra/kafka`, or `infra/producer`.
 
-## 5. Deploy Elasticsearch
+## 5. Deploy Elasticsearch and Kibana
 
 ```powershell
 kubectl apply -f infra\search\elasticsearch-service.yaml
 kubectl apply -f infra\search\elasticsearch-statefulset.yaml
 kubectl rollout status statefulset/elasticsearch -n search
+kubectl apply -f infra\search\kibana-service.yaml
+kubectl apply -f infra\search\kibana-deployment.yaml
+kubectl rollout status deployment/kibana -n search
 ```
 
 Check health:
 
 ```powershell
 kubectl exec -n search elasticsearch-0 -- curl -s http://localhost:9200/_cluster/health?pretty
+```
+
+To open Kibana, keep this command running in its own terminal:
+
+```powershell
+kubectl port-forward -n search svc/kibana 5601:5601
+```
+
+Open:
+
+```text
+http://localhost:5601
 ```
 
 ## 6. Deploy Kafka
