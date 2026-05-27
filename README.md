@@ -91,7 +91,7 @@ Dự án thu thập và phân tích dữ liệu việc làm từ TopCV theo mô 
 
 ### Speed Path
 
-1. `apps/producer/crawler_jsonl_producer.py`, `apps/producer/file_to_kafka.py`, hoặc `apps/producer/fake_crawler_producer.py` publish raw events vào Kafka topic `jobs_raw`.
+1. `apps/producer/crawler_jsonl_producer.py`, publish raw events vào Kafka topic `jobs_raw`.
 2. `apps/stream_etl/stream_main.py` consume `jobs_raw`, validate/parse raw schema, chuẩn hóa fields, load salary model, và score các job có salary thỏa thuận khi bật cấu hình.
 3. Dòng hợp lệ được ghi vào `jobs_clean`; dòng lỗi được ghi vào `jobs_dead_letter`.
 4. Realtime records và aggregations được ghi vào Elasticsearch:
@@ -258,9 +258,3 @@ Các sink module của speed layer trong `apps/stream_etl/sinks/` ghi:
 - `realtime_top_skills_hourly_v1`
 - `realtime_salary_bins_hourly_v1`
 
-## Notes and Current Repo Caveats
-
-- `apps/serving/api.py` là Redis-based speed API cũ. K8s serving manifests hiện tại deploy `apps/api/search_api.py`.
-- `infra/kafka/jobs-topics.yaml` là topic manifest thực tế trong repo. Target `kafka-topics-up` trong `Makefile` hiện đang trỏ tới `infra/kafka/topics.yaml`, file này không tồn tại.
-- `infra/namespaces/all.yaml` định nghĩa `spark`, `search`, `serving`, `kafka`, và `airflow`; namespace `hdfs` được tạo trong `infra/hdfs/hdfs.yaml`.
-- Một số tài liệu cũ vẫn mô tả folder name hoặc Redis serving trước đây. Xem file này cùng `data/*/*_data_format.md` là reference kiến trúc hiện tại.
