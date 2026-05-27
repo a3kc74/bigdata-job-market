@@ -107,8 +107,8 @@ def main() -> None:
         clean_scored_base_df = score_salary_predictions(
             clean_base_df,
             salary_model,
-            experience_col="experience_months",
-            location_col="location_raw",
+            experience_col="monthOfExperience",
+            location_col="location",
             company_col="company_name",
             remote_col="has_remote",
             needs_prediction_col=(
@@ -194,7 +194,7 @@ def main() -> None:
     if WRITE_CONSOLE_DEBUG:
         queries.extend(
             [
-                clean_df.select("job_id", "title", "city", "salary_bin")
+                clean_df.select("job_id", "title", "primary_city", "salary_bin")
                 .writeStream.format("console")
                 .queryName("phase3_jobs_clean_console_debug")
                 .option("truncate", "false")

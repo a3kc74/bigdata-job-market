@@ -155,6 +155,39 @@ def build_job_id_from_url(url):
     normalized_url = normalize_url(url)
     return sha256_hash(f"{SOURCE}|{normalized_url}")
 
+
+def _normalize_speed_processed_entry(entry):
+    """
+    Chuẩn hóa một entry trong speed processed cache.
+
+    Hỗ trợ cả:
+    - format cũ: {job_id: processed_at_ms}
+    - format mới: {
+          job_id: {
+              "processed_at_ms": ...,
+              "listing_updated_ts": ...
+          }
+      }
+    """
+    if isinstance(entry, int):
+        return {
+            "processed_at_ms": entry,
+            "listing_updated_ts": None,
+        }
+
+    if isinstance(entry, dict):
+        processed_at_ms = entry.get("processed_at_ms")
+        listing_updated_ts = entry.get("listing_updated_ts")
+
+        if isinstance(processed_at_ms, int):
+            return {
+                "processed_at_ms": processed_at_ms,
+                "listing_updated_ts": listing_updated_ts if isinstance(listing_updated_ts, int) else None,
+            }
+
+    return None
+
+
 def load_speed_processed_jobs(
     file_path=SPEED_PROCESSED_JOBS_FILE,
     ttl_days=SPEED_PROCESSED_TTL_DAYS,
@@ -176,11 +209,21 @@ def load_speed_processed_jobs(
 
         cutoff_ms = now_ms() - ttl_days * 24 * 60 * 60 * 1000
 
-        return {
-            job_id: ts
-            for job_id, ts in data.items()
-            if isinstance(job_id, str) and isinstance(ts, int) and ts >= cutoff_ms
-        }
+        normalized = {}
+        for job_id, entry in data.items():
+            if not isinstance(job_id, str):
+                continue
+
+            normalized_entry = _normalize_speed_processed_entry(entry)
+            if not normalized_entry:
+                continue
+
+            if normalized_entry["processed_at_ms"] < cutoff_ms:
+                continue
+
+            normalized[job_id] = normalized_entry
+
+        return normalized
 
     except Exception as e:
         logger.warning(f"[SPEED CACHE] Không đọc được cache speed processed jobs: {e}")
@@ -198,9 +241,47 @@ def save_speed_processed_jobs(processed_jobs, file_path=SPEED_PROCESSED_JOBS_FIL
     except Exception as e:
         logger.error(f"[SPEED CACHE] Không lưu được cache speed processed jobs: {e}")
 
-def mark_speed_processed_job(processed_jobs, job_id):
+def mark_speed_processed_job(processed_jobs, job_id, listing_updated_ts=None):
     if job_id:
-        processed_jobs[job_id] = now_ms()
+        processed_jobs[job_id] = {
+            "processed_at_ms": now_ms(),
+            "listing_updated_ts": listing_updated_ts if isinstance(listing_updated_ts, int) else None,
+        }
+
+
+def should_skip_by_speed_cache(processed_jobs, job_id, listing_updated_time=None):
+    """
+    Quyết định có nên bỏ qua 1 job ở speed mode hay không.
+
+    Rule:
+    - Nếu chưa có trong cache -> không skip.
+    - Nếu job card hiện tại không parse được listing_updated_time -> skip theo cache.
+      Lý do: không có tín hiệu nào cho thấy job đã được update.
+    - Nếu parse được listing_updated_time:
+        + chỉ skip khi timestamp hiện tại <= timestamp đã xử lý gần nhất.
+        + nếu timestamp mới hơn -> vẫn crawl lại để có cơ hội phát hiện hash_content đổi.
+    """
+    cache_entry = processed_jobs.get(job_id)
+    if not cache_entry:
+        return False
+
+    normalized_entry = _normalize_speed_processed_entry(cache_entry)
+    if not normalized_entry:
+        return False
+
+    if not isinstance(listing_updated_time, datetime):
+        return True
+
+    current_listing_updated_ts = int(listing_updated_time.timestamp() * 1000)
+    last_seen_ts = normalized_entry.get("listing_updated_ts")
+
+    if not isinstance(last_seen_ts, int):
+        last_seen_ts = normalized_entry.get("processed_at_ms")
+
+    if not isinstance(last_seen_ts, int):
+        return False
+
+    return current_listing_updated_ts <= last_seen_ts
 
 def save_batch_checkpoint(checkpoint, file_path=BATCH_CHECKPOINT_FILE):
     """
@@ -2214,9 +2295,14 @@ def run_master_crawler(
 
                         job_id = build_job_id_from_url(href)
 
-                        # Chỉ speed mode mới skip job_id đã xử lý trong TTL.
-                        # Batch mode không dùng cache để có thể crawl lại job cũ được cập nhật.
-                        if use_processed_cache and job_id in speed_processed_jobs:
+                        # Chỉ speed mode mới skip theo cache.
+                        # Tuy nhiên nếu listing_updated_time mới hơn lần đã xử lý trước,
+                        # vẫn phải crawl lại để có cơ hội bắt hash_content thay đổi.
+                        if use_processed_cache and should_skip_by_speed_cache(
+                            speed_processed_jobs,
+                            job_id,
+                            job_meta.get("updated_time"),
+                        ):
                             stats["skipped_by_speed_cache"] += 1
                             continue
 
@@ -2347,7 +2433,11 @@ def run_master_crawler(
                                 # Chỉ speed mode mới mark cache sau khi ghi/emit thành công.
                                 # Batch mode không mark để lần batch sau vẫn có thể crawl lại theo threshold.
                                 if use_processed_cache:
-                                    mark_speed_processed_job(speed_processed_jobs, record.get("job_id"))
+                                    mark_speed_processed_job(
+                                        speed_processed_jobs,
+                                        record.get("job_id"),
+                                        listing_updated_ts=updated_ts,
+                                    )
                                     save_speed_processed_jobs(speed_processed_jobs)
                             else:
                                 log_failed_link(link, "save_jsonl returned False")

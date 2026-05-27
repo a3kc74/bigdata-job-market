@@ -234,3 +234,27 @@ bigdata-job-market/
 | Silver salary source | `ld_salary_min/max` từ json_ld là primary; regex `salary` string là fallback |
 | Silver tỉ giá USD | Hằng số `USD_TO_VND = 25_000` trong code, cập nhật định kỳ |
 | `findspark` | Chỉ dùng khi dev local; không cần trong K8s (Dockerfile đã set `PYSPARK_PYTHON`) |
+
+---
+
+## Salary Prediction Contract
+
+- Shared model code: `apps/ml/salary_prediction.py`
+- Train job: `apps/batch/jobs/train_salary_model.py`
+- Batch scoring: `apps/batch/jobs/silver_to_gold.py`
+- Speed scoring: `apps/stream_etl/stream_main.py`
+
+**Model family**
+- Spark ML `GBTRegressor`
+- Label: `log1p(mid_salary_vnd)`
+
+**Feature groups**
+- Text: `title`, `skills`
+- Categorical: `company_name`, `employmentType`, `education`, `occupationalCategory`, `company_field`, `company_scale`, `primary_city`
+- Numeric / Boolean: `experience_months`, `experience_required`, `has_remote`, `location_count`
+
+**Notes**
+- `company_name` vẫn là feature chính, không bucket.
+- `primary_city` là 1 city canonical đại diện cho job; lấy từ `city`, `location_detail[0].city`, hoặc phần city của `location`.
+- Speed layer hiện không dùng embedding; title vẫn đi theo hướng bag-of-words trong Spark ML.
+- Trigger hiện tại của speed stream job: `TRIGGER_SECONDS=30`.

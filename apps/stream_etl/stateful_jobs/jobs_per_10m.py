@@ -12,8 +12,8 @@ def build_jobs_per_10m(clean_df: DataFrame) -> DataFrame:
         .groupBy(
             F.window(F.col("event_time"), "10 minutes"),
             F.coalesce(F.col("source"), F.lit("unknown")).alias("source"),
-            F.coalesce(F.col("city"), F.lit("unknown")).alias("city"),
-            F.coalesce(F.col("category"), F.lit("unknown")).alias("category"),
+            F.coalesce(F.col("primary_city"), F.lit("unknown")).alias("primary_city"),
+            F.coalesce(F.col("company_field"), F.lit("unknown")).alias("company_field"),
         )
         .agg(
             F.approx_count_distinct("job_id").cast("long").alias("job_count"),
@@ -24,8 +24,8 @@ def build_jobs_per_10m(clean_df: DataFrame) -> DataFrame:
             F.col("window.start").alias("window_start"),
             F.col("window.end").alias("window_end"),
             "source",
-            "city",
-            "category",
+            "primary_city",
+            "company_field",
             "job_count",
             "distinct_company_count",
             F.current_timestamp().alias("updated_at"),

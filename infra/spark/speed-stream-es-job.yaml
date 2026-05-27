@@ -72,7 +72,7 @@ spec:
               value: "/mnt/spark-checkpoints/speed-es-only"
 
             - name: TRIGGER_SECONDS
-              value: "10"
+              value: "30"
 
           command:
             - /opt/spark/bin/spark-submit
@@ -95,9 +95,9 @@ spec:
             - --conf
             - spark.kubernetes.container.image.pullPolicy=IfNotPresent
             - --conf
-            - spark.executor.instances=1
+            - spark.executor.instances=2
             - --conf
-            - spark.executor.cores=1
+            - spark.executor.cores=2
             - --conf
             - spark.kubernetes.executor.request.cores=250m
             - --conf
@@ -143,7 +143,7 @@ spec:
             - --conf
             - spark.kubernetes.driverEnv.CHECKPOINT_DIR=/mnt/spark-checkpoints/speed-es-only
             - --conf
-            - spark.kubernetes.driverEnv.TRIGGER_SECONDS=10
+            - spark.kubernetes.driverEnv.TRIGGER_SECONDS=30
             - --conf
             - spark.executorEnv.KAFKA_BOOTSTRAP_SERVERS=my-cluster-kafka-bootstrap.kafka.svc.cluster.local:9092
             - --conf
