@@ -73,6 +73,7 @@ COPY apps/ml/                  /opt/spark/work-dir/apps/ml/
 COPY apps/stream_etl/          /opt/spark/work-dir/apps/stream_etl/
 COPY apps/ingestion/           /opt/spark/work-dir/apps/ingestion/
 COPY apps/producer/            /opt/spark/work-dir/apps/producer/
+COPY apps/batch/               /opt/spark/work-dir/apps/batch/
 COPY apps/batch/jobs/          /opt/spark/work-dir/jobs/
 COPY configs/                  /opt/spark/work-dir/configs/
 COPY shared/                   /opt/spark/work-dir/shared/
