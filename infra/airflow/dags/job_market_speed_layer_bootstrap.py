@@ -52,8 +52,9 @@ with DAG(
     description="Bootstrap speed layer: Kafka -> Spark Streaming -> Elasticsearch",
     default_args=DEFAULT_ARGS,
     start_date=pendulum.datetime(2026, 1, 1, tz=TZ),
-    schedule=None,
+    schedule="*/20 * * * *",
     catchup=False,
+    max_active_runs=1,
     tags=["job-market", "speed-layer", "spark", "kafka", "elasticsearch"],
     params={
         "reset_checkpoint": Param(
@@ -159,6 +160,23 @@ with DAG(
         bash_command=f"""
         set -euo pipefail
 
+        EXISTING_DRIVER="$(
+          kubectl get pods -n {SPARK_NAMESPACE} \
+            -l spark-role=driver,spark-app-name=speed-stream-es \
+            --field-selector=status.phase=Running \
+            --no-headers 2>/dev/null \
+            | awk 'NR==1 {{print $1}}' \
+            || true
+        )"
+
+        if [ -n "$EXISTING_DRIVER" ]; then
+          echo "[airflow-speed] existing streaming driver is running: $EXISTING_DRIVER"
+          echo "[airflow-speed] skipping Spark streaming resubmit for scheduled crawler run"
+          kubectl get pods -n {SPARK_NAMESPACE} -l spark-app-name=speed-stream-es -o wide
+          exit 0
+        fi
+
+        echo "[airflow-speed] no running streaming driver found"
         echo "[airflow-speed] deleting old speed submit job"
         kubectl delete job -n {SPARK_NAMESPACE} speed-stream-es-submit --ignore-not-found=true
 
@@ -240,7 +258,7 @@ with DAG(
           --for=condition=complete \
           job/speed-real-crawler-producer \
           -n {SPARK_NAMESPACE} \
-          --timeout=7200s; then
+          --timeout=1000s; then
 
           echo "[airflow-speed] real crawler producer failed or timed out"
           kubectl get pods -n {SPARK_NAMESPACE} -l app=speed-real-crawler-producer
