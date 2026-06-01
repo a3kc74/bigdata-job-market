@@ -185,6 +185,7 @@ HDFS NameNode URL trong K8s: `hdfs://hdfs-namenode.hdfs.svc:9000`
 | `kafka` | Kafka broker (KRaft mode), Topics |
 | `search` | Elasticsearch, Kibana |
 | `serving` | FastAPI search endpoint |
+| `airflow` | Airflow orchestration |
 
 **Lưu ý Minikube:** Image bị mất sau khi tắt máy. Rebuild bắt buộc sau mỗi lần restart:
 ```bash
@@ -206,12 +207,12 @@ bigdata-job-market/
 ├── data/silver/silver_data_format.md    # Silver schema spec
 ├── data/gold/gold_data_format.md        # Gold schema spec
 ├── infra/spark/Dockerfile               # Spark image (base: apache/spark:4.1.1-python3)
-├── infra/spark/10-rbac.yaml            # K8s RBAC cho Spark
-├── infra/kubernetes/batch-etl-cronjob.yaml  # CronJob daily ETL
+├── infra/spark/rbac.yaml                # K8s RBAC cho Spark
+├── infra/spark/raw-to-bronze-cronjob.yaml # CronJob daily raw-to-bronze ETL
 ├── docs/raw_to_bronze_runbook.md        # Hướng dẫn chạy ETL
 ├── docs/spark_on_minikube.md            # Setup + ops Spark trên Minikube
 ├── docs/hdfs_data_ingestion.md          # Nạp raw data vào HDFS
-└── PROJECT_ARCHITECTURE.md             # Architecture diagram chi tiết
+└── PROJECT_ARCHITECTURE.md              # Architecture diagram chi tiết
 ```
 
 ---
