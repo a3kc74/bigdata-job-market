@@ -72,28 +72,30 @@
 
 ### Thêm mới bởi Bronze ETL
 
-| Tên trường | Kiểu | Mô tả |
+| Tên trường | Kiểu | Mô tả chi tiết & Ý nghĩa nghiệp vụ/kỹ thuật |
 | :--- | :--- | :--- |
-| `record_version` | Integer | Dedup: tăng khi `hash_content` đổi với cùng `job_id`. Mặc định `1` |
-| `is_deleted` | Boolean | Mặc định `false` |
-| `crawl_domain` | String | Parse từ `source_url` → `"www.topcv.vn"` |
+| `record_version` | Integer | **Phiên bản của bản ghi**: Được tính toán tự động bằng cách xếp hạng theo thời gian nạp `dense_rank() over (partition by job_id order by ingest_ts)`. Khi nội dung của cùng một công việc thay đổi (nhận diện qua `hash_content` khác biệt), phiên bản này sẽ tự động tăng lên (mặc định bắt đầu từ `1`). Điều này giúp hệ thống lưu trữ lịch sử các lần chỉnh sửa tin tuyển dụng của công ty thay vì ghi đè trực tiếp. |
+| `is_deleted` | Boolean | **Cờ xóa mềm (Soft Delete flag)**: Mặc định được gán giá trị `false`. Được dùng làm chỉ mục kỹ thuật để đánh dấu trạng thái tin tuyển dụng đã bị đóng hoặc bị gỡ bỏ khỏi hệ thống nguồn (TopCV) mà không cần xóa vật lý bản ghi Parquet trên HDFS, bảo toàn tính bất biến của kho dữ liệu. |
+| `crawl_domain` | String | **Tên miền nguồn thu thập**: Được trích xuất tự động từ `source_url` thông qua hàm native `parse_url(col, 'HOST')` (Ví dụ: `"www.topcv.vn"`). Trường này đóng vai trò quan trọng trong việc mở rộng kiến trúc dữ liệu sang mô hình đa nguồn (multi-source ingestion) trong tương lai, giúp lọc và phân loại dữ liệu theo website tuyển dụng gốc một cách nhanh chóng. |
 
-### Count Metrics — thêm mới
+### Count Metrics — thêm mới (Chỉ số đo lường văn bản)
 
-| Tên trường | Kiểu | Công thức |
-| :--- | :--- | :--- |
-| `description_count` | Integer | `size(split(description, '\n'))` — số dòng |
-| `requirements_count` | Integer | `size(split(requirements, '\n'))` — số dòng |
-| `benefits_count` | Integer | `size(split(benefits, '\n'))` — số dòng |
-| `income_count` | Integer | `size(income)` |
-| `skills_count` | Integer | `size(skills)` (sau khi gộp) |
-| `specialty_count` | Integer | `size(specialty)` |
+*Các trường này hỗ trợ giám sát chất lượng dữ liệu (Data Quality Monitoring) và đánh giá độ chi tiết/chất lượng của tin tuyển dụng.*
 
-### Partition column
+| Tên trường | Kiểu | Công thức | Ý nghĩa & Vai trò |
+| :--- | :--- | :--- | :--- |
+| `description_count` | Integer | `size(split(description, '\n'))` | **Số dòng mô tả**: Đếm số lượng dòng trong văn bản mô tả công việc (phân cách bởi dấu xuống dòng `\n`). Dùng để đo lường độ dài và tính chi tiết của phần mô tả công việc. |
+| `requirements_count` | Integer | `size(split(requirements, '\n'))` | **Số dòng yêu cầu**: Đếm số dòng trong phần yêu cầu ứng viên. Giúp đánh giá mức độ khắt khe hoặc chi tiết của tiêu chí tuyển dụng. |
+| `benefits_count` | Integer | `size(split(benefits, '\n'))` | **Số dòng quyền lợi**: Đếm số dòng trong phần quyền lợi được hưởng. Dùng để đo lường sự hấp dẫn của vị trí tuyển dụng. |
+| `income_count` | Integer | `size(income)` | **Số lượng khoản thu nhập phụ**: Đếm số lượng phần tử trong mảng `income` (các phụ cấp/khoản thu nhập thêm tách rời khỏi lương chính). |
+| `skills_count` | Integer | `size(skills)` | **Số lượng kỹ năng**: Đếm tổng số kỹ năng yêu cầu (cả kỹ năng bắt buộc và kỹ năng ưu tiên sau khi đã thực hiện hợp và loại trùng mảng). |
+| `specialty_count` | Integer | `size(specialty)` | **Số lượng chuyên môn**: Đếm số lượng chuyên môn được gắn thẻ cho tin tuyển dụng. |
 
-| Tên trường | Kiểu | Công thức |
-| :--- | :--- | :--- |
-| `ingest_date` | String | `date_format(ingest_ts, 'yyyy-MM-dd')` |
+### Partition column (Trường phân vùng dữ liệu)
+
+| Tên trường | Kiểu | Công thức | Ý nghĩa & Vai trò |
+| :--- | :--- | :--- | :--- |
+| `ingest_date` | String | `date_format(ingest_ts, 'yyyy-MM-dd')` | **Ngày nạp dữ liệu**: Trích xuất từ timestamp thu thập dữ liệu `ingest_ts` dưới dạng chuỗi `YYYY-MM-DD`. Đây là cột phân vùng vật lý (Partition column) trên HDFS, giúp tối ưu hóa việc lưu trữ dữ liệu theo ngày và cải thiện đáng kể tốc độ truy vấn của Spark SQL khi lọc dữ liệu theo thời gian. |
 
 ---
 
